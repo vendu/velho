@@ -1,0 +1,11 @@
+reader
+------
+- register location of TLS-hazard pointer in global hash-table
+- set TLS-hazard pointer to the value used to access the data at hand
+- when done, restore TLS-hazard pointer to NULL
+
+writer
+------
+- replace original data pointer (copied to hazard pointers) to a new value
+- scan hazard pointers to see if old value is still in use
+

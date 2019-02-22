@@ -1,0 +1,90 @@
+Zen Operating System Design Notes
+---------------------------------
+
+Zen is, currently, a set of ideas for a new operating system kernel. Rather than
+reinvent and 'get married' with UNIX/POSIX, I'll draw inspiration from them and
+try to create something without legacy payload. The initial target architecture
+will most likely be quite-constrained, namely a custom microprocessor running
+on an FPGA-board.
+
+I will start the design around Von Neumann Machine abstraction, i.e. a
+processor with memory and input/output (I/O) subsystems.
+
+Task Abstractions
+-----------------
+
+- tmr	- timer
+  - tmrconf(id, cmd, *parm)
+    - id:	system timer ID
+      		INTR		0
+		HIRES		1
+		RTC		2
+- sched	- [thread] scheduler driven by timer interrupts
+  - schedyield(), schedpick(), schedwait(), schedsleep(), schedconf()
+- proc	- process, a set of threads
+  - procnew(), procconf(), procexit()
+- thr	- thread of execution
+  - thrnew()	- launch new thread of execution
+  - thrconf()	- configure thread parameters
+  - thrjoin()	- wait for thread to terminate
+  - thrdrop()	- release waiting threads
+  - threxit()	- terminate thread
+  - thryield()	- release processor for other threads
+  - thrsave()	- save thread context
+  - thrjmp()	- switch to another thread
+- sig	- signals
+  - sigsend(sig, pid)
+    - send/raise signal
+      - sig:	signal number
+      - pid:	process ID specification
+      		-x	 - all processes in group x
+      		-1	 - CLD
+      		0	 - SELF
+		1	 - PARENT
+  - sigmask(cmd, bits)
+    - manipulate signal mask
+      - cmd: SETMASK, BLK, UNBLK
+  - sigset(sig, spec)
+    - set signal handler; SIG_IGN, SIG_DFL, action
+    - spec:	signal disposion specification
+      		- SIG_ERR	 -1
+    		- SIG_IGN	 0
+    		- SIG_DFL	 1
+		- f		 function handler address
+  - sigwait(mask, blk, save)
+    - wait for signal in mask; temporarily set mask to blk; return
+      - mask:	mask of signals waited for
+      - blk:	temporary signal mask if non-zero
+      - save:	address to store current mask to; restore when waken up
+  - shmget(key, size, flg)
+    - get shared memory handle
+  - shmat(key, adr, flg)
+    - attach shared memory segment
+      - key:	shared memory handle as returned by shmget
+      - adr:	NULL -> map address, otherwise try to use adr
+      - flg:	FIXED, WIRED, DONTKEEP, ...
+- mq	- message queues
+
+Memory Abstractions
+-------------------
+
+- buf	- block I/O buffer
+- slab	- a fixed-size region of memory split into smaller allocation blocks
+- mag	- magazine; stack of allocation blocks (split from slabs)
+- pool	- a queue of magazines with same-size blocks
+
+I/O Abstractions
+----------------
+
+- term	- terminal/console interface
+- ptr	- mouse/pointer interface
+- blk	- block device such as disk or tape
+- chr	- character device such as terminal or printer
+- sock	- socket used for network communication
+
+Kernel Subsystems
+-----------------
+
+Tao Scheduler
+-------------
+

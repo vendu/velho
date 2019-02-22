@@ -1,0 +1,26 @@
+# object files
+*.o
+*.a
+*.so
+# backups/old filr versions
+*.BAK
+*.orig
+# core dumps
+core.*
+# VIM swap files
+*.swp
+# emacs backup files
+*~
+\#*
+# ctags files
+TAGS
+# pdflatex files
+*.aux
+*.log
+*.toc
+*.out
+_minted-*
+# valgring files
+callgrind.out.*
+cachegrind.out.*
+vgcore.*
