@@ -1,5 +1,5 @@
-#ifndef __VALHALLA_CDEFS_H__
-#define __VALHALLA_CDEFS_H__
+#ifndef __VELHO_CDEFS_H__
+#define __VELHO_CDEFS_H__
 
 #if defined(__STDC_VERSION__)
 #if (__STDC_VERSION__ >= 199901L)
@@ -8,15 +8,14 @@
 #else
 #   define VLA          0
 #endif
-
 #if (__STDC_VERSION__ >= 201112L)
 #include <stdalign.h>
 #define ALIGNED(x)      alignas(x)
 #if !defined(__STDC_NO_THREADS__)
 #include <threads.h>
 #define THREADLOCAL     _Thread_local
+#endif /* !defined(__STDC_NO_THREADS__) */
 #endif /* __STDC_VERSION__ >= 201112L */
-#endif /* !defined(__STDC_NO_THREADS__)
 #endif /* __STDC_VERSION__ */
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -58,5 +57,5 @@
 #define adralign(a, b2) ((uintptr_t)(a) & -(b2))
 #define ptralign(a, b2) ((void *)adralign(a, b2))
 
-#endif /* __VALHALLA_CDEFS_H__ */
+#endif /* __VELHO_CDEFS_H__ */
 
