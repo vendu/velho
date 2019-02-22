@@ -714,31 +714,34 @@ memcpy(void *dest, const void *src, size_t len)
     n = (uintptr_t)bdest & (sizeof(long) - 1);
     if (n == ((uintptr_t)bsrc & (sizeof(long) - 1))) {
         n = sizeof(long) - n;
+        n = min(n, nb);
         nb -= n;
-        nw = nb / sizeof(long);
-        bdest += n;
-        bsrc += n;
-        switch (n) {
-            case 8:
-                bdest[7] = bsrc[7];
-            case 7:
-                bdest[6] = bsrc[6];
-            case 6:
-                bdest[5] = bsrc[5];
-            case 5:
-                bdest[4] = bsrc[4];
-            case 4:
-                bdest[3] = bsrc[3];
-            case 3:
-                bdest[2] = bsrc[2];
-            case 2:
-                bdest[1] = bsrc[1];
-            case 1:
-                bdest[0] = bsrc[0];
-            case 0:
+        if (n) {
+            switch (n) {
+                case 8:
+                    bdest[7] = bsrc[7];
+                case 7:
+                    bdest[6] = bsrc[6];
+                case 6:
+                    bdest[5] = bsrc[5];
+                case 5:
+                    bdest[4] = bsrc[4];
+                case 4:
+                    bdest[3] = bsrc[3];
+                case 3:
+                    bdest[2] = bsrc[2];
+                case 2:
+                    bdest[1] = bsrc[1];
+                case 1:
+                    bdest[0] = bsrc[0];
+                case 0:
 
-                break;
+                    break;
+            }
+            bdest += n;
+            bsrc += n;
         }
+        nw = nb / sizeof(long);
         if (nw) {
             ldest = (long *)bdest;
             lsrc = (long *)bsrc;
