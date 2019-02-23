@@ -96,6 +96,116 @@ memcpy(void *dest,
 
 /* TESTED OK */
 static void *
+_memcpybk(void *dest, const void *src, size_t len)
+{
+    int8_t     *bsrc = (int8_t *)src + len;
+    int8_t     *bdest = (int8_t *)dest + len;
+    size_t      nb = len;
+    size_t      nw;
+    long       *lsrc;
+    long       *ldest;
+    size_t      n;
+
+    n = (uintptr_t)bdest & (sizeof(long) - 1);
+    if (n == ((uintptr_t)bsrc & (sizeof(long) - 1))) {
+        n = sizeof(long) - n;
+        n = min(n, nb);
+        nb -= n;
+        if (n) {
+            switch (n) {
+                case 8:
+                    bdest[-1] = bsrc[-1];
+                case 7:
+                    bdest[-2] = bsrc[-2];
+                case 6:
+                    bdest[-3] = bsrc[-3];
+                case 5:
+                    bdest[-4] = bsrc[-4];
+                case 4:
+                    bdest[-5] = bsrc[-5];
+                case 3:
+                    bdest[-6] = bsrc[-6];
+                case 2:
+                    bdest[-7] = bsrc[-7];
+                case 1:
+                    bdest[-8] = bsrc[-8];
+                case 0:
+
+                    break;
+            }
+            bdest -= n;
+            bsrc -= n;
+        }
+        nw = nb / sizeof(long);
+        if (nw) {
+            ldest = (long *)bdest;
+            lsrc = (long *)bsrc;
+            nb -= nw * sizeof(long);
+            while (nw--) {
+                n = min(nw, 8);
+                switch (n) {
+                    case 8:
+                        ldest[-1] = lsrc[-1];
+                    case 7:
+                        ldest[-2] = lsrc[-2];
+                    case 6:
+                        ldest[-3] = lsrc[-3];
+                    case 5:
+                        ldest[-4] = lsrc[-4];
+                    case 4:
+                        ldest[-5] = lsrc[-5];
+                    case 3:
+                        ldest[-6] = lsrc[-6];
+                    case 2:
+                        ldest[-7] = lsrc[-7];
+                    case 1:
+                        ldest[-8] = lsrc[-8];
+                    case 0:
+
+                        break;
+                }
+                nw -= n;
+                ldest -= n;
+                lsrc -= n;
+            }
+            bdest = (int8_t *)ldest;
+            bsrc = (int8_t *)lsrc;
+        }
+    }
+    while (nb) {
+        n = min(nb, 8);
+        switch (n) {
+            case 8:
+                bdest[-1] = bsrc[-1];
+            case 7:
+                bdest[-2] = bsrc[-2];
+            case 6:
+                bdest[-3] = bsrc[-3];
+            case 5:
+                bdest[-4] = bsrc[-4];
+            case 4:
+                bdest[-5] = bsrc[-5];
+            case 3:
+                bdest[-6] = bsrc[-6];
+            case 2:
+                bdest[-7] = bsrc[-7];
+            case 1:
+                bdest[-8] = bsrc[-8];
+            case 0:
+
+                break;
+        }
+        nb -= n;
+        bdest -= n;
+        bsrc -= n;
+    }
+
+    return dest;
+}
+
+#if 0
+/* TESTED OK */
+static void *
 _memcpybk(void *dest,
           const void *src,
           size_t n)
@@ -157,6 +267,7 @@ _memcpybk(void *dest,
 
     return dest;
 }
+#endif
 
 /* TESTED OK */
 void *
@@ -587,6 +698,7 @@ strtok(char *str1,
 
 #endif /* !__GLIBC__ */
 
+/* TESTED OK */
 void *
 memset(void *ptr, int byte, size_t len)
 {
@@ -698,114 +810,6 @@ memset(void *ptr, int byte, size_t len)
     }
 
     return ptr;
-}
-
-void *
-memcpy(void *dest, const void *src, size_t len)
-{
-    int8_t     *bsrc = (int8_t *)src;
-    int8_t     *bdest = (int8_t *)dest;
-    size_t      nb = len;
-    size_t      nw;
-    long       *lsrc;
-    long       *ldest;
-    size_t      n;
-
-    n = (uintptr_t)bdest & (sizeof(long) - 1);
-    if (n == ((uintptr_t)bsrc & (sizeof(long) - 1))) {
-        n = sizeof(long) - n;
-        n = min(n, nb);
-        nb -= n;
-        if (n) {
-            switch (n) {
-                case 8:
-                    bdest[7] = bsrc[7];
-                case 7:
-                    bdest[6] = bsrc[6];
-                case 6:
-                    bdest[5] = bsrc[5];
-                case 5:
-                    bdest[4] = bsrc[4];
-                case 4:
-                    bdest[3] = bsrc[3];
-                case 3:
-                    bdest[2] = bsrc[2];
-                case 2:
-                    bdest[1] = bsrc[1];
-                case 1:
-                    bdest[0] = bsrc[0];
-                case 0:
-
-                    break;
-            }
-            bdest += n;
-            bsrc += n;
-        }
-        nw = nb / sizeof(long);
-        if (nw) {
-            ldest = (long *)bdest;
-            lsrc = (long *)bsrc;
-            nb -= nw * sizeof(long);
-            while (nw--) {
-                n = min(nw, 8);
-                switch (n) {
-                    case 8:
-                        ldest[7] = lsrc[7];
-                    case 7:
-                        ldest[6] = lsrc[6];
-                    case 6:
-                        ldest[5] = lsrc[5];
-                    case 5:
-                        ldest[4] = lsrc[4];
-                    case 4:
-                        ldest[3] = lsrc[3];
-                    case 3:
-                        ldest[2] = lsrc[2];
-                    case 2:
-                        ldest[1] = lsrc[1];
-                    case 1:
-                        ldest[0] = lsrc[0];
-                    case 0:
-
-                        break;
-                }
-                nw -= n;
-                ldest += n;
-                lsrc += n;
-            }
-            bdest = (int8_t *)ldest;
-            bsrc = (int8_t *)lsrc;
-        }
-    }
-    while (nb) {
-        n = min(nb, 8);
-        switch (n) {
-            case 8:
-                bdest[7] = bsrc[7];
-            case 7:
-                bdest[6] = bsrc[6];
-            case 6:
-                bdest[5] = bsrc[5];
-            case 5:
-                bdest[4] = bsrc[4];
-            case 4:
-                bdest[3] = bsrc[3];
-            case 3:
-                bdest[2] = bsrc[2];
-            case 2:
-                bdest[1] = bsrc[1];
-            case 1:
-                bdest[0] = bsrc[0];
-            case 0:
-
-                break;
-        }
-        nb -= n;
-        bdest += n;
-        bsrc += n;
-    }
-
-    return dest;
 }
 
 char *

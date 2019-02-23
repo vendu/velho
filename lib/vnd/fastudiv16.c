@@ -25,7 +25,10 @@
  */
 
 #include <stdint.h>
-#include <valhalla/param.h>
+#include <mach/param.h>
+#include <zero/cdefs.h>
+#include <zero/trix.h>
+#include <vnd/bitop.h>
 
 #define FASTUDIVSHIFTMASK 0x1f
 #define FASTUDIVADDBIT    0x20
@@ -35,6 +38,8 @@ struct divuf16 {
     uint_fast16_t magic;
     uint_fast16_t info;
 };
+
+static struct divuf16 fastu16divuf16tab[65536] ALIGNED(PAGESIZE);
 
 /* get the high 16 bits of val1 * val2 */
 static INLINE uint_fast16_t
@@ -46,8 +51,6 @@ _mulhiuf16(uint32_t val1, uint32_t val2)
 
     return (uint_fast16_t)res;
 }
-
-static struct divuf16 *fastu16divuf16tab[65536] ALIGNED(SYS_PAGE_SIZE);
 
 /*
  * This routine precomputes a lookup table for divisors 2..lim16
@@ -68,7 +71,7 @@ fastu16divu16init(struct divuf16 *duptr, uint_fast32_t lim16)
     duptr++;
     for (div = 2 ; div <= lim16 ; div++) {
         duptr++;
-        lzero32(div, val);
+        val = clz32(div);
         val -= 16;
         shift = 15 - val;
         if (!powerof2(div)) {
@@ -93,7 +96,7 @@ fastu16divu16init(struct divuf16 *duptr, uint_fast32_t lim16)
                 rem = val32;
                 magic <<= 1;
                 rem <<= 1;
-                info = shift | FASTU32DIVADDBIT;
+                info = shift | FASTUDIVADDBIT;
                 if (rem >= div || rem < val32) {
                     magic++;
                 }
@@ -102,7 +105,7 @@ fastu16divu16init(struct divuf16 *duptr, uint_fast32_t lim16)
         } else {
             info = shift;
             magic = 0;
-            info |= FASTU32DIVSHIFTBIT;
+            info |= FASTUDIVSHIFTBIT;
         }
         duptr->magic = magic;
         duptr->info = info;
@@ -114,24 +117,24 @@ fastu16divu16init(struct divuf16 *duptr, uint_fast32_t lim16)
 }
 
 /* compute num/divu16 with [possible] multiplication + shift operations */
-static INLINE uint_fast16_t
+uint_fast16_t
 fastu16divu16(uint32_t num, uint32_t divu16)
 {
     struct divuf16       *tab = fastu16divuf16tab;
-    const struct divuf16 *uf16ptr = &tab[divuf16];
+    const struct divuf16 *uf16ptr = &tab[divu16];
     uint32_t              lim = tab[0].magic;
     uint32_t              magic;
     uint32_t              info;
     uint32_t              res;
 
     if (!tab->magic) {
-        fastu16divu16init(fastu16divu16tab, 65535);
+        fastu16divu16init(tab, 65535);
     }
-    if (divuf16 == 1) {
+    if (divu16 == 1) {
 
         return num;
-    } else if (divuf16 >= lim) {
-        res = num / divuf16;
+    } else if (divu16 >= lim) {
+        res = num / divu16;
 
         return res;
     }
@@ -150,7 +153,7 @@ fastu16divu16(uint32_t num, uint32_t divu16)
         res = quot;
     } else {
         res = num;
-        info &= FASTU32DIVSHIFTMASK;
+        info &= FASTUDIVSHIFTMASK;
     }
     res >>= info;
 

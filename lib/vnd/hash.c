@@ -1,6 +1,5 @@
-#include <limits.h>
 #include <stdint.h>
-#include <valhalla/cdefs.h>
+#include <zero/cdefs.h>
 
 /* the following two snippets were posted on stackoverflow by Thomas Mueller */
 
@@ -20,6 +19,8 @@ tmunhash32(uint32_t u)
     u = ((u >> 16) ^ u) * 0x119de1f3;
     u = ((u >> 16) ^ u) * 0x119de1f3;
     u = (u >> 16) ^ u;
+
+    return u;
 }
 
 CONST uint64_t

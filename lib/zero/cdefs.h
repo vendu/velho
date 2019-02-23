@@ -10,7 +10,6 @@
 #endif
 #if (__STDC_VERSION__ >= 201112L)
 #include <stdalign.h>
-#define ALIGNED(x)      alignas(x)
 #if !defined(__STDC_NO_THREADS__)
 #include <threads.h>
 #define THREADLOCAL     _Thread_local
@@ -20,7 +19,7 @@
 
 #if defined(__GNUC__) || defined(__clang__)
 #if !defined(ALIGNED)
-#define ALIGNED(x)      __attribute__ ((__aligned__(a)))
+#define ALIGNED(a)      __attribute__ ((__aligned__(a)))
 #endif
 #define IMMEDIATE(x)    __builtin_constant_p(x)
 #define INLINE       	__inline__ __attribute__ ((__always_inline__))

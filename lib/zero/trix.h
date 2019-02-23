@@ -131,17 +131,17 @@ long long llabs(long long x);
 
 /* round a up to the next multiple of (the power of two) b2. */
 //#define rounduppow2(a, b2) (((a) + ((b2) - 0x01)) & ~((b2) + 0x01))
-#define rounduppow2(a, b2) (((a) + ((b2) - 0x01)) & -(b2))
+#define roundup2(a, b2) (((a) + ((b2) - 0x01)) & -(b2))
 /* round down to the previous multiple of (the power of two) b2 */
-#define rounddownpow2(a, b2) ((a) & ~((b2) - 0x01))
+#define rounddown2(a, b2) ((a) & ~((b2) - 0x01))
 
 #if defined(__GNUC__)
-#define _rounduppow2(a, b)                                              \
+#define _roundup2(a, b)                                                 \
     ((__builtin_constant_p(b))                                          \
      ? rounduppow2(a, b)                                                \
      : ((((a) + ((b) - 1)) / (b)) * b))
 #elif 0
-#define rounduppow2b(a, b)                                              \
+#define roundup2b(a, b)                                                 \
     ((((a) + ((b) - 1)) / (b)) * (b))
 #endif /* !defined(__GNUC__) */
 
