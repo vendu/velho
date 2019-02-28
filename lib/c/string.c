@@ -712,15 +712,17 @@ memset(void *ptr, int byte, size_t len)
     size_t      n;
     size_t      total = 0;
 
-    val <<= 8;
-    val |= tmp;
-    tmp = val;
-    val <<= 16;
-    val |= tmp;
-    if (sizeof(long) == 8) {
-        tmp = val;
-        val <<= 32;
+    if (byte) {
+        val <<= 8;
         val |= tmp;
+        tmp = val;
+        val <<= 16;
+        val |= tmp;
+        if (sizeof(long) == 8) {
+            tmp = val;
+            val <<= 32;
+            val |= tmp;
+        }
     }
     n = (uintptr_t)bptr & (sizeof(long) - 1);
     if (n) {
