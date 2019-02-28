@@ -1,17 +1,21 @@
 #ifndef __VND_TABHASH_H__
 #define __VND_TABHASH_H__
 
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define TABHASH_HDR_WORDS       4
 #define TABHASH_TAB_ITEMS       ((64 - TABHASH_HDR_WORDS) / TABHASH_ITEM_WORDS)
 
 #define tabhashfind(hash, key)  tabhashget(hash, key, 0)
 #define tabhashrm(hash, key)    tabhashget(hash, key, 1)
-#define tabhashdel(hash, key)   TABHASH_FREE(tabhashrm(hash, key))
-#define tabhashcpy(src, dest)   memcpy(dest, src, sizeof(TABHASH_ITEM_T))
-#define tabhashclr(ptr)         memset(ptr, 0, sizeof(TABHASH_ITEM_T))
+#define tabhashdel(hash, key)   TABHASH_FREE(tabhashdel(hash, key))
+#if !defined(TABHASH_COPY)
+#define TABHASH_COPY(src, dest) memcpy(dest, src, sizeof(TABHASH_ITEM_T))
+#endif
+#if !defined(TABHASH_CLEAR)
+#define TABHASH_CLEAR(ptr)      memset(ptr, 0, sizeof(TABHASH_ITEM_T))
+#endif
 
 struct tabhashtab {
     long                ncur;
@@ -46,7 +50,7 @@ tabhashadd(TABHASH_TAB_T **hashtab, TABHASH_ITEM_T *item)
         }
         if (tab->ncur < tab->nmax) {
             ndx = tab->ncur;
-            tabhashcpy(item, &tab[ndx]);
+            TABHASH_COPY(item, &tab[ndx]);
             ndx++;
             tab->ncur = ndx;
             if (alloc) {
@@ -72,9 +76,11 @@ tabhashadd(TABHASH_TAB_T **hashtab, TABHASH_ITEM_T *item)
     return 0;
 }
 
-static __inline__ TABHASH_ITEM_T *
+static __inline__ TABHASH_ITEM_T
 tabhashget(TABHASH_TAB_T **hashtab, const uintptr_t key, long remove)
+
 {
+    TABHASH_ITEM_T      ret = TABHASH_INVALID;
     TABHASH_TAB_T      *tab;
     TABHASH_TAB_T      *prev;
     TABHASH_ITEM_T     *item;
@@ -89,18 +95,19 @@ tabhashget(TABHASH_TAB_T **hashtab, const uintptr_t key, long remove)
         for (cur = 0 ; cur < lim ; cur++) {
             item = &tab->items[cur];
             if (!TABHASH_CMP(item, key)) {
+                ret = *item;
                 if (remove) {
                     /* remove item from hash */
                     n = tab->ncur;
                     n--;
                     if (cur != n) {
                         /* copy last item in table over removed one */
-                        tabhashcpy(&tab->items[n], &tab->items[cur]);
+                        TABHASH_COPY(&tab->items[n], &tab->items[cur]);
                     }
 #if defined(TABHASH_FREE)
                     TABHASH_FREE(tab->items[n]);
 #endif
-                    tabhashclr(&tab->items[n]);
+                    TABHASH_CLEAR(&tab->items[n]);
                     tab->ncur = n;
                     if (!n) {
                         /* free empty table */
@@ -118,14 +125,14 @@ tabhashget(TABHASH_TAB_T **hashtab, const uintptr_t key, long remove)
                     hashtab[key] = tab;
                 }
 
-                return item;
+                return ret;
             }
         }
         prev = tab;
         tab = tab->next;
     }
 
-    return NULL;
+    return ret;
 }
 
 #endif /* __VND_TABHASH_H__ */
