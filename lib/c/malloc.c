@@ -1,79 +1,14 @@
 #include <stddef.h>
 #include <string.h>
+#include <errno.h>
 #include <zero/cdefs.h>
 #include <vnd/unix.h>
 #include <vnd/mem.h>
 
-extern struct memhashtab       *g_memhashtab[MEM_HASH_SLOTS];
-extern struct memglob           g_mem;
-THREADLOCAL struct memtls      *t_memtls;
-
-void *
-memalloc(size_t size, size_t align, long flg)
-{
-    size_t              aln = max(align, MEM_ALIGN_MIN);
-    void               *ptr;
-    void               *ret;
-    size_t              blksz = memalnsize(size, aln);
-    long                type = memalloctype(blksz);
-    long                qid;
-    struct memhash      hash;
-
-    switch (type) {
-        case MEM_BLK:
-            qid = memblkqueue(blksz);
-            ptr = memgetblk(&t_memtls->blktab[qid], qid);
-
-            break;
-        case MEM_RUN:
-            qid = memrunqueue(blksz);
-            ptr = memgetrun(&t_memtls->runtab[qid], qid);
-
-            break;
-        case MEM_BIG:
-            ptr = memmapbig(blksz);
-
-            break;
-    }
-    if (flg & MEM_ZERO_BIT) {
-        memset(ptr, 0, size);
-    }
-    ret = memalignptr(ptr, aln);
-
-    return ret;
-}
-
-void
-memfree(void *adr)
-{
-    uintptr_t            page = (uintptr_t)adr & ~(PAGESIZE - 1);
-    struct memhash       hash = tabhashfind(g_memhashtab, page);
-    struct membuf       *buf = memhashbuf(hash);
-    long                 type = memhashbuftype(hash);
-    size_t               size = memhashbufsize(hash);
-
-    switch (type) {
-        case MEM_BLK:
-            memputblk(buf, adr);
-
-            break;
-        case MEM_RUN:
-            memputrun(buf, adr);
-
-            break;
-        case MEM_BIG:
-            memfreebig((void *)page, size);
-
-            break;
-    }
-
-    return;
-}
-
 void *
 malloc(size_t size)
 {
-    void *ptr = memalloc(size, 0, 0);
+    void *ptr = memget(size, 0);
 
     return ptr;
 }
@@ -82,29 +17,128 @@ void *
 calloc(size_t n, size_t size)
 {
     size_t       blksz = n * size;
-    void        *ptr;
+    void        *ptr = NULL;
 
-    if (!blksz) {
-
-        return NULL;
+    if ((blksz) && blksz >= size) {
+        /* n > 0 && size > 0, n * size didn't overflow */
+        ptr = memget(size, 0);
     }
-    if (blksz >= size) {
-        ptr = memalloc(size, 0, 1);
+    memset(ptr, 0, blksz);
+
+    return ptr;
+}
+
+void *
+realloc(void *ptr, size_t size)
+{
+    void       *adr;
+
+    if (!ptr) {
+        adr = memget(size, 0);
+    } else {
+        adr = memresize(ptr, size, 0, 0);
     }
 
     return ptr;
 }
 
 void *
-realloc(void *adr, size_t size)
+reallocf(void *adr, size_t size)
 {
-    void        *ptr = memalloc(size, 0, 0);
+    void       *ptr = memresize(adr, size, 0,
+                                MEM_FREE_ON_FAILURE
+                                | MEM_ALLOC_ON_NULL
+                                | MEM_ERRNO_ON_RESIZE);
+
+    return ptr;
+}
+
+void
+free(void *ptr)
+{
+    if (ptr) {
+        memrel(ptr);
+    }
+
+    return;
 }
 
 void *
 aligned_alloc(size_t align, size_t size)
 {
-    void *ptr = memalloc(size, align, 0);
+    void       *ptr = memget(size, align);
+
+    return ptr;
+}
+
+int
+posix_memalign(void **memptr, size_t align, size_t size)
+{
+    void       *ptr;
+
+    if (!size
+        || (align & (CHAR_BIT * sizeof(void *) - 1))
+        || !powerof2(align)) {
+
+        return EINVAL;
+    } else {
+        ptr = memget(size, align);
+    }
+    if (!ptr) {
+
+        return ENOMEM;
+    }
+    *memptr = ptr;
+
+    return 0;
+}
+
+void *
+memalign(size_t align, size_t size)
+{
+    void       *ptr;
+
+    if (!powerof2(align)) {
+
+        return NULL;
+    }
+    ptr = memget(size, align);
+
+    return ptr;
+}
+
+void *
+valloc(size_t size)
+{
+    void       *ptr = memget(size, PAGESIZE);
+
+    return ptr;
+}
+
+void *
+pvalloc(size_t size)
+{
+    size_t      blksz = roundup2(size, PAGESIZE);
+    void       *ptr = memget(blksz, PAGESIZE);
+
+    return ptr;
+}
+
+void *
+reallocarray(void *adr, size_t n, size_t size)
+{
+    size_t      tabsz = n * size;
+    void       *ptr;
+
+    if (tabsz < size) {
+        errno = ENOMEM;
+
+        return NULL;
+    }
+    ptr = memresize(adr, tabsz, 0, 0);
+    if (!ptr) {
+        errno = ENOMEM;
+    }
 
     return ptr;
 }

@@ -9,9 +9,10 @@
 #define TABHASH_SLOTS           MEM_HASH_SLOTS
 #define TABHASH_KEY(item)       ((item)->page)
 #if (WORDSIZE == 8)
-#define TABHASH_HASH(item)      tmhash64((item)->page)
+#define TABHASH_HASH(key)       tmhash64(key)
+#define TABHASH_HASH_ITEM(item) TABHASH_HASH((item)->page)
 #else
-#define TABHASH_HASH(item)      tmhash32((item)->page
+#define TABHASH_HASH_ITEM(item) tmhash32((item)->page)
 #endif
 #define TABHASH_CMP(item, key)  ((item)->page == key)
 #include <vnd/hash.h>
