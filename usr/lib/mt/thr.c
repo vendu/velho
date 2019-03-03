@@ -1,17 +1,17 @@
 #include <time.h>
 #include <sys/time.h>
-#include <zero/cdefs.h>
 #include <mach/asm.h>
-#include <zero/time.h>
 #include <mt/thr.h>
 #include <mt/cond.h>
+#include <zero/cdefs.h>
+#include <zero/time.h>
 #include <zero/prof.h>
-#define MTLIST_TYPE             mtthr
-#define MTLIST_QTYPE            mtthrqueue
-#define MTLIST_RM_COND(thr)     ((thr)->sleep)
-#define MTLIST_QUEUE(thr)       ((thr)->sleep = MTTHR_ASLEEP)
-#define MTLIST_DEQUEUE(thr)     ((thr)->sleep = MTTHR_AWAKE)
-#include <mt/mtlist.h>
+#define HTLIST_TYPE             mtthr
+#define HTLIST_QTYPE            mtthrqueue
+#define HTLIST_RM_COND(thr)     ((thr)->sleep)
+#define HTLIST_QUEUE(thr)       ((thr)->sleep = MT_THR_ASLEEP)
+#define HTLIST_DEQUEUE(thr)     ((thr)->sleep = MT_THR_AWAKE)
+#include <zero/htlist.h>
 
 static mtthrqueue               thrsleepqueue;
 THREADLOCAL mtthr               thrself;
@@ -24,7 +24,7 @@ thrwait1(mtthrqueue *queue)
     if (!queue) {
         queue = &thrsleepqueue;
     }
-    mtlistpush(queue, thr);
+    htlistpush(queue, thr);
     while (m_atomread(&thr->sleep)) {
         thryield();
     }
@@ -46,7 +46,7 @@ thrsleep2(mtthrqueue *queue, const struct timespec *absts)
     if (!queue) {
         queue = &thrsleepqueue;
     }
-    mtlistpush(queue, thr);
+    htlistpush(queue, thr);
 #if defined(USECLOCKNANOSLEEP)
     while (clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, absts, &tsrem)) {
         if (errno == EINTR) {
@@ -54,14 +54,14 @@ thrsleep2(mtthrqueue *queue, const struct timespec *absts)
             continue;
         } else {
             if (m_atomread(&thr->sleep)) {
-                mtlistrm(queue, thr);
+                htlistrm(queue, thr);
             }
 
             return -1;
         }
     }
     if (m_atomread(&thr->sleep)) {
-        mtlistrm(queue, thr);
+        htlistrm(queue, thr);
     }
 #else
     gettimeofday(&tvcur, NULL);
@@ -69,7 +69,7 @@ thrsleep2(mtthrqueue *queue, const struct timespec *absts)
     do {
         if (timevalcmp(&tvout, &tvcur) > 0) {
             if (m_atomread(&thr->sleep)) {
-                mtlistrm(queue, thr);
+                htlistrm(queue, thr);
             }
 
             return 0;
@@ -90,7 +90,7 @@ thrwake1(mtthrqueue *queue)
     if (!queue) {
         queue = &thrsleepqueue;
     }
-    mtlistdequeue(queue, &thr);
+    htlistdequeue(queue, &thr);
 
     return thr;
 }
@@ -104,7 +104,7 @@ thrwakeall(mtthrqueue *queue)
         queue = &thrsleepqueue;
     }
     do {
-        mtlistdequeue(queue, &thr);
+        htlistdequeue(queue, &thr);
     } while (thr);
 
     return;

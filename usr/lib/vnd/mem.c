@@ -8,7 +8,7 @@ struct tabhashtab              *g_memhashtab[TABHASH_SLOTS];
 struct memglob                  g_mem ALIGNED(PAGESIZE);
 THREADLOCAL struct memtls      *t_memtls;
 
-#define memblkslabsz(qid)                                               \
+#define memblkslabsize(qid)                                             \
     (((qid) <= MEM_BLK_MID_QUEUE_MIN)                                   \
      ? (MEM_BLK_SLAB >> 2)                                              \
      : (((qid) <= MEM_BLK_BIG_QUEUE_MIN)                                \
@@ -17,13 +17,14 @@ THREADLOCAL struct memtls      *t_memtls;
 static void
 meminitblktabs(struct memglob *mem)
 {
-    float       slabsz = MEM_BLK_SLAB;
+    float       slabsz;
     float       blksz;
     float       nblk;
     float       multi;
     long        qid;
 
     for (qid = 0 ; qid < MEM_BLK_QUEUES ; qid++) {
+        slabsz = memblkslabsize(qid);
         blksz = MEM_BLK_MIN * (float)(qid + 1);
         nblk = slabsz / blksz;
         multi = 1.0 / blksz;
@@ -34,12 +35,12 @@ meminitblktabs(struct memglob *mem)
     return;
 }
 
-#define memrunslabsz(qid)                                               \
-    (((qid) <= MEM_RUN_MID_QUEUE_MIN)                                   \
-     ? (MEM_RUN_MAX >> 1)                                               \
-     : (((qid) <= MEM_RUN_BIG_QUEUE_MIN)                                \
-        ? MEM_RUN_MAX                                                   \
-        : (2 * MEM_RUN_MAX)))
+#define memrunslabsize(qid)                                             \
+    (((qid) < MEM_RUN_MID_QUEUE_MIN)                                    \
+     ? MEM_RUN_MIN_SLAB                                                 \
+     : (((qid) < MEM_RUN_BIG_QUEUE_MIN)                                 \
+        ? MEM_RUN_MID_SLAB                                              \
+        : MEM_RUN_BIG_SLAB))
 static void
 meminitruntab(struct memglob *mem)
 {
@@ -50,7 +51,7 @@ meminitruntab(struct memglob *mem)
     long        qid;
 
     for (qid = 0 ; qid < MEM_RUN_QUEUES ; qid++) {
-        slabsz = (float)memrunslabsz(qid);
+        slabsz = (float)memrunslabsize(qid);
         runsz = PAGESIZE * (float)(qid + 1);
         nrun = slabsz / runsz;
         multi = 1.0 / runsz;
@@ -157,7 +158,7 @@ memputbuf(struct membuf *buf, long type)
 
 /* allocate new block buffer */
 static struct membuf *
-memallocblkbuf(struct membufq *queue)
+memgetblkbuf(struct membufq *queue)
 {
     long                qid = queue->qid;
     struct membuf      *buf = memgetbuf(queue, MEM_BLK);
@@ -224,7 +225,7 @@ memallocblkbuf(struct membufq *queue)
 }
 
 static struct membuf *
-memallocrunbuf(struct membufq *queue)
+memgetrunbuf(struct membufq *queue)
 {
     long                qid = queue->qid;
     struct membuf      *buf = memgetbuf(queue, MEM_RUN);
@@ -269,6 +270,7 @@ mempushbuf(struct membufq *queue, struct membuf *buf)
 
     buf->prev = NULL;
     buf->next = head;
+    queue->nbuf++;
     if (head) {
         head->prev = buf;
     } else {
@@ -287,6 +289,7 @@ memqueuebuf(struct membufq *queue, struct membuf *buf)
 
     buf->next = NULL;
     buf->prev = tail;
+    queue->nbuf++;
     if (tail) {
         tail->next = buf;
     } else {
@@ -306,6 +309,7 @@ memdequebuf(struct membufq *queue, struct membuf *buf)
 
     prev = buf->prev;
     next = buf->next;
+    queue->nbuf--;
     if (prev) {
         prev->next = buf->next;
     } else {
@@ -327,7 +331,8 @@ memputblk(struct membuf *buf, void *ptr)
     struct membufq     *queue = buf->queue;
     long                qid = queue->qid;
     struct memtls      *tls = queue->tls;
-    long                lim = memnblkbuf(qid);
+    long                lim = (tls) ? memnblktlsbuf(qid) : memnblkbuf(qid);
+    struct membufq     *glob;
     void               *adr;
     long                ndx;
     long                max;
@@ -337,20 +342,28 @@ memputblk(struct membuf *buf, void *ptr)
         mtlkfmtx(&queue->mtx);
     }
     adr = memgetptr(ptr);
-    ndx = buf->cur;
+    ndx = buf->ofs;
     max = buf->max;
     ndx--;
     nbuf = queue->nbuf;
     max--;
     buf->tab[ndx] = (uintptr_t)adr;
-    buf->cur = ndx;
+    buf->ofs = ndx;
     if (ndx == max) {
         memqueuebuf(queue, buf);
-    } else if (!ndx && nbuf >= lim) {
-        if (tls) {
-            tls = NULL;
-            mtlkfmtx(&queue->mtx);
-            memqueuebuf(queue, buf);
+    } else if (!ndx && nbuf > lim) {
+        memdequebuf(queue, buf);
+        if (!tls) {
+            memfreebuf(buf);
+        } else {
+            glob = &g_mem.blktab[qid];
+            nbuf = glob->nbuf;
+            lim = memnblkbuf(qid);
+            if (nbuf > lim) {
+                memfreebuf(buf);
+            } else {
+                mempushbuf(glob, buf);
+            }
         }
     }
     if (!tls) {
@@ -362,9 +375,12 @@ memputblk(struct membuf *buf, void *ptr)
 
 /* acquire allocation block */
 void *
-memgetblk(struct membufq *queue, size_t align)
+memgetblk(long qid, size_t align, struct memtls *tls)
 {
-    long                qid = queue->qid;
+
+    struct membufq     *queue = ((tls)
+                                 ? &tls->blktab[qid]
+                                 : &g_mem.blktab[qid]);
     void               *ptr = NULL;
     void               *ret = NULL;
     long                lim;
@@ -373,55 +389,48 @@ memgetblk(struct membufq *queue, size_t align)
     struct membuf      *buf;
     long                bits;
     long                pgbit;
-    long                lock;
+    long                alloc;
     uintptr_t           num;
     TABHASH_ITEM_T      item;
 
-    /* try thread-local buffer */
-    buf = queue->head;
     lock = 0;
-    if (!buf) {
-        /* try global buffer */
-        queue = &g_mem.blktab[qid];
-        lock = 1;
+    alloc = 0;
+    if (!tls) {
         mtlkfmtx(&queue->mtx);
-        buf = queue->head;
     }
+    buf = queue->head;
     if (!buf) {
         /* allocate new buffer */
-        lock = 1;
-        mtlkfmtx(&queue->mtx);
-        buf = memallocrunbuf(queue);
+        buf = memgetblkbuf(queue);
+        alloc = 1;
     }
-    bits = buf->bits;                   // allocation page-bitmap
-    ndx = buf->cur;                     // top of allocation stack
+    ndx = buf->ofs;                     // top of allocation stack
     lim = buf->max;                     // # of blocks in buffer
-    ofs = ndx + lim;                    // offset of book-keeping word
+    ofs = ndx;
+    bits = buf->bits;                   // allocation page-bitmap
+    ofs += lim;                         // offset of book-keeping word
     ptr = (void *)buf->tab[ndx];        // allocation pointer
-    lim--;                              // adjust stack limit
     ret = memalignptr(ptr, align);      // align allocation address
-    ofs = membufblknum(qid, buf, ret);  // ID of aligned allocation in buffer
-    num = membufpagenum(buf, ptr);      // ID of unaligned allocation in buffer
-    pgbit = 1L << num;                  // page-bit
+    pgbit = 1L << ndx;                  // page-bit
     buf->tab[ofs] = (uintptr_t)ptr;     // store unaligned allocation address
     ndx++;                              // adjust allocation stack top
     if (!(bits & pgbit)) {
         /* no record for the allocation page, hash one */
-        item.page = mempageadr(ret);
+        item.page = memsethashpage(mempageadr(ret), 0);
         item.buf = memsethashbuf(buf, qid);
         bits |= pgbit;
         tabhashadd(g_memhashtab, &item);
         buf->bits = bits;
     }
-    buf->cur = ndx;
+    buf->ofs = ndx;
     if (ndx == lim) {
-        /* was fully-allocated buffer, queue in back */
-        memqueuebuf(queue, buf);
-    } else if (ndx == 1) {
+        /* fully-allocated buffer, dequeue */
+        memdequebuf(queue, buf);
+    } else if (alloc) {
         /* first allocation from buffer, queue in front */
         mempushbuf(queue, buf);
     }
-    if (lock) {
+    if (!tls) {
         mtunlkfmtx(&queue->mtx);
     }
 
@@ -430,9 +439,11 @@ memgetblk(struct membufq *queue, size_t align)
 
 /* acquire allocation run */
 void *
-memgetrun(struct membufq *queue, size_t align)
+memgetrun(long qid, size_t align, struct memtls *tls)
 {
-    long                qid = queue->qid;
+    struct membufq     *queue = ((tls)
+                                 ? &tls->blktab[qid]
+                                 : &g_mem.blktab[qid]);
     void               *ptr = NULL;
     long                ntry = 32;
     long                nrun;
@@ -441,114 +452,114 @@ memgetrun(struct membufq *queue, size_t align)
     long                mask;
     struct membuf      *buf;
     struct membuf      *head;
-    long                lock;
     long                alloc;
     TABHASH_ITEM_T      item;
 
-    buf = queue->head;
-    lock = 0;
     alloc = 0;
-    if (!buf) {
-        queue = &g_mem.runtab[qid];
-        lock = 1;
-        mtlkfmtx(&queue->mtx);
-        buf = queue->head;
+    if (!tls) {
+        mtmtxlk(&queue->mtx);
     }
-    if (!buf) {
-        buf = memallocrunbuf(queue);
+    buf = queue->head;
+    if (buf) {
+        do {
+            bits = buf->bits;
+            if (!bits) {
+                m_waitspin();
+            }
+        } while (!bits && --ntry);
+    } else {
+        buf = memgetrunbuf(queue);
         alloc = 1;
-    }
-    do {
         bits = buf->bits;
-        if (!bits) {
-            m_waitspin();
-        }
-    } while (!bits && --ntry);
+    }
     nrun = buf->max;
     if (bits) {
-        ndx = lo1bit(bits);
+        ndx = m_ctz(bits);
         mask = 1L << ndx;
-        ptr = (void *)(buf->adr + qid * (ndx << PAGESIZELOG2));
+        ndx <<= PAGESIZELOG2;
+        ptr = buf->adr + qid * ndx;
         mask = ~mask;
         bits &= mask;
         buf->bits = bits;
     }
     head = queue->head;
-    if (m_ham(bits) == nrun) {
+    if (!bits) {
         if (head) {
             head->prev = NULL;
         }
         queue->head = buf->next;
     } else if (alloc) {
-        buf->next = head;
-        if (head) {
-            head->prev = buf;
-        }
-        queue->head = buf;
+        mempushbuf(queue, buf);
     }
-    if (lock) {
+    if (!tls) {
         mtunlkfmtx(&queue->mtx);
     }
     if (ptr) {
-        item.page = mempageadr(ptr);
-        item.buf = memhashsetbuf(buf, qid);
+        item.page = memsethashpage(mempageadr(ptr), type, 0);
+        item.buf = memsethashbuf(buf, qid);
     }
 
     return ptr;
 }
 
 /* release allocation run */
-static void
+static struct membuf *
 memputrun(struct membuf *buf, void *adr)
 {
     struct membufq     *queue = buf->queue;
     long                qid = queue->qid;
+    struct memtls      *tls = queue->tls;
     long                ndx = memrunnum(qid, buf, adr);
-    int32_t             bits = buf->bits;
-    long                mask = 1L << ndx;
+    uintptr_t           bits = buf->bits;
+    uintptr_t           mask = (uintptr_t)1 << ndx;
     long                nrun = buf->max;
-    struct membuf      *head;
-    struct membuf      *prev;
-    struct membuf      *next;
+    long                nbuf = queue->nbuf;
+    long                lim = 2;
+    struct membufq     *glob;
 
-    mtlkfmtx(&queue->mtx);
-    if (!(bits & mask)) {
+    if (!tls) {
+        mtlkfmtx(&queue->mtx);
+    }
+    if (bits & mask) {
         /* deal with duplicate free */
         ;
     }
-    nrun--;
-    prev = buf->prev;
-    next = buf->next;
-    if (!bits) {
-        head = queue->head;
-        if (head) {
-            head->prev = buf;
-        } else {
-            queue->tail = prev;
-        }
-        queue->head = buf;
-    } else if (m_ham(bits) == nrun) {
-        if (prev) {
-            prev->next = buf->next;
-        } else {
-            queue->head = next;
-        }
-        if (next) {
-            next->prev = buf->next;
-        } else {
-            queue->tail = buf;
-        }
-    }
     bits |= mask;
     buf->bits = bits;
-    mtunlkfmtx(&queue->mtx);
+    if (bits == mask) {
+        memqueuebuf(queue, buf);
+    } else {
+        mask = (uintptr_t)1 << nrun;
+        mask--;
+        if (bits == mask && nbuf > lim) {
+            memdequebuf(queue, buf);
+            if (!tls) {
+                memfreebuf(buf);
+            } else {
+                glob = &g_mem.runtab[qid];
+                nrun = glob->max;
+                nbuf = glob->nbuf;
+                mask = (uintptr_t)1 << nrun;
+                lim = glob->max;
+                mask--;
+                if (bits == mask && nbuf > lim) {
+                    memfreebuf(buf);
+                } else {
+                    mempushbuf(glob, buf);
+                }
+            }
+        }
+    }
+    if (!tls) {
+        mtunlkfmtx(&queue->mtx);
+    }
 
-    return;
+    return buf;
 }
 
 /* acquire big allocation */
 void *
-memgetbig(size_t size, size_t align)
+memmapbig(size_t size, size_t align)
 {
     struct membuf      *buf = memgetbuf(NULL, MEM_BIG);
     size_t              mapsz = roundup2(size, PAGESIZE);
@@ -579,7 +590,7 @@ memgetbig(size_t size, size_t align)
 static void
 memfreebig(void *ptr, size_t size)
 {
-    tabhashdel(g_memhashtab, (uintptr_t)qptr);
+    tabhashdel(g_memhashtab, (uintptr_t)ptr);
     unmapanon(ptr, size);
 
     return;
@@ -590,9 +601,9 @@ void *
 memget(size_t size, size_t align)
 {
     size_t              aln = max(align, MEM_ALIGN_MIN);
-    void               *ptr;
     size_t              alnsz = memalnsize(size, aln);
-    long                type = memalloctype(alnsz);
+    uintptr_t           type = membuftype(alnsz);
+    void               *ptr;
     size_t              blksz;
     long                qid;
 
@@ -600,18 +611,23 @@ memget(size_t size, size_t align)
         case MEM_BLK:
             blksz = roundup2(alnsz, MEM_BLK_MIN);
             qid = memblkqid(blksz);
-            ptr = memgetblk(&t_memtls->blktab[qid], aln);
+            ptr = memgetblk(qid, aln, tls);
 
             break;
         case MEM_RUN:
             blksz = roundup2(alnsz, PAGESIZE);
             qid = memrunqid(blksz);
-            ptr = memgetrun(&t_memtls->runtab[qid], aln);
+            ptr = memgetrun(qid, aln, tls);
 
             break;
         case MEM_BIG:
             blksz = roundup2(alnsz, PAGESIZE);
-            ptr = memgetbig(blksz, aln);
+            qid = membigqid(blksz);
+            if (qid >= MEM_BIG_QUEUES) {
+                ptr = memmapbig(blksz, aln);
+            } else {
+                ptr = memgetbig(qid, aln);
+            }
 
             break;
     }
@@ -648,7 +664,7 @@ memresize(void *ptr, size_t size, size_t align, long flg)
     if (!ret) {
         errno = ENOMEM;
         if (flg & MEM_FREE_ON_FAILURE) {
-            memrel(ptr);
+            memput(ptr);
         }
     }
 
@@ -657,7 +673,7 @@ memresize(void *ptr, size_t size, size_t align, long flg)
 
 /* release allocation */
 void
-memrel(void *ptr)
+memput(void *ptr)
 {
     uintptr_t           page = mempageadr(ptr);
     struct memhash      hash = tabhashfind(g_memhashtab, page);

@@ -7,11 +7,11 @@
 #include <zero/sys.h>
 
 #if (MTFMTX)
-#define barinitlk(lp) (*(lp) = FMTXINITVAL)
-#define barlk(lp)     fmtxlk(lp)
-#define barunlk(lp)   fmtxunlk(lp)
+#define barinitlk(lp) (*(lp) = MTFMTXINITVAL)
+#define barlk(lp)     mtlkfmtx(lp)
+#define barunlk(lp)   mtunlkfmtx(lp)
 #else
-#define barinitlk(lp) (*(lp) = MTXINITVAL)
+#define barinitlk(lp) (*(lp) = MTFMTXINITVAL)
 #define barlk(lp)     mtxlk(lp)
 #endif
 
@@ -48,7 +48,7 @@ barwait(mtbar *bar)
     bar->num++;
     if (bar->num == bar->cnt) {
         bar->num += BARFLAGBIT - 1;
-        condbcast(&bar->cond);
+        condsigall(&bar->cond);
         barunlk(&bar->lk);
 
         return BARSERIALTHR;
@@ -58,7 +58,7 @@ barwait(mtbar *bar)
         }
         bar->num--;
         if (bar->num == BARFLAGBIT) {
-            condbcast(&bar->cond);
+            condsigall(&bar->cond);
         }
         barunlk(&bar->lk);
 
@@ -81,7 +81,7 @@ barinitpool(mtbarpool *pool, long cnt)
 void
 barfreepool(mtbarpool *pool)
 {
-    m_fetchadd32(&pool->nref, -1);
+    m_fetchadd(&pool->nref, -1);
     do {
         volatile long nref = m_atomread(&pool->nref);
 
@@ -125,7 +125,7 @@ barwaitpool(mtbarpool *pool)
         /* we were too slow, so wait for barrier to be released */
         syswait(&pool->cnt.vals.seq, seq);
     } while (1);
-    if (m_fetchadd32(&pool->nref, -1) == 1) {
+    if (m_fetchadd(&pool->nref, -1) == 1) {
         /* last one to wake up, wake destroying thread */
         syswait(&pool->nref, 1);
     }

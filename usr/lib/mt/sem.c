@@ -17,7 +17,7 @@ semwait(mtsem *sem)
             thryield();
         }
 #elif defined(MTFMTX)
-        while (!fmtxtrylk(&sem->lk)) {
+        while (!mttryfmtx(&sem->lk)) {
             thryield();
         }
 #endif
@@ -26,7 +26,7 @@ semwait(mtsem *sem)
 #if defined(PTHREAD)
             pthread_mutex_unlock(&sem->lk);
 #elif defined(MTFMTX)
-            fmtxunlk(&sem->lk);
+            mtunlkfmtx(&sem->lk);
 #endif
 
             return 0;
@@ -34,7 +34,7 @@ semwait(mtsem *sem)
 #if defined(PTHREAD)
             pthread_mutex_unlock(&sem->lk);
 #elif defined(MTFMTX)
-            fmtxunlk(&sem->lk);
+            mtunlkfmtx(&sem->lk);
 #endif
             thryield();
         }
@@ -52,7 +52,7 @@ semtrywait(mtsem *sem)
             thryield();
         }
 #elif defined(MTfMTX)
-        while (!fmtxtrylk(&sem->lk)) {
+        while (!mttryfmtx(&sem->lk)) {
             thryield();
         }
 #endif
@@ -61,7 +61,7 @@ semtrywait(mtsem *sem)
 #if defined(PTHREAD)
             pthread_mutex_unlock(&sem->lk);
 #elif defined(MTFMTX)
-            fmtxunlk(&sem->lk);
+            mtunlkfmtx(&sem->lk);
 #endif
 
             return 0;
@@ -69,7 +69,7 @@ semtrywait(mtsem *sem)
 #if defined(PTHREAD)
             pthread_mutex_unlock(&sem->lk);
 #elif defined(MTFMTX)
-            fmtxunlk(&sem->lk);
+            mtunlkfmtx(&sem->lk);
 #endif
             errno = EAGAIN;
 
@@ -89,7 +89,7 @@ sempost(mtsem *sem)
             thryield();
         }
 #elif defined(MTFMTX)
-        while (fmtxtrylk(&sem->lk)) {
+        while (mttryfmtx(&sem->lk)) {
             thryield();
         }
 #endif
@@ -97,7 +97,7 @@ sempost(mtsem *sem)
 #if defined(PTHREAD)
             pthread_mutex_unlock(&sem->lk);
 #elif defined(MTFMTX)
-            fmtxunlk(&sem->lk);
+            mtunlkfmtx(&sem->lk);
 #endif
             thryield();
         } else if (sem->val != MTSEM_MAXVAL) {
@@ -105,7 +105,7 @@ sempost(mtsem *sem)
 #if defined(PTHREAD)
             pthread_mutex_unlock(&sem->lk);
 #elif defined(MTFMTX)
-            fmtxunlk(&sem->lk);
+            mtunlkfmtx(&sem->lk);
 #endif
 
             return 0;

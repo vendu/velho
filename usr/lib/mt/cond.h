@@ -1,14 +1,14 @@
 #ifndef __MT_COND_H__
 #define __MT_COND_H__
 
-#include <mt/conf.h>
-#include <mt/mtx.h>
-#include <mt/thr.h>
 #if defined(PTHREAD)
 #include <stddef.h>
 #include <time.h>
 #include <pthread.h>
 #endif
+#include <mt/conf.h>
+#include <mt/mtx.h>
+#include <mt/thr.h>
 
 #if 0 && defined(PTHREAD) && !defined(MTCOND)
 

@@ -12,6 +12,8 @@
 
 #define clz32(u32)      __builtin_clz(u32)
 #define clz64(u64)      __builtin_clzll(u64)
+#define ctz32(u32)      __builtin_ctz(u32)
+#define ctz64(u64)      __builtin_ctzll(u64)
 #define ham32(u32)      __builtin_popcount(u32)
 #define ham64(u64)      __builtin_popcountll(u64)
 #define par32(u32)      __builtin_parity(u32)
@@ -182,9 +184,11 @@ ham64nomul(uint64_t a)
 
 #if (WORDSIZE == 8)
 #define m_clz clz64
+#define m_ctz ctz64
 #define m_ham ham64
 #else
 #define m_clz clz32
+#define m_ctz ctz32
 #define m_ham ham32
 #endif
 

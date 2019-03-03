@@ -12,10 +12,12 @@ void
 condinit(mtcond *cond)
 {
 #if (MTFMTX)
-    fmtxinit(&cond->queue.lk);
+    mtinitfmtx(&cond->queue.mtx);
 #endif
     cond->queue.head = NULL;
     cond->queue.tail = NULL;
+
+    return;
 }
 
 long
@@ -38,7 +40,7 @@ condsigmany(mtcond *cond, long nthr)
         return -EINVAL;
     }
     while (nthr--) {
-        if (!thrwake(&cond->queue)) {
+        if (!thrwake1(&cond->queue)) {
 
             return 0;
         }
@@ -65,7 +67,7 @@ condwait(mtcond *cond, mtfmtx *fmtx)
     if (!cond || !fmtx) {
 
         return -EINVAL;
-    } else if (!fmtxtrylk(fmtx)) {
+    } else if (!mttryfmtx(fmtx)) {
 
         return -EPERM;
     } else {
@@ -83,7 +85,7 @@ condwaitabstime(mtcond *cond, mtfmtx *fmtx, const struct timespec *absts)
         || absts->tv_nsec < 0 || absts->tv_nsec >= 1000000000) {
 
         return -EINVAL;
-    } else if (!fmtxtrylk(fmtx)) {
+    } else if (!mttryfmtx(fmtx)) {
 
         return -EPERM;
     } else if (thrsleep2(&cond->queue, absts) < 0) {

@@ -10,7 +10,10 @@
 #define thrid()         ((uintptr_t)pthread_self())
 #endif
 
-#if defined(MT_THREAD) || (POSIX_THREAD)
+#if defined(VELHO)
+#include <sched.h>
+#define thryield()      sched_yield()
+#elif defined(MTTHREAD) || (POSIX_THREAD)
 #define thryield()      pthread_yield()
 #elif defined(_WIN64) || defined(_WIN32)
 #define thryield()      kYieldProcessor()
@@ -20,9 +23,9 @@
 #define thryield()      schedyield()
 #endif
 
-#if defined(MT_THREAD)
+#if defined(MTTHREAD)
 
-#if defined(MT_SCHED)
+#if defined(MTSCHED)
 #include <sched.h>
 #endif
 
@@ -47,7 +50,7 @@ typedef struct __mtthratr {
     size_t                ncpu;
     void                *cpuset;
 #endif
-#if defined(MT_SCHED)
+#if defined(MTSCHED)
     struct sched_param   schedparm;
 #endif
 } mtthratr;
@@ -64,22 +67,20 @@ typedef struct __mtthr {
 } mtthr;
 
 #define MT_THRQUEUE_INITIALIZER { MTXINITVAL, NULL, NULL }
-typedef struct {
-    mtfmtx      lk;
+typedef struct __mtthrqueue {
+    mtfmtx      mtx;
     mtthr      *head;
     mtthr      *tail;
 } mtthrqueue;
 
 extern void     thrwait1(mtthrqueue *queue);
 extern long     thrsleep2(mtthrqueue *queue, const struct timespec *absts);
-extern mtthr  * thrwake(mtthrqueue *queue);
+extern mtthr  * thrwake1(mtthrqueue *queue);
 extern void     thrwakeall(mtthrqueue *queue);
 
 #define         thrwait()       thrwait1(NULL)
-#define         thrwake()       thrwake1(NULL)
-#define         thrwakeall()    thrwakeall1(NULL)
 
-#endif /* defined(MT_THREAD) */
+#endif /* defined(MTTHREAD) */
 
 #endif /* __MT_THR_H__ */
 

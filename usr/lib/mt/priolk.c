@@ -35,7 +35,7 @@ priolkinit(struct priolkdata *data, unsigned long val)
                 head = (struct priolkdata *)g_priolkq;
                 if (head) {
                     next = (struct priolkdata *)head->next;
-                    res = m_cmpswapptr((m_atomic_t **)&g_priolkq,
+                    res = m_cmpswapptr((m_atomicptr_t *)&g_priolkq,
                                        (long *)head,
                                        (long *)next);
                 }
@@ -89,7 +89,7 @@ priolkget(struct priolk *priolk)
         m_waitspin();
     }
     /* see if no higher-priority waiters and unlocked */
-    res = m_cmpswapptr((m_atomic_t **)&priolk->owner,
+    res = m_cmpswapptr((m_atomicptr_t *)&priolk->owner,
                        NULL,
                        (long *)t_priolk);
     if (res) {
@@ -110,7 +110,7 @@ priolkget(struct priolk *priolk)
             m_waitspin();
         }
         /* see if no higher-priority waiters and unlocked */
-        owner = m_fetchswapptr((m_atomic_t **)&priolk->owner,
+        owner = m_fetchswapptr((m_atomicptr_t *)&priolk->owner,
                                NULL,
                                (long *)t_priolk);
         if (!owner) {
@@ -149,7 +149,7 @@ priolkfin(void)
     do {
         head = (struct priolkdata *)g_priolkq;
         ptr->next = head;
-        if (m_cmpswapptr((m_atomic_t **)&g_priolkq,
+        if (m_cmpswapptr((m_atomicptr_t *)&g_priolkq,
                          (long *)head,
                          (long *)ptr)) {
             t_priolk = NULL;
