@@ -1,5 +1,0 @@
-not()
-and()
-or()
-xor()
-sft()
