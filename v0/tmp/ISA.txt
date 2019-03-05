@@ -1,0 +1,381 @@
+V0 INSTRUCTION SET
+------------------
+
+Instruction Format
+------------------
+
+Instructions are represented as 32-bit parcels with optional 32-bit immediate
+argument parcel following them. The format of the instruction parcel is as
+follows.
+
+Field		Description	Bits
+-----		-----------	----
+
+instruction	operation ID	0:7
+unit		coprocessor ID	8:11
+flags		flag bits   	12:15
+register #1	argument 1	16:21
+register #2	argument 2	22:27
+reserved 	always 0 	28:29
+address-mode	addressing mode	30:31
+
+Flags-Field Bits
+----------------
+
+ID	Description		Bit
+--	-----------		---
+
+BYTE	byte-size operation	12
+HALF	half-word operation	13
+IMM	immediate argument	14
+SGN	signed operation	15
+
+Address-Mode Bits
+-----------------
+
+Value	Description
+-----	-----------
+00	no address; register arguments only
+01	register address; base address in register
+10	direct address; no base register
+11	indexed address; base register + offset
+
+Register File
+-------------
+
+General Purpose Registers
+-------------------------
+
+R0	zero register - reads return zero, writes are ignored
+
+Caller-Save/Function Argument Registers
+---------------------------------------
+
+R1	first function argument, function return value
+R2	second function argument, second function return value
+R3	third function argument
+R4	fourth function argument
+R5	fifth function argument
+R6	sixth function argument
+R7	seventh function argument
+
+Callee-Save/Scratch Registers
+-----------------------------
+
+R8
+R9
+R10
+R11
+R12
+R13
+R14
+R15
+
+Special Registers
+-----------------
+
+32-Bit Registers
+----------------
+
+ID	Description		Contents
+--	-----------		--------
+
+PC	program counter		'instruction pointer'
+LR	link register		return address back to caller
+FP	frame pointer		function stack-frame address
+SP	stack pointer		current stack pointer
+MSW	machine status word	processor state flags
+TR	task register		ID, status, flags
+IM	interrupt mask		1-bits for masked interrupts, 0 for enabled
+IOM	I/O map register	I/O descriptor table address
+IV	interrupt vector	interrupt descriptor table address
+PD	page directory		page structure base address + limit
+MFR	machine feature word	flags for features present
+TCB	thread context base	thread context table base address
+
+64-Bit Registers
+----------------
+
+ID	Description		Contents
+--	-----------		--------
+
+BR	bound range		buffer low and high bounds
+TSC	timestamp counter	linear cycle counter
+
+MSW Register Bits
+-----------------
+
+ID	Description		Bit
+--	-----------		---
+
+ZF	zero/equal		0
+SF	signed result		1
+LT	less than		2
+GT	greater than		3
+CF	carry/borrow		4
+OF	overflow		5
+IF	interrupts enabled	6
+RF	ring (0 - system)	7
+
+MSW/MFR Register Bits
+---------------------
+
+ID	Description		Bit
+--	-----------		---
+
+MP	multiprocessor		31
+PG	paging			30
+IO	I/O permission control	29
+FP	floating-point unit	28
+FM	fixed-point unit	27
+GP	graphics unit		26
+DP	digital signal unit	25
+MD	SIMD unit      		24
+VP	vector unit		23
+
+TR Register Contents
+--------------------
+
+ID	Description		Bits	Contents
+--	-----------		----	--------
+
+ID	thread ID    		0:7	8-bit thread ID
+ST	thread status		8:15	thread exit status
+TF	thread flags		16:31	thread flags
+CTX	thread state address	31:63	thread context
+
+Instruction Operands
+--------------------
+
+R    register operand
+I    immediate operand following opcode
+ADR  memory address formed after one of the addressing modes
+
+Addressing Modes
+----------------
+
+no address	        register arguments only
+register address	base address in register
+indexed address		immediate index/offset or direct address
+
+Addressing Examples
+-------------------
+
+inc	%r1, %r2	; no address, registers only
+jmp	*%r1 		; register address
+ldr	4(%sp), %r1	; register + index
+ldr	trapvec, %r1	; indexed/direct address
+
+LOGIC UNIT
+----------
+NOT RI1, R2          	; R2 = ~RI1		- bitwise negation
+AND RI1, R2          	; R2 &= RI1		- bitwise logical AND
+IOR RI1, R2          	; R2 |= RI1		- bitwise logical inclusive OR
+XOR RI1, R2          	; R2 ^= RI1		- bitwise logical exclusive OR
+
+SHIFT UNIT
+----------
+SHL RI1, R2          	; R2 <<= RI1		- [logical] left shift
+SHR RI1, R2          	; R2 >>= RI1		- logical right shift
+SAR RI1, R2          	; R2 >>>= RI1		- arithmetic right shift
+ROL RI1, R2          	; R2 <<.= RI1		- rotate left
+ROR RI1, R2          	; R2 >>.= RI1		- rotate right
+
+Fused Instructions
+------------------
+
+SLA I, R1, R2        	; R2 = (R2 << I) + R1	- shift left and add
+SRA I, R1, R2        	; R2 = (R2 >> I) + R1	- shift right and add
+SLM I, R1, R2        	; R2 = (R2 << I) & R1	- shift left and mask
+SRM I, R1, R2        	; R2 = (R2 >> I) & R1	- shift right and mask
+
+ADDER UNIT
+----------
+INC RI1, R2          	; R2 = ++RI1
+ICU RI1, R2          	; R2 = ++RI1, unsigned
+DEC RI1, R2          	; R2 = --RI§
+DCU RI1, R2          	; R2 = --RI§, unsigned
+ADD RI1, R2          	; R2 += RI1
+ADU RI1, R2          	; R2 += RI1, unsigned
+ADC RI1, R2          	; R2 += RI1, set CF in MSW
+ACU RI1, R2          	; R2 += RI1, set CF in MSW, unsigned
+SUB RI1, R2          	; R2 -= RI1
+SBU RI1, R2          	; R2 -= RI1, unsigned
+SBC RI1, R2          	; R2 -= RI1, set CF in MSW
+SCU RI1, R2          	; R2 -= RI1, set CF in MSW
+CMP RI1, R2          	; R2 -= RI1, set ZF|LT|GT in MSW
+CMU RI1, R2          	; R2 -= RI1, set ZF|LT|GT in MSW, unsigned
+
+MULTI UNIT
+----------
+
+NOTES
+-----
+- RPS and RPU return the inverse reciprocal in R1 as well as shift count in
+  R2 for simulating
+
+      X / RI1
+
+  by doing
+
+      (X * R1 >> R2)	; simulate division with multiplication + shift
+
+MUL RI1, R2          	; R2 = R2RI1
+MLU RI1, R2          	; R2 = R2RI1, unsigned
+MLH RI1, R2          	; R2 = (R2RI1) >> 32
+MHU RI1, R2          	; R2 = (R2RI1) >> 32, unsigned
+DIV RI1, R2          	; R2 = R2 / RI1
+DVU RI1, R2          	; R2 = R2 / RI1, unsigned
+REM RI1, R2          	; R2 = R2 % RI1
+RMU RI1, R2          	; R2 = R2 % RI1, unsigned
+RPS I, R1, R2       	; R2 = RPS(I), R1 = CNT, inverse reciprocal + shift
+RPU I, R1, R2       	; R2 = RPU(I), R1 = CNT, unsigned
+
+BIT UNIT
+--------
+SEX I, RI1, R2       	; R2 = SEX(RI1, I), V0_BYTE_BIT, V0_HALF_BIT
+ZEX I, RI1, R2       	; R2 = ZEX(RI1, I), V0_BYTE_BIT, V0_HALF_BIT
+NEG RI1, R2          	; R2 = -RI1
+SWP RI1, R2          	; R2 = bswap(RI1), V0_BYTE_BIT, V0_HALF_BIT
+SET I, ADR              ; *ADR |= (1 << I)
+CLR I, ADR              ; *ADR &= ~(1 << I)
+
+Miscellaneous Instructions
+-------------------------
+
+PAR RI1, R2          	; R2 = PAR(RI1), byte parity (0 means even)
+CLZ RI1, R2          	; R2 = CLZ(RI1), count leading zeroes in RI1
+HAM RI1, R2          	; R2 = HAM(RI1), Hamming weight i.e. # of 1-bits in RI1
+DCD RI1, ADR         	; *ADR = DCD(RI1)
+BCD RI1, ADR         	; *ADR = BCD(RI1)
+CRC I, ADR, R2    	; R2 = CRC(ADR, I), I is byte-count
+       	    		; 16-bit for IP4 checksum, 32-bit for ECC
+HSH RI1, R2          	; R2 = hash(RI1)
+HUN RI1, R2		; R2 = unhash(RI1)
+
+MEM UNIT
+--------
+LEA ADR, R2          	; R2 = ADR
+LDR ADR, R2          	; R2 = *ADR
+STR R1, ADR          	; *ADR = R1
+IPG ADR              	; flush TLB-entry for page of ADR
+CLR ADR              	; lock cacheline of ADR
+CPF ADR              	; prefetch cacheline of ADR
+CFL ADR              	; flush and unlock cacheline of ADR
+BAR                  	; full memory barrier
+BRD                  	; memory read barrier
+BWR                  	; memory write barrier
+LFL R2               	; R2 = MSW
+SFL R1               	; MSW = R1
+CLD ADR, R2          	; conditional load R2 = *ADR
+CST RI1, ADR         	; conditional store *ADR = RI1
+
+CLD/CST Condition Codes
+-----------------------
+EQ			; load/store if equal
+NE			; load/store if not equal
+LT			; load/store if less than
+GE			; load/store if greater than or equal
+LE			; load/store if less than or equal
+GT			; load/store if greater than
+CF			; load/store if carry set
+NC			; load/store if carry not set
+OF			; load/store if overflow set
+NO			; load/store if overflow not set
+
+STACK UNIT
+----------
+PSH RI1              	; *--SP = RI1
+POP R2               	; R2 = *SP++
+PSM I                	; push registers (I & 0x0f)..(I >> 4) in reverse order
+POM I                	; pop registers (I & 0x0f)..(I >> 4)
+PSF                  	; *--SP = MSW
+POF                  	; MSW = *SP++
+MKF I, ADR           	; frame and registers with I words from table at ADR
+
+ATOM UNIT
+---------
+LNK ADR, R2		; load-link R2 = *ADR
+STC RI1, ADR         	; *ADR = RI1
+CAS I, R1, ADR       	; *ADR = R1 iff *ADR == I
+BTS RI1, ADR         	; CF = *ADR & (1 << I), *ADR |= (1 << I)
+BTC RI1, ADR         	; CF = *ADR & (1 << I), *ADR &= ~(1 << I)
+
+FLOW UNIT
+---------
+JMP RI1              	; jump to *RI1
+JMR I			; jump it I(PC) for position independent code (PIC)
+BEQ RI1              	; branch if comparison equal
+BNE RI1              	; branch if comparsion not equal
+BLT RI1              	; branch if comparison less than
+BGE RI1              	; branch if comparison greater than or equal
+BLE RI1              	; branch if comparison less than or equal
+BGT RI1              	; branch if comparison greater than
+BCF RI1              	; branch if carry-flag set
+BNC RI1              	; branch if carry-flag cler
+BOF RI1              	; branch if overflow-flag set
+BNO RI1              	; branch if overflow-flag not set
+
+Branch Condition Codes in MSW
+-----------------------------
+BEQ - ZF
+BNE - !ZF
+BLT - !ZF && LT
+BLE - ZF || LT
+BGT - !ZF && !LT
+BGE - ZF || !LT
+BCF - CF
+BNC - !CF
+BOF - OF
+BNO - !OF
+
+SUBR UNIT
+---------
+BEG RI1              	; function prologue
+CSR RI1              	; call subroutine at RI1
+FIN                  	; function epilogue
+SYS                  	; invoke system mode/call
+RET                  	; return from function
+IRT                  	; return from interrupt function
+SRT                  	; return from system mode
+THR                  	; launch new thread
+THX                  	; terminate thread
+THS                  	; launch system thread
+TSX			; terminate system thread
+
+SYS UNIT
+--------
+HLT                  	; halt; wait for interrupt
+RST                  	; reset
+WFE                  	; wait for [cacheline] event
+SEV                  	; signal [cacheline] event
+CLI                  	; disable interrupts
+STI                  	; enable interrupts
+INT                  	; trigger software interrupt
+
+IO UNIT
+-------
+IOC I, R1, ADR       	; I/O command		- I = CMD, R1 = DESC, ADR = DEST
+IRD I, R1, ADR       	; I/O read operation	- I = CMD, R1 = DESC, ADR = DEST
+IWR I, R1, ADR       	; I/O write operation	- I = CMD; R1 = DESC, ADR = DEST
+ILD RI1, R2            	; load I/O register	- RI1 = SRC, R2 = DEST
+IST RI1, ADR          	; store I/O register	- RI1 = SRC, ADR = DEST
+
+IOC Commands
+------------
+
+- TODO: ASYNC, DMA
+
+PROBE_BUS
+INIT_BUT
+PROBE_DEV
+INIT_DEV
+READ_BYTE
+READ_HALF
+READ_WORD
+WRITE_BYTE
+WRITE_HALF
+WRITE_WORD
+READ_BLK
+WRITE_BLK
+

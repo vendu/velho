@@ -1,0 +1,41 @@
+Valhalla Processor 0; V0
+------------------------
+
+This directory contains an on-going implementation of the first version of my
+new Valhalla Processor Architecture.
+
+The reasons for doing this are mostly educational, and of course having fun
+designing and implementing all this.
+
+V0 is designed to be friendly to the programmers and compiler implementors. The
+instruction set is relatively RISC-like with a few additions here and there;
+most notably, so far, CPL and related instructions to aid the programmers
+as well as compilers in doing function calls in easier ways.
+
+Here's some software I plan to do for the virtual machine (hopefully later to
+be implemented in hardware using FPGA-kits)
+- an AT&T syntax assembler
+  - this is quite far already, based on work I did for some earlier virtual
+    architectures; the assembler needs some things added as well as more
+    exhaustive testing and fixing of bugs and features
+- a programming game; assembly programming resembling programming today's
+  microprocessor architectures
+  - possibility to compete in code size
+  - relative, somewhat hypothetical speed for different architectures based
+    on measurements doing things on a real processor
+- C compiler? This could be either a retargeted one a'la LCC or TinyCC or a
+  brand new one, in which case I would pay attention to vector-based
+  intermediate program presentation to leverage utilisation of
+  [hardware-specific] SIMD instructions avaiblable in many modern systems
+- development tools
+  - graphical debuggers for machine- and source-level debugging of programs
+  - some kind of visualisation of things such as program memory footprint and
+    execution flow
+  - possibly profiler(s)
+  - a programmable programmer's calculator; in addition to the virtual machine,
+    we could experiment with arbitrary-precision mathematics
+  - machine [and possibly cache] simulators in Valgrind-style
+    - use V0 as the simulated architecture instead of more complicated ones
+      such as IA-32 and X86-64
+- perhaps support for other languages; Forth? Lisp? :)
+

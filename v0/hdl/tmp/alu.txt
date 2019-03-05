@@ -1,0 +1,30 @@
+- s[1:0]	- select operation
+- s[2]		- select unit
+  		- 0 - arithmetic unit
+		- 1 - logic unit
+- s[5:3]	- shift/rotate type
+  		- 3'b000 - no operation
+		- 3'b010 - shift left
+		- 3'b011 - shift right
+		- 3'b100 - rotate left
+		- 3'b101 - rotate right
+		- 3'b111 - arithmetic shift right (sign-extend)
+- a, b		- inputs
+- y  		- output
+- cin		- carry in
+
+logic unit
+----------
+- s[1:0]	- 00 - a & b
+  		- 01 - a | b
+		- 10 - a ^ b
+		- 11 - ~a
+
+shifter
+-------
+
+
+arithmetic unit
+---------------
+- s[1:0]
+

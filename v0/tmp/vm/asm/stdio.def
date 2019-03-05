@@ -1,0 +1,11 @@
+; stdio.def - valhalla aseembly definitions
+
+.define NUL             0 ; zero string-terminator
+.define STDIN           0 ; standard input (keyboard)
+.define STDOUT          1 ; standard output (console)
+.define STDERR          2 ; standard error messages (console)
+.define V0_TMR_PORT     3 ; high-resolution timer for profiling
+.define V0_RTC_PORT     4 ; real-time clock
+.define V0_MOUSE_PORT   5 ; mouse input
+.define V0_VTD_PORT     6 ; virtual tape drive
+.define V0_MAP_PORT     7 ; memory-mapped device control

@@ -1,0 +1,33 @@
+- s[3:0]	- select unit
+- s[7:4]	- instruction
+
+unit instructions
+-----------------
+
+logic unit
+----------
+- 2'b00 - ~a
+- 2'b01 - a & b
+- 2'b10 - a | b
+- 2'b11 - a ^ b
+
+shifter
+-------
+- 3'b000 - no operation
+- 3'b010 - shift left
+- 3'b011 - shift right
+- 3'b100 - rotate left
+- 3'b101 - rotate right
+- 3'b111 - arithmetic shift right (sign-extend)
+
+- a, b		- inputs
+- y  		- output
+
+shifter
+-------
+
+
+arithmetic unit
+---------------
+- s[1:0]
+
