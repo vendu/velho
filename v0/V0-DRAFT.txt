@@ -1,0 +1,446 @@
+V0 MACHINE ARCHITECTURE
+-----------------------
+
+INTRODUCTION
+------------
+
+V0 stems from more than 2 decades of hacking code on Unix-like systems such as
+Linux and FreeBSD. At around 2004, I decided to do a new UNIX/POSIX-like
+operating system. More than 100,000 lines of code into the project, I'm taking a
+turn to give my shot at designing a new microprocessor, a toolchain of
+[at least] an assembler and C compiler for it, and a new operating system kernel
+as well as libraries for it. The plan would be to write a couple of books on the
+project, too.
+
+INSTRUCTION SET
+---------------
+
+Instructions are represented as 32-bit parcels with an optional 32-bit immediate
+argument parcel following them. The format of the instruction parcel is as
+follows.
+
+Opcode Structure
+----------------
+
+This structure is represented in C and is in little-endian byte order.
+
+struct v0ins {
+    uint16_t		code;         // flag-bits, unit, instruction
+    uint16_t		parm;         // 4 address-bits + 2 6-bit register IDs
+    union v0arg32	arg[VLA];     // immediate if (ins->parm & V0_IMM_BIT)
+};
+
+FLAG-Bits
+---------
+
+These bits are located in the high bits of the code-field of the instruction.
+
+ID	Description		Bit
+--	-----------		---
+
+BYTE	byte-size operation	12
+HALF	half-word operation	13
+IMM	immediate argument	14
+UNSG	unsigned operation	15
+
+Register IDs
+------------
+
+Register #1 (source) ID is stored in the bits [0:5] of the parm-field of the
+instruction, whereas register ID #2 (destination) is in the bits [6:11].
+
+MODE-Bits
+---------
+
+These bits are the bits [14:15] in the parm-field of the instruction.
+
+Bit	Description
+---	-----------
+14	ATOM-bit, the instruction performs a bus-lock for the operation when due
+15	VAL-bit, the opcode has an embedded signed 15-bit argument
+
+ADR-Bits
+--------
+
+These bits are the bits [12:13] in the parm-field of the instruction.
+
+Value	Description
+-----	-----------
+00	no address; register arguments only
+01	register address; base address in register
+10	direct address; no base register
+11	indexed address; base register + offset (register or immediate)
+
+Register File
+-------------
+
+General Purpose Registers
+-------------------------
+
+R0	zero register - reads return zero, writes are ignored
+
+Caller-Save/Function Argument Registers
+---------------------------------------
+
+R1	first function argument, function return value
+R2	second function argument, second function return value
+R3	third function argument
+R4	fourth function argument
+R5	fifth function argument
+R6	sixth function argument
+R7	seventh function argument
+
+Callee-Save/Scratch Registers
+-----------------------------
+
+R8	first scratch register
+R9	second  scratch register
+R10	third scratch register
+R11	fourth scratch register
+R12	fifth scratch register
+R13	sixth scratch register
+R14	seventh scratch register
+R15	eighth scratch register
+
+Special Registers
+-----------------
+
+ID	Description		Contents
+--	-----------		--------
+
+PC	program counter		program counter, instruction pointer
+LR	link register		return address back to caller
+FP	frame pointer		function stack-frame address
+SP	stack pointer		current stack pointer
+MSW	machine status word	processor state flags
+WC	task register		ID, status, flags
+IM	interrupt mask		1-bits for masked interrupts, 0 for enabled
+IOM	I/O map register	I/O descriptor table address
+IOD	I/O descriptor register	current I/O descriptor base address + index
+IV	interrupt vector	interrupt descriptor table address
+PD	page directory		page structure base address + limit
+TCB	thread context base	thread context table base address
+BLO	bound range low limit	array base address
+BHI	bound range high limit	base + size, 1 past last item
+TSC	timestamp counter	64-bit timestamp/cycle counter
+MFR	machine feature word	flags for features present
+
+MSW Register Bits
+-----------------
+
+ID	Description		Bits
+--	-----------		---
+
+ZF	zero/equal		0
+SF	signed result		1
+LT	less than		2
+GT	greater than		3
+CF	carry/borrow		4
+OF	overflow		5
+IF	interrupts enabled	6
+RF	ring (0 - system)	7
+TID	thread ID 		[8:15]
+
+MSW/MFR Register Bits
+---------------------
+
+ID	Description		Bit
+--	-----------		---
+
+MP	multiprocessor		31
+PG	paging			30
+IO	I/O permission control	29
+FP	floating-point unit	28
+FM	fixed-point unit	27
+GP	graphics unit		26
+DP	digital signal unit	25
+MD	SIMD unit      		24
+VP	vector unit		23
+
+Notes
+-----
+
+The ID-field is the hardware thread ID. The control block, i.e. execution
+context of the thread can be found at the address
+
+	TCB + ID * TCBSIZE
+
+where TCBSIZE is the size of the processor thread control block
+
+Instruction Operands
+--------------------
+
+R    register operand
+I    immediate operand following opcode
+ADR  memory address formed after one of the addressing modes
+
+Addressing Modes
+----------------
+
+no address	        register arguments only
+register address	base address in register
+indexed address		immediate index/offset or direct address
+
+Addressing Examples
+-------------------
+
+inc	%r1, %r2	; no address, registers only
+jmp	*%r1 		; register address
+ldr	4(%sp), %r1	; register + index
+ldr	trapvec, %r1	; indexed/direct address
+
+Opcode Format
+-------------
+
+NOTE that opcodes are represented in little-endian format, i.e. lowest-
+significant bit/byte first.
+
+Field		Description		Bits
+-----		-----------		----
+
+OP		operation ID		0:7
+UNIT		coprocessor ID		8:11
+FLAGS		flag bits		12:15
+REG1		argument 1		16:21
+REG2		argument 2		22:27
+MODE		mode bits		28:29
+ADR		addressing mode		30:31
+
+Instruction Set Reference
+-------------------------
+MNEMONIC	ARGUMENTS	FLAGS	MODE	BRIEF
+--------	---------	-----	----	-----
+----		----		UIHB	VA	----
+
+LOGIC-UNIT
+----------
+RI1		source register or immediate
+R2		destination register
+----
+NOT	0x00	R1		U---	V--	logical negation
+AND	0x01	RI1, R2		----	V--	logical AND
+IOR	0x02	RI1, R2		----	V--	logical inclusive OR
+XOR	0x03	RI1, R2		----	V--	logical exclusive OR
+
+SHIFT-UNIT
+----------
+RV1		shift count in register or immediate within opcode
+R2		destination register
+----
+SHL	0x00	RV1, R2		-I--	V--	[logical] left shift
+SHR	0x01	RV1, R2		-I--	V--	logical right shift
+SAR	0x02	RV1, R2		UI--	V--	arithmetic right shift
+----	0x03
+ROL	0x04	RV1, R2		-I--	V--	rotate left
+ROR	0x05	RV1, R2		-I--	V--	rotate right
+----	0x06
+----	0x07
+
+Fused Instructions
+------------------
+V		shift count within opcode
+RI1		increment or mask
+R2		destination register
+----
+SLA	0x08	V, RI1, R2	-I--	V--	shift left and add
+SRA	0x09	V, RI1, R2	-I--	V--	shift right and add
+SLM	0x0a	V, RI1, R2	-I--	V--	shift left and mask
+SRM	0x0b	V, RI1, R2	-I--	V--	shift right and mask
+
+ADDER-UNIT
+----------
+INC	0x00	R1		-I--	---	increment by one
+UINC		R1		UI--	---	unsigned increment by one
+DEC	0x01	R1		-I--	---	decrement by one
+UDEC		R1		UI--	---	unsigned decrement by one
+ADD	0x02	RI1, R2		-I--	---	addition
+UDD		RI1, R2		UI--	---	unsigned addition
+ADC	0x03	RI1, R2		-I--	---	addition with carry
+UDC		RI1, R2		UI--	---	unsigned addition with carry
+SUB	0x04	RI1, R2		-I--	---	subtraction
+USUB		RI1, R2		UI--	---	unsigned subtraction
+SBC	0x05	RI1, R2		-I--	---	subtraction with borrow
+USBC		RI1, R2		UI--	---	unsigned subtraction with borrow
+CMP	0x06	RI1, R2		-I--	---	compare (subtract and set MSW)
+UCMP		RI1, R2		UI--	---	unsigned compare
+
+MULTI-UNIT
+----------
+MUL	0x00	RI1, R2		-I--	V--	multiplication
+UMUL		RI1, R2		UI--	V--	unsigned multiplication
+DIV	0x01	RI1, R2		-I--	V--	division
+UDIV		RI1, R2		UI--	V--	unsigned division
+REM	0x02	RI1, R2		-I--	V--	remainder
+UREM		RI1, R2		UI--	V--	unsigned remainder
+RPC	0x03	RI1, R2		-I--	V--	reciprocal
+URPC		RI1, R2		UI--	V--	unsigned reciprocal
+MLH	0x04	RI1, R2		-I--	V--	multiplication, high result
+UMLH			     	UI--	V--	unsigned high multiplication
+
+BIT-UNIT
+--------
+SEX	0x00	R1		UIHB	V--	sign extend
+ZEX	0x01	R1		UIHB	V--	zero extend
+NEG	0x02	R1		UIHB	V--	arithmetic negation
+SWP	0x03	R1		UIHB	---	swap byte order
+
+Miscellaneous Operations
+------------------------
+PAR	0x04	R1, R2		UIHB	V--	compute byte-parity, 1 for odd
+CLZ	0x05	R1, R2		-IHB	V--	count leading zero-bits
+HAM	0x06	R1, R2		-IHB	V--	count Hamming weight
+----	0x07
+BCD	0x08	RI1, R2		UIHB	V--	encode to binary-coded decimal
+DCD	0x09	RI1, R2		UIHB	V--	decode from binary-coded decimal
+CRC	0x0a	RI1, R2		UIHB	V--	compute IPv4 or ECC checksum
+----	0x0b
+HSH	0x0c	RI1, R2		-IHB	V--	hash source operand
+HUN	0x0d	RI1, R2		-IHB	V--	unhash source operand
+
+MEM-UNIT
+--------
+LEA	0x00	A, R2		----	---	load effective address
+LDR	0x01	RI1, R2		UIHB	---	load register
+STR	0x02	RI1, A		UIHB	---	store register or immediate
+
+Control Operations
+------------------
+IPG	0x03	A		-I--	---	invalidate page TLB-entry
+CLD	0x04	A		-I--	---	clear cacheline dirty-bit
+CPF	0x05	A		-I--	---	prefetch cacheline
+CFL	0x06	A		-I--	---	flush [write out] cacheline
+PFN	0x07	A		-I--	---	prefetch non-temporal/uncached
+
+prefetch cacheline (bypass cache)
+
+Memory Barriers
+---------------
+BAR	0x08			-I--	---	full memory barrier
+BRD	0x09			-I--	---	memory read barrier
+BWR	0x0a			-I--	---	memory write barrier
+----	0x0b
+
+Conditional Load and Store
+--------------------------
+CLD	0x0c			-IHB	---	conditional load, suffixes below
+CST	0x0d			-IHB	---	conditional store
+
+Non-Temporal Operations
+-----------------------
+LDN	0x0e			-IHB	---
+STN	0x0f			-IHB	---	store directly to RAM
+
+Conditions
+----------
+Code	MSW-Bits
+----	--------
+EQ	!ZF
+NE	ZF
+LT	!ZF && LT
+LE	ZF || LT
+GT	!ZF && !LT
+GE	ZF || !LT
+CF	CF
+NC	!CF
+OF	OF
+NO	!OF
+
+STACK-UNIT
+----------
+PSH	0x00	RI1		-I--	V--	push register
+POP	0x01	RI1		----	---	pop register
+PSM	0x02	R1, R2		----	---	push register range R1..R2
+POM	0x03	R1, R2		----	---	pop register range R1..R2
+
+ATOM-UNIT
+---------
+Load and Store
+--------------
+LNK	0x00	A, R2		-IHB	---	load linked
+STC	0x01	RI1, A		-IHB	---	store conditional (unmodified)
+BTC	0x02	RI1, A		----	V--	bit test-and-clear
+BTS	0x03	RI1, A		----	V--	bit test-and-set
+Add Operations
+--------------
+XADD	0x04	RI1, A		-IHB	---	atomic fetch-and-add
+XINC	0x05	A, R2		--HB	---	atomic fetch-and-increment
+XDEC	0x06	A, R2		--HB	---	atomic fetch-and-decrement
+----	0x07
+Compare and Swap
+----------------
+R1	new value
+R2	expected value
+I	destination address
+----
+CAS	0x08	R1, R2, I	atomic compare and swap
+CAS2	0x09	R1, R2, I
+
+FLOW-UNIT
+---------
+JMP	0x00	A		-I--	---	absolute unconditional jump
+JMR	0x01	AI, R2		-I--	V--	absolute relative jump to I(R)
+BEQ	0x02	A  		-I--	---	branch if equal/zero
+BZF				-I--	---
+BNE	0x03	A		-I--	---	branch if not equal/zero
+BNZ				-I--	---
+BLT	0x04	A		-I--	---	branch if less than
+BGE	0x05	A		-I--	---	branch if greater than or equal
+BLE	0x06	A		-I--	---	branch if less than or equal to
+BGT	0x07	A		-I--	---	branch if greater than
+BCF	0x08	A		-I--	---	branch if carry set
+BNC	0x09	A		-I--	---	branch if carry not set
+BOF	0x0a	A		-I--	---	branch if overflow set
+BNO	0x0b	A		-I--	---	branch if overflow not set
+
+Conditions
+----------
+- see under MEM-unit
+
+SUBR-UNIT
+---------
+CSF	0x00	V1, A		----	V--	fill registers and stack frame
+BEG	0x01	   		----	---	psh %fp; ldr %fp, %sp
+CSR	0x02			----	V--	call subroutine
+FIN	0x03			----	V--	subroutine epilogue; set stack
+SYS	0x04			----	---	enter system call
+SRT	0x05			----	---	return from system call
+THR	0x06			----	---	launch a thread
+THX	0x07	RI1		-I--	---	terminate a thread
+RET	0x08			----	---	return from subroutine
+IRT	0x09			----	---	return from interrupt function
+
+SYS-UNIT
+--------
+HLT	0x00			----	---	halt system (wait for interrupt)
+RST	0x01			----	---	reset system
+WFE	0x02			----	---	wait for event (on wait channel)
+SEV	0x03			----	---	signal event (on wait channel)
+CLI	0x04			----	---	disable interrupts
+STI	0x05			----	---	enable interrupts
+----	0x06
+----	0x07
+INT	0x08			----	---	raise software interrupt
+
+IO-UNIT
+-------
+IOC	0x00			----	---	I/O command
+IRD	0x01			----	---	I/O read operation
+IWR	0x02			----	---	I/O write operation
+ILD	0x03			----	---	load I/O register
+IST	0x04			----	---	store I/O register
+IOC Commands
+------------
+- TODO: ASYNC, DMA
+PROBE_BUS
+INIT_BUT
+PROBE_DEV
+INIT_DEV
+READ_BYTE
+READ_HALF
+READ_WORD
+WRITE_BYTE
+WRITE_HALF
+WRITE_WORD
+READ_BLK
+WRITE_BLK
+
