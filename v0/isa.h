@@ -109,13 +109,13 @@
 #define V0_MSW_REG       0x14 // machine status word
 #define V0_WC_REG        0x15 // thread wait channel
 #define V0_IM_REG        0x16 // interrupt-mask (1-bit enabled)
-#define V0_IOM_REG       0x17 // I/O descriptor map address + # of descriptors
-#define V0_IOD_REG       0x18 // current I/O descriptor address + index
-#define V0_IV_REG        0x19 // interrupt vector address
-#define V0_PD_REG        0x1a // page directory address + flags
-#define V0_TCB_REG       0x1c // thread control block base address
-#define V0_BLO_REG       0x1d // bound-range low limit
-#define V0_BHI_REG       0x1e // bound-range high limit (base + size)
+#define V0_IV_REG        0x17 // interrupt vector address
+#define V0_PD_REG        0x18 // page directory address + flags
+#define V0_TCB_REG       0x19 // thread control block base address
+#define V0_BLO_REG       0x1a // bound-range low limit
+#define V0_BHI_REG       0x1b // bound-range high limit (base + size)
+#define V0_TLO_REG       0x1c // timestamp low 32 bits
+#define V0_THI_REG       0x1d // timestamp high 32 bits
 #define V0_MFR_REG       0x1f // machine feature word, read-only
 
 BLO	bound range low limit

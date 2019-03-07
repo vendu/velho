@@ -12,6 +12,10 @@ turn to give my shot at designing a new microprocessor, a toolchain of
 as well as libraries for it. The plan would be to write a couple of books on the
 project, too.
 
+Whereas relatively simple, the V0 processor has features to facilitate virtual
+memory, multithreading, multiprocessing, as well as other capabilities of
+multitasking operating systems.
+
 INSTRUCTION SET
 ---------------
 
@@ -38,6 +42,8 @@ These bits are located in the high bits of the code-field of the instruction.
 ID	Description		Bit
 --	-----------		---
 
+PRIV	ring #0 operation	10
+ATOm	atomic operations	11
 BYTE	byte-size operation	12
 HALF	half-word operation	13
 IMM	immediate argument	14
@@ -46,29 +52,19 @@ UNSG	unsigned operation	15
 Register IDs
 ------------
 
-Register #1 (source) ID is stored in the bits [0:5] of the parm-field of the
-instruction, whereas register ID #2 (destination) is in the bits [6:11].
-
-MODE-Bits
----------
-
-These bits are the bits [14:15] in the parm-field of the instruction.
-
-Bit	Description
----	-----------
-14	ATOM-bit, the instruction performs a bus-lock for the operation when due
-15	VAL-bit, the opcode has an embedded signed 15-bit argument
+Register #1 (source) ID is stored in the bits [0:6] of the parm-field of the
+instruction, whereas register ID #2 (destination) is in the bits [7:13].
 
 ADR-Bits
 --------
 
-These bits are the bits [12:13] in the parm-field of the instruction.
+These bits are the bits [14:15] in the parm-field of the instruction.
 
 Value	Description
 -----	-----------
 00	no address; register arguments only
-01	register address; base address in register
-10	direct address; no base register
+10	register address; base address in register
+01	direct address; no base register
 11	indexed address; base register + offset (register or immediate)
 
 Register File
@@ -115,14 +111,13 @@ SP	stack pointer		current stack pointer
 MSW	machine status word	processor state flags
 WC	task register		ID, status, flags
 IM	interrupt mask		1-bits for masked interrupts, 0 for enabled
-IOM	I/O map register	I/O descriptor table address
-IOD	I/O descriptor register	current I/O descriptor base address + index
-IV	interrupt vector	interrupt descriptor table address
+IV	interrupt vector	interrupt descriptor table address + # of items
 PD	page directory		page structure base address + limit
 TCB	thread context base	thread context table base address
 BLO	bound range low limit	array base address
 BHI	bound range high limit	base + size, 1 past last item
-TSC	timestamp counter	64-bit timestamp/cycle counter
+TLO	timestamp counter	low 32-bit word of timestamp counter
+THI	timestamp counter	high 32-bit word of timestamp counter
 MFR	machine feature word	flags for features present
 
 MSW Register Bits
@@ -131,15 +126,15 @@ MSW Register Bits
 ID	Description		Bits
 --	-----------		---
 
-ZF	zero/equal		0
-SF	signed result		1
-LT	less than		2
-GT	greater than		3
-CF	carry/borrow		4
-OF	overflow		5
-IF	interrupts enabled	6
-RF	ring (0 - system)	7
-TID	thread ID 		[8:15]
+TID	thread ID 		[0:7]
+ZF	zero/equal		8
+SF	signed result		9
+LT	less than		10
+GT	greater than		11
+CF	carry/borrow		12
+OF	overflow		13
+IF	interrupts enabled	14
+RF	ring (0 - system)	15
 
 MSW/MFR Register Bits
 ---------------------
@@ -327,8 +322,8 @@ CST	0x0d			-IHB	---	conditional store
 
 Non-Temporal Operations
 -----------------------
-LDN	0x0e			-IHB	---
-STN	0x0f			-IHB	---	store directly to RAM
+LDN	0x0e	RIA1, R2	-IHB	---	cache-bypassing load
+STN	0x0f	RI1, A2		-IHB	---	cache-bypassing store
 
 Conditions
 ----------
@@ -402,12 +397,12 @@ CSF	0x00	V1, A		----	V--	fill registers and stack frame
 BEG	0x01	   		----	---	psh %fp; ldr %fp, %sp
 CSR	0x02			----	V--	call subroutine
 FIN	0x03			----	V--	subroutine epilogue; set stack
-SYS	0x04			----	---	enter system call
-SRT	0x05			----	---	return from system call
-THR	0x06			----	---	launch a thread
+SYS	0x04	RI1, A		----	---	enter system call
+SRT	0x05	RI1		----	---	return from system call
+THR	0x06	RI1, A		----	---	launch a thread
 THX	0x07	RI1		-I--	---	terminate a thread
-RET	0x08			----	---	return from subroutine
-IRT	0x09			----	---	return from interrupt function
+RET	0x08	RI1		----	---	return from subroutine
+IRT	0x09	RI1		----	---	return from interrupt function
 
 SYS-UNIT
 --------
@@ -419,15 +414,15 @@ CLI	0x04			----	---	disable interrupts
 STI	0x05			----	---	enable interrupts
 ----	0x06
 ----	0x07
-INT	0x08			----	---	raise software interrupt
+INT	0x08	RI1		----	---	raise software interrupt
 
 IO-UNIT
 -------
-IOC	0x00			----	---	I/O command
-IRD	0x01			----	---	I/O read operation
-IWR	0x02			----	---	I/O write operation
-ILD	0x03			----	---	load I/O register
-IST	0x04			----	---	store I/O register
+IOC	0x00	RI1, R2		----	---	I/O command
+IRD	0x01	RI1, R2		----	---	I/O read operation
+IWR	0x02	RI1, R2		----	---	I/O write operation
+ILD	0x03	RI1, R2		----	---	load I/O register
+IST	0x04	RI1, A		----	---	store I/O register
 IOC Commands
 ------------
 - TODO: ASYNC, DMA
