@@ -1,0 +1,95 @@
+V0 REGISTER FILE
+----------------
+
+General Purpose Registers
+-------------------------
+
+R0	zero register - reads return zero, writes are ignored
+
+Caller-Save/Function Argument Registers
+---------------------------------------
+
+R1	first function argument, function return value
+R2	second function argument, second function return value
+R3	third function argument
+R4	fourth function argument
+R5	fifth function argument
+R6	sixth function argument
+R7	seventh function argument
+
+Callee-Save/Scratch Registers
+-----------------------------
+
+R8	first scratch register
+R9	second  scratch register
+R10	third scratch register
+R11	fourth scratch register
+R12	fifth scratch register
+R13	sixth scratch register
+R14	seventh scratch register
+R15	eighth scratch register
+
+Special Registers
+-----------------
+
+ID	Description		Contents
+--	-----------		--------
+
+PC	program counter		program counter, instruction pointer
+LR	link register		return address back to caller
+FP	frame pointer		function stack-frame address
+SP	stack pointer		current stack pointer
+MSW	machine status word	processor state flags
+WC	task register		ID, status, flags
+IM	interrupt mask		1-bits for masked interrupts, 0 for enabled
+IV	interrupt vector	interrupt descriptor table address + # of items
+PD	page directory		page structure base address + limit
+TCB	thread context base	thread context table base address
+BLO	bound range low limit	array base address
+BHI	bound range high limit	base + size, 1 past last item
+TLO	timestamp counter	low 32-bit word of timestamp counter
+THI	timestamp counter	high 32-bit word of timestamp counter
+MFR	machine feature word	flags for features present
+
+MSW Register Bits
+-----------------
+
+ID	Description		Bits
+--	-----------		----
+
+TID	thread ID 		[0:7]
+ZF	zero/equal		8
+SF	signed result		9
+LT	less than		10
+GT	greater than		11
+CF	carry/borrow		12
+OF	overflow		13
+IF	interrupts enabled	14
+RF	ring-flag, 1 for system 15
+
+MSW/MFR Register Bits
+---------------------
+
+ID	Description		Bit
+--	-----------		---
+
+MP	multiprocessor		31
+PG	paging			30
+IO	I/O permission control	29
+FP	floating-point unit	28
+FM	fixed-point unit	27
+GP	graphics unit		26
+DP	digital signal unit	25
+MD	SIMD unit      		24
+VP	vector unit		23
+
+Notes
+-----
+
+The ID-field is the hardware thread ID. The control block, i.e. execution
+context of the thread can be found at the address
+
+	TCB + ID * TCBSIZE
+
+where TCBSIZE is the size of the processor thread control block
+
