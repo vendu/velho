@@ -15,19 +15,30 @@ This structure is represented in C and is in little-endian byte order.
 struct v0ins {
     uint16_t		code;         // flag-bits, unit, instruction
     uint16_t		parm;         // 4 address-bits + 2 6-bit register IDs
-    union v0arg32	arg[VLA];     // immediate if (ins->parm & V0_IMM_BIT)
+    union v0arg32	arg[VLA];     // immediate if (ins->code & V0_IMM_BIT)
+};
+
+Here is the same structure represented as a bitfield
+
+struct v0ins {
+    unsigned		op	: 5;
+    unsigned		unit	: 3;
+    unsigned		flags	: 8;
+    unsigned		reg1	: 7;
+    unsigned		reg2	: 7;
+    unsigned		adr	: 2;
 };
 
 CODE-FIELD
 ----------
 
 The code-field of an instruction consists of the instruction ID and flag-bits.
-We reserve the low-most [first] 10 bits for instruction IDs.
+We reserve the low-most [first] 8 bits for instruction and unit IDs.
 
 FLAGS-Bits
 ---------
 
-These bits are located in the high bits [10:15] of the code-field of the
+These bits are located in the high bits [8:15] of the code-field of the
 instruction.
 
 Name	Description		Bit
@@ -58,27 +69,24 @@ Value	Description
 01	direct address; no base register
 11	indexed address; base register + offset (register or immediate)
 
-Instruction Operands
---------------------
-
-R    register operand
-I    immediate operand following opcode
-A    memory address formed after one of the addressing modes
-
 Addressing Modes
 ----------------
 
-no address	        register operands only
-register address	base address in register
-indexed address		immediate index/offset or direct address
+Mode	Description		Brief
+----	-----------		-----
+N	no address		register operands only
+R	register address	base address in register
+O	offset			immediate offset or direct address
 
 Addressing Examples
 -------------------
 
-inc	%r1, %r2	; no address, registers only
-jmp	*%r1 		; register address
-ldr	4(%sp), %r1	; register + index
-ldr	trapvec, %r1	; indexed/direct address
+Mode	Instruction		Comment
+----	-----------		-------
+N	inc	%r1, %r2	; no address, registers only
+R	jmp	*%r1 		; register address
+RI	ldr	4(%sp), %r1	; register + offset
+O	ldr	trapvec, %r1	; indexed/direct address
 
 Opcode Format
 -------------
@@ -88,8 +96,8 @@ significant bit/byte first.
 
 Field		Description		Bits
 -----		-----------		----
-
-OP		operation ID		0:7
+OP		operation ID		0:4
+UNIT		unit ID	  		5:7
 FLAGS		flag bits		8:15
 REG1		argument 1		16:22
 REG2		argument 2		22:28
@@ -97,133 +105,171 @@ ADR		addressing mode		30:31
 
 Instruction Set Reference
 -------------------------
-MNEMONIC	ARGUMENTS	FLAGS	MODE	BRIEF
---------	---------	-----	----	-----
 
-LOGIC-UNIT
-----------
-RI1		source register or immediate
-R2		destination register
-----
-NOT	0x00	RI1, R2		U---	V--	logical negation
-AND	0x01	RI1, R2		----	V--	logical AND
-IOR	0x02	RI1, R2		----	V--	logical inclusive OR
-XOR	0x03	RI1, R2		----	V--	logical exclusive OR
+Instruction Operands
+--------------------
 
-SHIFT-UNIT
+R	register operand
+I	immediate operand following opcode
+A	memory address formed after one of the addressing modes
+
+SYS-UNIT	0x00
+--------
+HLT	0x00			------	---	halt system (wait for interrupt)
+RST	0x01			------	---	reset system
+WFE	0x02			------	---	wait for event (on wait channel)
+SEV	0x03			------	---	signal event (on wait channel)
+CLI	0x04			------	---	disable interrupts
+STI	0x05			------	---	enable interrupts
+----	0x06
+----	0x07
+INT	0x08	RI1		------	---	raise software interrupt
+
+LOGIC-UNIT	0x01
 ----------
-RV1		shift count in register or immediate within opcode
-R2		destination register
-----
-SHL	0x00	RV1, R2		-I--	V--	[logical] left shift
-SHR	0x01	RV1, R2		-I--	V--	logical right shift
-SAR	0x02	RV1, R2		UI--	V--	arithmetic right shift
+				UIHBAP
+OP	CODE	ARGUMENTS	FLAGS	MODE	BRIEF
+--	----	---------	-----	----	-----
+NOT	0x00	RI1, R2		-IHB--	---	logical negation
+AND	0x01	RI1, R2		-IHB--	---	logical AND
+IOR	0x02	RI1, R2		-IHB--	---	logical inclusive OR
+XOR	0x03	RI1, R2		-IHB--	---	logical exclusive OR
+
+SHIFT-UNIT	0x02
+----------
+
+OP	CODE	ARGUMENTS	FLAGS	MODE	BRIEF
+--	----	---------	-----	----	-----
+
+SHL	0x00	RV1, R2		--HB--	---	[logical] left shift
+SHR	0x01	RV1, R2		--HB--	---	logical right shift
+SAR	0x02	RV1, R2		--HB--	---	arithmetic right shift
+USAR	0x02	RV1, R2		U-HB--	---	arithmetic right shift
 ----	0x03
-ROL	0x04	RV1, R2		-I--	V--	rotate left
-ROR	0x05	RV1, R2		-I--	V--	rotate right
+ROL	0x04	RV1, R2		------	---	rotate left
+UROL	0x04	RV1, R2		U-HB--	---	rotate left
+ROR	0x05	RV1, R2		--HB--	---	rotate right
+UROR	0x05	RV1, R2		U-HB--	---	rotate right
 ----	0x06
 ----	0x07
 
 Fused Instructions
 ------------------
-V		shift count within opcode
-RI1		increment or mask
-R2		destination register
-----
-SLA	0x08	V, RI1, R2	-I--	V--	shift left and add
-SRA	0x09	V, RI1, R2	-I--	V--	shift right and add
-SLM	0x0a	V, RI1, R2	-I--	V--	shift left and mask
-SRM	0x0b	V, RI1, R2	-I--	V--	shift right and mask
 
-ADDER-UNIT
+OP	CODE	ARGUMENTS	FLAGS	MODE	BRIEF
+--	----	---------	-----	----	-----
+
+SLA	0x08	V, RI1, R2	-IHB--	---	shift left and add
+SRA	0x09	V, RI1, R2	-IHB--	---	shift right and add
+SLM	0x0a	V, RI1, R2	-IHB--	---	shift left and mask
+SRM	0x0b	V, RI1, R2	-IHB--	---	shift right and mask
+
+ADDER-UNIT	0x03
 ----------
-INC	0x00	R1		-I--	---	increment by one
-UINC		R1		UI--	---	unsigned increment by one
-DEC	0x01	R1		-I--	---	decrement by one
-UDEC		R1		UI--	---	unsigned decrement by one
-ADD	0x02	RI1, R2		-I--	---	addition
-UDD		RI1, R2		UI--	---	unsigned addition
-ADC	0x03	RI1, R2		-I--	---	addition with carry
-UDC		RI1, R2		UI--	---	unsigned addition with carry
-SUB	0x04	RI1, R2		-I--	---	subtraction
-USUB		RI1, R2		UI--	---	unsigned subtraction
-SBC	0x05	RI1, R2		-I--	---	subtraction with borrow
-USBC		RI1, R2		UI--	---	unsigned subtraction with borrow
-CMP	0x06	RI1, R2		-I--	---	compare (subtract and set MSW)
-UCMP		RI1, R2		UI--	---	unsigned compare
 
-MULTI-UNIT
+OP	CODE	ARGUMENTS	FLAGS	MODE	BRIEF
+--	----	---------	-----	----	-----
+
+INC	0x00	R1		--HB--	---	increment by one
+UINC		R1		U-HB--	---	unsigned increment by one
+DEC	0x01	R1		--HB--	---	decrement by one
+UDEC		R1		U-HB--	---	unsigned decrement by one
+ADD	0x02	RI1, R2		-IHB--	---	addition
+UDD		RI1, R2		UIHB--	---	unsigned addition
+ADC	0x03	RI1, R2		-IHB--	---	addition with carry
+UDC		RI1, R2		UIHB--	---	unsigned addition with carry
+SUB	0x04	RI1, R2		-IHB--	---	subtraction
+USUB		RI1, R2		UIHB--	---	unsigned subtraction
+SBC	0x05	RI1, R2		-IHB--	---	subtraction with borrow
+USBC		RI1, R2		UIHB--	---	unsigned subtraction with borrow
+CMP	0x06	RI1, R2		-IHB--	---	compare (subtract and set MSW)
+UCMP		RI1, R2		UIHB--	---	unsigned compare
+
+MULTI-UNIT	0x04
 ----------
-MUL	0x00	RI1, R2		-I--	V--	multiplication
-UMUL		RI1, R2		UI--	V--	unsigned multiplication
-DIV	0x01	RI1, R2		-I--	V--	division
-UDIV		RI1, R2		UI--	V--	unsigned division
-REM	0x02	RI1, R2		-I--	V--	remainder
-UREM		RI1, R2		UI--	V--	unsigned remainder
-RPC	0x03	RI1, R2		-I--	V--	reciprocal
-URPC		RI1, R2		UI--	V--	unsigned reciprocal
-MLH	0x04	RI1, R2		-I--	V--	multiplication, high result
-UMLH			     	UI--	V--	unsigned high multiplication
+MUL	0x00	RI1, R2		-IHB--	---	multiplication
+UMUL		RI1, R2		UIHB--	---	unsigned multiplication
+DIV	0x01	RI1, R2		-IHB--	---	division
+UDIV		RI1, R2		UIHB--	---	unsigned division
+REM	0x02	RI1, R2		-IHB--	---	remainder
+UREM		RI1, R2		UIHB--	---	unsigned remainder
+RPC	0x03	RI1, R2		-IHB--	---	reciprocal
+URPC		RI1, R2		UIHB--	---	unsigned reciprocal
+MLH	0x04	RI1, R2		-IHB--	---	multiplication, high result
+UMLH			     	UIHB--	---	unsigned high multiplication
 
-BIT-UNIT
+BIT-UNIT	0x05
 --------
-SEX	0x00	R1		UIHB	V--	sign extend
-ZEX	0x01	R1		UIHB	V--	zero extend
-NEG	0x02	R1		UIHB	V--	arithmetic negation
-SWP	0x03	R1		UIHB	---	swap byte order
+SEX	0x00	R1		-IHB--	---	sign extend
+USEX	0x00	R1		UIHB--	---	sign extend
+ZEX	0x01	R1		-IHB--	---	zero extend
+UZEX	0x01	R1		UIHB--	---	zero extend
+NEG	0x02	R1		-IHB--	---	arithmetic negation
+UNEG	0x02	R1		UIHB--	---	arithmetic negation
+SWP	0x03	R1		-IHB--	---	swap byte order
+USWP	0x03	R1		UIHB--	---	swap byte order
 
 Miscellaneous Operations
 ------------------------
-PAR	0x04	R1, R2		UIHB	V--	compute byte-parity, 1 for odd
-CLZ	0x05	R1, R2		-IHB	V--	count leading zero-bits
-HAM	0x06	R1, R2		-IHB	V--	count Hamming weight
+PAR	0x04	R1, R2		-IHB--	---	compute byte-parity, 1 for odd
+UPAR	0x04	R1, R2		UIHB--	---	compute byte-parity, 1 for odd
+CLZ	0x05	R1, R2		-IHB--	---	count leading zero-bits
+UCLZ	0x05	R1, R2		UIHB--	---	count leading zero-bits
+HAM	0x06	R1, R2		-IHB--	---	count Hamming weight
+UHAM	0x06	R1, R2		UIHB--	---	count Hamming weight
 ----	0x07
-BCD	0x08	RI1, R2		UIHB	V--	encode to binary-coded decimal
-DCD	0x09	RI1, R2		UIHB	V--	decode from binary-coded decimal
-CRC	0x0a	RI1, R2		UIHB	V--	compute IPv4 or ECC checksum
+BCD	0x08	RI1, R2		-IHB--	---	encode to binary-coded decimal
+UBCD	0x08	RI1, R2		UIHB--	---	encode to binary-coded decimal
+DCD	0x09	RI1, R2		-IHB--	---	decode from binary-coded decimal
+UDCD	0x09	RI1, R2		UIHB--	---	decode from binary-coded decimal
+CRC	0x0a	RI1, R2		-IHB--	---	compute IPv4 or ECC checksum
+UCRC	0x0a	RI1, R2		UIHB--	---	compute IPv4 or ECC checksum
 ----	0x0b
-HSH	0x0c	RI1, R2		-IHB	V--	hash source operand
-HUN	0x0d	RI1, R2		-IHB	V--	unhash source operand
+HSH	0x0c	RI1, R2		-IHB--	---	hash source operand
+HUN	0x0d	RI1, R2		-IHB--	---	unhash source operand
 
-MEM-UNIT
+MEM-UNIT	0x06
 --------
-LEA	0x00	A, R2		----	---	load effective address
-LDR	0x01	RI1, R2		UIHB	---	load register
-STR	0x02	RI1, A		UIHB	---	store register or immediate
+LEA	0x00	RA1, R2		--HB--	---	load effective address
+LDR	0x01	RI1, R2		-IHB--	---	load register
+STR	0x02	RI1, A2		-IHB--	---	store register or immediate
 
 Control Operations
 ------------------
-IPG	0x03	A		-I--	---	invalidate page TLB-entry
-CLD	0x04	A		-I--	---	clear cacheline dirty-bit
-CPF	0x05	A		-I--	---	prefetch cacheline
-CFL	0x06	A		-I--	---	flush [write out] cacheline
-PFN	0x07	A		-I--	---	prefetch non-temporal/uncached
+IPG	0x03	RA1		-I----	---	invalidate page TLB-entry
+CLD	0x04	RA1		-I----	---	clear cacheline dirty-bit
+CPF	0x05	RA1		-I----	---	prefetch cacheline
+CFL	0x06	RA1		-I----	---	flush [write out] cacheline
+PFN	0x07	RA1		-I----	---	prefetch non-temporal/uncached
 
 prefetch cacheline (bypass cache)
 
 Memory Barriers
 ---------------
-BAR	0x08			-I--	---	full memory barrier
-BRD	0x09			-I--	---	memory read barrier
-BWR	0x0a			-I--	---	memory write barrier
+BAR	0x08			-I----	---	full memory barrier
+BRD	0x09			-I----	---	memory read barrier
+BWR	0x0a			-I----	---	memory write barrier
 ----	0x0b
 
 Conditional Load and Store
 --------------------------
-CLD	0x0c			-IHB	---	conditional load, suffixes below
-CST	0x0d			-IHB	---	conditional store
+CLD	0x0c	RI1, R2		-IHB--	---	conditional load, suffixes below
+CST	0x0d	RI1, A2		-IHB--	---	conditional store
 
 Non-Temporal Operations
 -----------------------
-LDN	0x0e	RIA1, R2	-IHB	---	cache-bypassing load
-STN	0x0f	RI1, A2		-IHB	---	cache-bypassing store
+LDN	0x0e	RIA1, R2	-IHB--	---	cache-bypassing load
+STN	0x0f	RI1, A2		-IHB--	---	cache-bypassing store
 
-Conditions
-----------
+Conditions for CLD and CST
+--------------------------
+
 Code	MSW-Bits
 ----	--------
-EQ	!ZF
-NE	ZF
+EQ	ZF
+Z	ZF
+NE	!ZF
+NZ	!ZF
 LT	!ZF && LT
 LE	ZF || LT
 GT	!ZF && !LT
@@ -233,89 +279,81 @@ NC	!CF
 OF	OF
 NO	!OF
 
-STACK-UNIT
+STACK-UNIT	0x07
 ----------
-PSH	0x00	RI1		-I--	V--	push register
-POP	0x01	RI1		----	---	pop register
-PSM	0x02	R1, R2		----	---	push register range R1..R2
-POM	0x03	R1, R2		----	---	pop register range R1..R2
+PSH	0x00	RI1		-IHB--	---	push register
+POP	0x01	RI1		--HB--	---	pop register
+PSM	0x02	I1, I2		------	---	push register range R1..R2
+POM	0x03	I1, I2		------	---	pop register range R1..R2
 
-ATOM-UNIT
+ATOM-UNIT	0x08
 ---------
+
 Load and Store
 --------------
-LNK	0x00	A, R2		-IHB	---	load linked
-STC	0x01	RI1, A		-IHB	---	store conditional (unmodified)
-BTC	0x02	RI1, A		----	V--	bit test-and-clear
-BTS	0x03	RI1, A		----	V--	bit test-and-set
+LNK	0x00	A1, R2		-IHB--	---	load linked
+STC	0x01	RI1, A2		-IHB--	---	store conditional (unmodified)
+BTC	0x02	RI1, A2		------	---	bit test-and-clear
+BTS	0x03	RI1, A2		------	---	bit test-and-set
+
 Add Operations
 --------------
-XADD	0x04	RI1, A		-IHB	---	atomic fetch-and-add
-XINC	0x05	A, R2		--HB	---	atomic fetch-and-increment
-XDEC	0x06	A, R2		--HB	---	atomic fetch-and-decrement
+XADD	0x04	RI1, A2		-IHB--	---	atomic fetch-and-add
+XINC	0x05	A1, R2		--HB--	---	atomic fetch-and-increment
+XDEC	0x06	A1, R2		--HB--	---	atomic fetch-and-decrement
 ----	0x07
+
 Compare and Swap
 ----------------
 R1	new value
 R2	expected value
 I	destination address
 ----
-CAS	0x08	R1, R2, I	atomic compare and swap
-CAS2	0x09	R1, R2, I
+CAS	0x08	R1, R2, I			atomic compare and swap
+CAS2	0x09	R1, R2, I			dual-word/pointer CAS
 
-FLOW-UNIT
+FLOW-UNIT	0x09
 ---------
-JMP	0x00	A		-I--	---	absolute unconditional jump
-JMR	0x01	AI, R2		-I--	V--	absolute relative jump to I(R)
-BEQ	0x02	A  		-I--	---	branch if equal/zero
-BZF				-I--	---
-BNE	0x03	A		-I--	---	branch if not equal/zero
-BNZ				-I--	---
-BLT	0x04	A		-I--	---	branch if less than
-BGE	0x05	A		-I--	---	branch if greater than or equal
-BLE	0x06	A		-I--	---	branch if less than or equal to
-BGT	0x07	A		-I--	---	branch if greater than
-BCF	0x08	A		-I--	---	branch if carry set
-BNC	0x09	A		-I--	---	branch if carry not set
-BOF	0x0a	A		-I--	---	branch if overflow set
-BNO	0x0b	A		-I--	---	branch if overflow not set
+JMP	0x00	A1		-I----	---	absolute unconditional jump
+JMR	0x01	AI, R2		-I----	---	absolute relative jump to I(R)
+BEQ	0x02	A1  		-I----	---	branch if equal/zero
+BZ				-I----	---	same as BEQ
+BNE	0x03	A1		-I----	---	branch if not equal/zero
+BNZ				-I----	---	same as BNE
+BLT	0x04	A1		-I----	---	branch if less than
+BGE	0x05	A1		-I----	---	branch if greater than or equal
+BLE	0x06	A1		-I----	---	branch if less than or equal to
+BGT	0x07	A1		-I----	---	branch if greater than
+BCF	0x08	A1		-I----	---	branch if carry set
+BNC	0x09	A1		-I----	---	branch if carry not set
+BOF	0x0a	A1		-I----	---	branch if overflow set
+BNO	0x0b	A1		-I----	---	branch if overflow not set
 
 Conditions
 ----------
 - see under MEM-unit
 
-SUBR-UNIT
+SUBR-UNIT	0x0a
 ---------
-CSF	0x00	V1, A		----	V--	fill registers and stack frame
-BEG	0x01	   		----	---	psh %fp; ldr %fp, %sp
-CSR	0x02			----	V--	call subroutine
-FIN	0x03			----	V--	subroutine epilogue; set stack
-SYS	0x04	RI1, A		----	---	enter system call
-SRT	0x05	RI1		----	---	return from system call
-THR	0x06	RI1, A		----	---	launch a thread
-THX	0x07	RI1		-I--	---	terminate a thread
-RET	0x08	RI1		----	---	return from subroutine
-IRT	0x09	RI1		----	---	return from interrupt function
+CSF	0x00	RI1, A		-I----	---	fill registers and stack frame
+BEG	0x01	   		------	---	psh %fp; ldr %fp, %sp
+CSR	0x02	A1		-I----	---	call subroutine
+FIN	0x03	RI1		-I----	---	subroutine epilogue; set stack
+SYS	0x04	RI1, A		-I----	---	enter system call
+SRT	0x05	RI1		-I----	---	return from system call
+THR	0x06	RI1, A		-I----	---	launch a thread
+THX	0x07	RI1		-I----	---	terminate a thread
+RET	0x08	RI1		-I----	---	return from subroutine
+IRT	0x09	RI1		-I----	---	return from interrupt function
 
-SYS-UNIT
---------
-HLT	0x00			----	---	halt system (wait for interrupt)
-RST	0x01			----	---	reset system
-WFE	0x02			----	---	wait for event (on wait channel)
-SEV	0x03			----	---	signal event (on wait channel)
-CLI	0x04			----	---	disable interrupts
-STI	0x05			----	---	enable interrupts
-----	0x06
-----	0x07
-INT	0x08	RI1		----	---	raise software interrupt
-
-IO-UNIT
+IO-UNIT		0x0b
 -------
-IOC	0x00	RI1, R2		----	---	I/O command
-IRD	0x01	RI1, R2		----	---	I/O read operation
-IWR	0x02	RI1, R2		----	---	I/O write operation
-ILD	0x03	RI1, R2		----	---	load I/O register
-IST	0x04	RI1, A		----	---	store I/O register
+IOC	0x00	RI1, R2		------	---	I/O command
+IRD	0x01	RI1, R2		------	---	I/O read operation
+IWR	0x02	RI1, R2		------	---	I/O write operation
+ILD	0x03	RI1, R2		------	---	load I/O register
+IST	0x04	RI1, A		------	---	store I/O register
+
 IOC Commands
 ------------
 - TODO: ASYNC, DMA
