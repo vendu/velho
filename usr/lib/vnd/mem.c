@@ -17,15 +17,15 @@ THREADLOCAL struct memtls      *t_memtls;
 static void
 meminitblktabs(struct memglob *mem)
 {
-    float       slabsz;
-    float       blksz;
-    float       nblk;
-    float       multi;
+    double      slabsz;
+    double      blksz;
+    double      nblk;
+    double      multi;
     long        qid;
 
     for (qid = 0 ; qid < MEM_BLK_QUEUES ; qid++) {
         slabsz = memblkslabsize(qid);
-        blksz = MEM_BLK_MIN * (float)(qid + 1);
+        blksz = MEM_BLK_MIN * (double)(qid + 1);
         nblk = slabsz / blksz;
         multi = 1.0 / blksz;
         mem->nblktab[qid] = (long)nblk;
@@ -44,15 +44,15 @@ meminitblktabs(struct memglob *mem)
 static void
 meminitruntab(struct memglob *mem)
 {
-    float       slabsz;
-    float       runsz;
-    float       nrun;
-    float       multi;
+    double      slabsz;
+    double      runsz;
+    double      nrun;
+    double      multi;
     long        qid;
 
     for (qid = 0 ; qid < MEM_RUN_QUEUES ; qid++) {
-        slabsz = (float)memrunslabsize(qid);
-        runsz = PAGESIZE * (float)(qid + 1);
+        slabsz = (double)memrunslabsize(qid);
+        runsz = PAGESIZE * (double)(qid + 1);
         nrun = slabsz / runsz;
         multi = 1.0 / runsz;
         mem->nruntab[qid] = (long)nrun;

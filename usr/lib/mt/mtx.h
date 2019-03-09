@@ -46,7 +46,7 @@ mtinitftmx(volatile m_atomic_t *lp)
 static INLINE long
 mttryfmtx(volatile m_atomic_t *lp)
 {
-    m_atomic_t res = 0;
+    m_atomic_t  res = 0;
 
     if (*lp == MTMTXINITVAL) {
         res = m_cmpswap(lp, MTMTXINITVAL, MTMTXLKVAL);
@@ -62,7 +62,7 @@ mttryfmtx(volatile m_atomic_t *lp)
 static INLINE void
 mtlkfmtx(volatile m_atomic_t *lp)
 {
-    m_atomic_t res = 0;
+    m_atomic_t  res = 0;
 
     do {
         while (*lp != MTMTXINITVAL) {

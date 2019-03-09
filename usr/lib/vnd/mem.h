@@ -198,15 +198,27 @@ struct memglob {
     /* allocation queue tables */
     struct membufq              blktab[MEM_BLK_QUEUES];
     long                        nblktab[MEM_BLK_QUEUES];
-    float                       blkdivtab[MEM_BLK_QUEUES];
+    double                      blkdivtab[MEM_BLK_QUEUES];
     struct membufq              runtab[MEM_RUN_QUEUES];
     long                        nruntab[MEM_RUN_QUEUES];
-    float                       rundivtab[MEM_RUN_QUEUES];
+    double                      rundivtab[MEM_RUN_QUEUES];
     volatile struct membuf     *blkhdrq;
     volatile struct membuf     *bufhdrq;
     volatile struct tabhashtab *hashtabq;
     mtmtx                       mtx;
     m_atomic_t                  flg;
+};
+
+#define MEM_CONF_MIN_SIZE       1
+#define MEM_CONF_MAX_BLK        2
+#define MEM_CONF_MAX_RUN        3
+
+#define MEM_CONF_ALIGN  (1L << 0)
+#define MEM_CONF_SIZE   (1L << 1)
+struct memconf {
+    long        flg;
+    size_t      align;
+    size_t      size;
 };
 
 #define MEM_FREE_ON_FAILURE (1 << 0)
