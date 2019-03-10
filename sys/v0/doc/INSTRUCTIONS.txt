@@ -13,20 +13,12 @@ Opcode Structure
 This structure is represented in C and is in little-endian byte order.
 
 struct v0ins {
-    uint16_t		code;         // flag-bits, unit, instruction
-    uint16_t		parm;         // 4 address-bits + 2 6-bit register IDs
-    union v0arg32	arg[VLA];     // immediate if (ins->code & V0_IMM_BIT)
-};
-
-Here is the same structure represented as a bitfield
-
-struct v0ins {
-    unsigned		op	: 5;
-    unsigned		unit	: 3;
-    unsigned		flags	: 8;
-    unsigned		reg1	: 7;
-    unsigned		reg2	: 7;
-    unsigned		adr	: 2;
+    unsigned	op	: 6;	// operation ID
+    unsigned	unit	: 5;	// unit ID
+    unsigned	flags	: 5;	// operation flags
+    unsigned	reg1	: 7;	// register #1 ID
+    unsigned	reg2	: 7;	// register #2 ID
+    unsigned	adr	: 2;	// address type/mode
 };
 
 CODE-FIELD
@@ -38,13 +30,12 @@ We reserve the low-most [first] 8 bits for instruction and unit IDs.
 FLAGS-Bits
 ---------
 
-These bits are located in the high bits [8:15] of the code-field of the
+These bits are located in the high bits [11:15] of the code-field of the
 instruction.
 
 Name	Description		Bit
 ----	-----------		---
 
-PRIV	ring #0 operation	10
 ATOM    atomic operations	11
 BYTE	byte-size operation	12
 HALF	half-word operation	13
@@ -66,7 +57,7 @@ Value	Description
 -----	-----------
 00	no address; register arguments only
 10	register address; base address in register
-01	direct address; no base register
+01	direct address; no base register (offset only)
 11	indexed address; base register + offset (register or immediate)
 
 Addressing Modes
@@ -81,12 +72,12 @@ O	offset			immediate offset or direct address
 Addressing Examples
 -------------------
 
-Mode	Instruction		Comment
-----	-----------		-------
-N	inc	%r1, %r2	; no address, registers only
-R	jmp	*%r1 		; register address
-RI	ldr	4(%sp), %r1	; register + offset
-O	ldr	trapvec, %r1	; indexed/direct address
+Mode	Instruction		Comment				ADR-Bits
+----	-----------		-------				--------
+N	inc	%r1, %r2	; no address, registers only	00
+R	jmp	*%r1 		; register address		10
+RI	ldr	4(%sp), %r1	; register + offset		11
+O	ldr	trapvec, %r1	; indexed/direct address	01
 
 Opcode Format
 -------------
@@ -96,9 +87,9 @@ significant bit/byte first.
 
 Field		Description		Bits
 -----		-----------		----
-OP		operation ID		0:4
-UNIT		unit ID	  		5:7
-FLAGS		flag bits		8:15
+OP		operation ID		0:5
+UNIT		unit ID	  		6:10
+FLAGS		flag bits		11:15
 REG1		argument 1		16:22
 REG2		argument 2		22:28
 ADR		addressing mode		30:31
@@ -115,6 +106,9 @@ A	memory address formed after one of the addressing modes
 
 SYS-UNIT	0x00
 --------
+
+OP	CODE	ARGUMENTS	FLAGS	MODE	BRIEF
+--	----	---------	-----	----	-----
 HLT	0x00			------	---	halt system (wait for interrupt)
 RST	0x01			------	---	reset system
 WFE	0x02			------	---	wait for event (on wait channel)
@@ -127,7 +121,7 @@ INT	0x08	RI1		------	---	raise software interrupt
 
 LOGIC-UNIT	0x01
 ----------
-				UIHBAP
+
 OP	CODE	ARGUMENTS	FLAGS	MODE	BRIEF
 --	----	---------	-----	----	-----
 NOT	0x00	RI1, R2		-IHB--	---	logical negation
@@ -153,7 +147,7 @@ UROR	0x05	RV1, R2		U-HB--	---	rotate right
 ----	0x06
 ----	0x07
 
-Fused Instructions
+Fused Instructions - OPTIONAL
 ------------------
 
 OP	CODE	ARGUMENTS	FLAGS	MODE	BRIEF
@@ -209,7 +203,7 @@ UNEG	0x02	R1		UIHB--	---	arithmetic negation
 SWP	0x03	R1		-IHB--	---	swap byte order
 USWP	0x03	R1		UIHB--	---	swap byte order
 
-Miscellaneous Operations
+Miscellaneous Operations	- OPTIONAL
 ------------------------
 PAR	0x04	R1, R2		-IHB--	---	compute byte-parity, 1 for odd
 UPAR	0x04	R1, R2		UIHB--	---	compute byte-parity, 1 for odd
@@ -234,7 +228,7 @@ LEA	0x00	RA1, R2		--HB--	---	load effective address
 LDR	0x01	RI1, R2		-IHB--	---	load register
 STR	0x02	RI1, A2		-IHB--	---	store register or immediate
 
-Control Operations
+Control Operations   		- OPTIONAL
 ------------------
 IPG	0x03	RA1		-I----	---	invalidate page TLB-entry
 CLD	0x04	RA1		-I----	---	clear cacheline dirty-bit
