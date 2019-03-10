@@ -1,5 +1,5 @@
-#ifndef __VELHO_CDEFS_H__
-#define __VELHO_CDEFS_H__
+#ifndef __ZERO_CDEFS_H__
+#define __ZERO_CDEFS_H__
 
 #if defined(__STDC_VERSION__)
 #if (__STDC_VERSION__ >= 199901L)
@@ -25,14 +25,14 @@
 #define INLINE       	__inline__ __attribute__ ((__always_inline__))
 #define NOINLINE     	__attribute__ ((__noinline__))
 #define NORETURN     	__attribute__ ((__noreturn__))
-#define CONST        	__attribute__ ((const))
+#define CONST        	__attribute__ ((__const__))
 #if !defined(UNUSED)
-#define UNUSED          __attribute__ ((unused))
+#define UNUSED          __attribute__ ((__unused__))
 #endif
 #if !defined(RESTRICT)
 #define RESTRICT        __restrict
 #endif
-#define PURE            __attribute__ ((pure))
+#define PURE            __attribute__ ((__pure__))
 #if !defined(THREADLOCAL)
 #define THREADLOCAL     __thread
 #endif
@@ -62,5 +62,5 @@
 #define adralign(a, b2) ((uintptr_t)(a) & -(b2))
 #define ptralign(a, b2) ((void *)adralign(a, b2))
 
-#endif /* __VELHO_CDEFS_H__ */
+#endif /* __ZERO_CDEFS_H__ */
 
