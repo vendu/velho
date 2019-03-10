@@ -1,6 +1,9 @@
 #ifndef __ZEN_TAO_H__
 #define __ZEN_TAO_H__
 
+#include <mach/param.h>
+#include <mt/mtx.h>
+
 /*
  * NOTES
  * -----
@@ -24,9 +27,10 @@ struct taothr {
 };
 
 struct taoschedq {
-    struct taothr *head;
-    struct taothr *tail;
-    struct taothr  dummy;
+    mtmtx               mtx;
+    struct taothr      *head;
+    struct taothr      *tail;
+    uint8_t            _pad[CLSIZE - 3 * WORDSIZE];
 };
 
 static __inline__ void

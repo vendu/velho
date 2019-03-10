@@ -31,7 +31,7 @@ typedef volatile m_atomic_t mtfmtx;
 #define MTFMTXLKVAL     1
 
 static INLINE void
-mtinitftmx(volatile m_atomic_t *lp)
+mtinitfmtx(volatile m_atomic_t *lp)
 {
     m_membar();         // full memory barrier
     *lp = MTMTXINITVAL;  // lazy-write
@@ -69,6 +69,64 @@ mtlkfmtx(volatile m_atomic_t *lp)
             m_waitspin();
         }
         res = m_cmpswap(lp, MTMTXINITVAL, MTMTXLKVAL);
+    } while (!res);
+
+    return;
+}
+
+/*
+ * unlock fast mutex
+ * - must use full memory barrier to guarantee proper write-ordering
+ */
+static INLINE void
+mtunlkfmtx(volatile m_atomic_t *lp)
+{
+    m_membar();         // full memory barrier
+    *lp = MTMTXINITVAL;  // lazy-write
+    m_endspin();        // signal wakeup-event
+
+    return;
+}
+
+
+/*
+ * try to acquire fast mutex lock
+ * - return non-zero on success, zero if already locked
+ */
+static INLINE long
+mttryrecfmtx(volatile m_atomic_t *lp)
+{
+    m_atomic_t  res = 0;
+    m_atomic_t  id = (m_atomic_t)pthread_self();
+
+    if (*lp == MTMTXINITVAL) {
+        res = m_cmpswap(lp, MTMTXINITVAL, id);
+    }
+    if (!res) {
+        res = (*lp == id);
+    }
+
+    return res;
+}
+
+/*
+ * - acquire fast mutex lock
+ * - spin on volatile lock to avoid excess lock-operations
+ */
+static INLINE void
+mtlkrecfmtx(volatile m_atomic_t *lp)
+{
+    m_atomic_t  res = 0;
+    m_atomic_t  id = (m_atomic_t)pthread_self();
+
+    do {
+        while (*lp != MTMTXINITVAL) {
+            m_waitspin();
+        }
+        res = m_cmpswap(lp, MTMTXINITVAL, MTMTXLKVAL);
+        if (!res) {
+            res = (*lp == id);
+        }
     } while (!res);
 
     return;

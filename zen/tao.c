@@ -3,20 +3,18 @@ static struct taoschedq[TAO_SCHED_CLASSES][TAO_SCHED_PRIOS];
 static void
 taoqueuethr(struct taoschedq *queue, struct taothr *thr)
 {
-    long one;
+    struct thr *prev;
+    long        one;
 
-    thr->mtx = ZEN_MTX_INIT_VAL;
     thr->next = NULL;
-    zenlkmtx(&queue->tail->mtx);
-    one = (m_atomread(&queue->tail) == &queue->dummy);
-    if (!one) {
-        thr->prev = queue->tail;
-    } else {
-        thr->prev = NULL;
-        m_atomwrite(&queue->head, thr);
+    zenlkmtx(&queue->mtx);
+    prev = queue->tail;
+    thr->prev = prev;
+    queue->tail = thr;
+    if (!prev) {
+        queue->head = thr;
     }
-    m_atomwrite(&queue->tail, thr);
-    zenunlkmtx(&queue->tail->mtx);
+    zenunlkmtx(&queue->mtx);
 
     return;
 }
@@ -25,20 +23,19 @@ static struct taothr *
 taopopthr(struct taoschedq *queue)
 {
     struct taothr *thr;
+    struct taothr *next;
     long           one;
 
-    zenlkmtx(&queue->head->mtx);
+    zenlkmtx(&queue->mtx);
     thr = queue->head;
-    one = (thr == &queue->dummy);
-    if (!one) {
-        thr->next->prev = NULL;
-        m_atomwrite(&queue->head, thr->next);
-    } else {
-        zenlkmtx(&queue->dummy.mtx);
-        m_atomwrite(&queue->tail, &queue->dummy);
-        m_atomwrite(&queue->head, &queue->dummy);
-        zenunlkmtx(&queue->dummy.mtx);
+    if (thr) {
+        next = thr->next;
+        queue->head = next;
+        if (!next) {
+            queue->tail = NULL;
+        }
     }
+    zenunlkmtx(&queue->mtx);
 
     return thr;
 }
@@ -46,16 +43,24 @@ taopopthr(struct taoschedq *queue)
 static void
 taodequethr(struct taoschedq *queue, struct taothr *thr)
 {
-    struct taothr *tp;
+    struct taothr *prev;
+    struct taothr *next;
 
-    zenlkmtx(&thr->mtx);
-    tp = thr->prev;
-    if (tp) {
-        tp->next = thr->next;
+    zenlkmtx(&queue->mtx);
+    prev = thr->prev;
+    next = thr->next;
+    if (prev) {
+        prev->next = next;
     } else {
-        tp = t->next;
-        if (tp) {
-        }
+        queue->head = next;
     }
+    if (next) {
+        next->prev = thr->prev;
+    } else {
+        queue->tail = prev;
+    }
+    zenunlkmtx(&queue->mtx);
+
+    return;
 }
 
