@@ -6,10 +6,10 @@
 #include <zero/trix.h>
 #include <corewar/cw.h>
 
-extern struct cwmars  cwmars;
+extern struct cwmars    g_cwmars;
 
-static void          *rcparsetab[128];  // instruction lookup table
-long                  rcnargtab[CWNOP]  // per-instruction argument counts
+static void            *g_rcparsetab[128];  // instruction lookup table
+long                    g_rcnargtab[CWNOP]  // per-instruction argument counts
 = {
     1, /* DAT */
     2, /* MOV */
@@ -34,10 +34,10 @@ rcaddop(const char *name, long id)
 
     name++;
     if (ndx) {
-        ptr1 = rcparsetab[ndx];
+        ptr1 = g_rcparsetab[ndx];
         if (!ptr1) {
             ptr1 = calloc(128, sizeof(void *));
-            rcparsetab[ndx] = ptr1;
+            g_rcparsetab[ndx] = ptr1;
         }
         if (!ptr1) {
             fprintf(stderr, "failed to allocate operation\n");
@@ -54,7 +54,7 @@ rcaddop(const char *name, long id)
             }
             if (!ptr2) {
                 fprintf(stderr, "failed to allocate operation\n");
-                
+
                 exit(1);
             }
             ndx = toupper(*name);
@@ -67,7 +67,7 @@ rcaddop(const char *name, long id)
                 }
                 if (!ptr1) {
                     fprintf(stderr, "failed to allocate operation\n");
-                    
+
                     exit(1);
                 }
                 *((long *)ptr1) = id;
@@ -86,7 +86,7 @@ rcfindop(char *str, long *narg)
     char *cp = str;
     void *ptr;
 
-    ptr = rcparsetab[toupper(*cp)];
+    ptr = g_rcparsetab[toupper(*cp)];
     cp++;
     if ((ptr) && isalpha(*cp)) {
         ptr = ((void **)ptr)[toupper(*cp)];
@@ -100,7 +100,7 @@ rcfindop(char *str, long *narg)
         }
     }
     if (op != CWNONE) {
-        *narg = rcnargtab[op];
+        *narg = g_rcnargtab[op];
     }
 
     return op;
@@ -199,7 +199,7 @@ rcgetop(char *str)
                         }
                     } else {
                         fprintf(stderr, "invalid A-field: %s\n", str);
-                        
+
                         exit(1);
                     }
                     if (sign) {
@@ -246,7 +246,7 @@ rcgetop(char *str)
                     }
                 } else {
                     fprintf(stderr, "invalid B-field: %s\n", str);
-                    
+
                     exit(1);
                 }
                 if (sign) {
@@ -257,7 +257,7 @@ rcgetop(char *str)
             }
         }
     }
-    
+
     return instr;
 }
 
@@ -288,7 +288,7 @@ rcgetline(FILE *fp)
                     buf = ptr;
                 }
                 if (ch == '\n') {
-                    
+
                     break;
                 }
                 buf[ndx] = ch;
@@ -347,22 +347,22 @@ rcxlate(FILE *fp, long pid, long base, long *baseret, long *limret)
                 if (op) {
                     op->pid = pid;
                     n++;
-                    *((uint64_t *)&instr) = *((uint64_t *)&cwmars.optab[pc]);
+                    *((uint64_t *)&instr) = *((uint64_t *)&g_cwmars.optab[pc]);
                     if (*((uint64_t *)&instr)) {
                         fprintf(stderr, "programs overlap\n");
-                        
+
                         exit(1);
                     }
-                    *((uint64_t *)(&cwmars.optab[pc])) = *((uint64_t *)op);
+                    *((uint64_t *)(&g_cwmars.optab[pc])) = *((uint64_t *)op);
                     if (ret < 0 && op->op != CWOPDAT) {
                         /* execution starts at first non-DAT instruction */
                         ret = pc;
-                    } 
+                    }
 #if (CWPIDMAP)
                     if (pid) {
-                        setbit(cwmars.pidmap, pc);
+                        setbit(g_cwmars.pidmap, pc);
                     } else {
-                        clrbit(cwmars.pidmap, pc);
+                        clrbit(g_cwmars.pidmap, pc);
                     }
 #endif
                     pc++;
@@ -377,7 +377,7 @@ rcxlate(FILE *fp, long pid, long base, long *baseret, long *limret)
 
                 continue;
             } else {
-                
+
                 break;
             }
         } else {

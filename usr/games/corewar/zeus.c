@@ -14,17 +14,17 @@
 #include <X11/Xutil.h>
 #endif
 
-extern struct cwmars  cwmars;
-extern long           rcnargtab[CWNOP];
+extern struct cwmars    g_cwmars;
+extern long             g_rcnargtab[CWNOP];
 
-struct zeussel        zeussel;
+struct zeussel          g_zeussel;
 
 #define ZEUSDEFLINE 256
 
 char *
 zeusdisasm(long pc, int *lenret)
 {
-    struct cwinstr *op = &cwmars.optab[pc];
+    struct cwinstr *op = &g_cwmars.optab[pc];
     char           *ptr = malloc(ZEUSDEFLINE * sizeof(char));
     char           *str = ptr;
     int             len = ZEUSDEFLINE;
@@ -35,7 +35,7 @@ zeusdisasm(long pc, int *lenret)
         ret = snprintf(str, len, "%ld ", pc);
         if (ret < 0) {
             free(ptr);
-            
+
             return NULL;
         }
         len -= ret;
@@ -51,20 +51,20 @@ zeusdisasm(long pc, int *lenret)
         }
         if (ret < 0) {
             free(ptr);
-            
+
             return NULL;
         }
         len -= ret;
         str += ret;
-        ret = snprintf(str, len, "%s ", cwmars.opnames[op->op]);
+        ret = snprintf(str, len, "%s ", g_cwmars.opnames[op->op]);
         if (ret < 0) {
             free(ptr);
-            
+
             return NULL;
         }
         len -= ret;
         str += ret;
-        if (rcnargtab[op->op] == 2) {
+        if (g_rcnargtab[op->op] == 2) {
             ch = '\0';
             if (op->aflg & CWIMMBIT) {
                 ch = '#';
@@ -83,7 +83,7 @@ zeusdisasm(long pc, int *lenret)
                 ret = snprintf(str, len, "%d,", op->a - CWCORESIZE);
                 if (ret < 0) {
                     free(ptr);
-                    
+
                     return NULL;
                 }
                 len -= ret;
@@ -92,7 +92,7 @@ zeusdisasm(long pc, int *lenret)
                 ret = snprintf(str, len, "%d,", op->a);
                 if (ret < 0) {
                     free(ptr);
-                    
+
                     return NULL;
                 }
                 len -= ret;
@@ -116,7 +116,7 @@ zeusdisasm(long pc, int *lenret)
             ret = snprintf(str, len, " ");
             if (ret < 0) {
                 free(ptr);
-                
+
                 return NULL;
             }
             len -= ret;
@@ -126,7 +126,7 @@ zeusdisasm(long pc, int *lenret)
             ret = snprintf(str, len, "%d", op->b - CWCORESIZE);
             if (ret < 0) {
                 free(ptr);
-                
+
                 return NULL;
             }
             len -= ret;
@@ -135,7 +135,7 @@ zeusdisasm(long pc, int *lenret)
             ret = snprintf(str, len, "%d", op->b);
             if (ret < 0) {
                 free(ptr);
-                
+
                 return NULL;
             }
             len -= ret;
@@ -164,7 +164,7 @@ zeusshowmem(void)
     int             dummy;
 
     for (pc = 0 ; pc < CWCORESIZE ; pc++) {
-        op = &cwmars.optab[pc];
+        op = &g_cwmars.optab[pc];
         if (*(uint64_t *)op) {
             fprintf(stderr, "%ld\t", pc);
             str = zeusdisasm(pc, &dummy);

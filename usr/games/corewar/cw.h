@@ -46,6 +46,7 @@
 #define CWPREDECBIT (1U << CWADRPREDEC)
 
 /* 64-bit instruction structure */
+#define cwisdat(ins)    ((ins)->op == CWOPDAT)
 struct cwinstr {
     unsigned op   : 8;          // operation ID
     unsigned aflg : 8;          // operand #1 flags
@@ -77,6 +78,8 @@ struct cwmars {
 };
 
 void        cwexec(long pid);
+
+#if 0
 static long cwdatop(long pid, long pc);
 static long cwmovop(long pid, long pc);
 static long cwaddop(long pid, long pc);
@@ -88,6 +91,7 @@ static long cwcmpop(long pid, long pc);
 static long cwsltop(long pid, long pc);
 static long cwdjnop(long pid, long pc);
 static long cwsplop(long pid, long pc);
+#endif
 
 #endif /* __COREWAR_CW_H__ */
 

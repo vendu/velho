@@ -26,6 +26,9 @@
 #define NOINLINE     	__attribute__ ((__noinline__))
 #define NORETURN     	__attribute__ ((__noreturn__))
 #define CONST        	__attribute__ ((const))
+#if !defined(UNUSED)
+#define UNUSED          __attribute__ ((unused))
+#endif
 #if !defined(RESTRICT)
 #define RESTRICT        __restrict
 #endif
@@ -48,6 +51,9 @@
 #endif
 #if !defined(CONST)
 #define CONST
+#endif
+#if !defined(UNUSED)
+#define UNUSED
 #endif
 #if !defined(PURE)
 #define PURE

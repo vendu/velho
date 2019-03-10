@@ -19,10 +19,10 @@
 #include <Imlib2.h>
 #endif
 
-extern struct cwmars  cwmars;
-extern struct zeussel zeussel;
+extern struct cwmars    g_cwmars;
+extern struct zeussel   g_zeussel;
 
-struct zeusx11buttons zeusx11buttons;
+struct zeusx11buttons   g_x11buttons;
 
 void zeusdrawsimop(struct zeusx11 *x11, long pc);
 
@@ -37,17 +37,17 @@ zeustogglesel(struct zeusx11 *x11, XEvent *event)
     y /= 5;
 //    pc = y * (x11->w / 5) + x;
     pc = y * (x11->simw / 5) + x;
-    if (!zeussel.bmap) {
-        zeussel.bmap = calloc(CWCORESIZE >> 3, sizeof(uint8_t));
+    if (!g_zeussel.bmap) {
+        g_zeussel.bmap = calloc(CWCORESIZE >> 3, sizeof(uint8_t));
     }
-    if (!zeussel.bmap) {
+    if (!g_zeussel.bmap) {
         fprintf(stderr, "memory allocation failure\n");
-    } else if (bitset(zeussel.bmap, pc)) {
-        clrbit(zeussel.bmap, pc);
+    } else if (bitset(g_zeussel.bmap, pc)) {
+        clrbit(g_zeussel.bmap, pc);
     } else {
-        setbit(zeussel.bmap, pc);
+        setbit(g_zeussel.bmap, pc);
     }
-    zeussel.last = pc;
+    g_zeussel.last = pc;
     zeusdrawsimop(x11, pc);
 
     return;
@@ -65,43 +65,43 @@ zeusaddsel(struct zeusx11 *x11, XEvent *event)
     y /= 5;
 //    pc = y * (x11->w / 5) + x;
     pc = y * (x11->simw / 5) + x;
-    if (!zeussel.bmap) {
-        zeussel.bmap = calloc(CWCORESIZE >> 3, sizeof(uint8_t));
+    if (!g_zeussel.bmap) {
+        g_zeussel.bmap = calloc(CWCORESIZE >> 3, sizeof(uint8_t));
     }
-    if (!zeussel.bmap) {
+    if (!g_zeussel.bmap) {
         fprintf(stderr, "memory allocation failure\n");
-    } else if (zeussel.last >= 0) {
-        if (pc < zeussel.last) {
-            lim = zeussel.last + 1;
+    } else if (g_zeussel.last >= 0) {
+        if (pc < g_zeussel.last) {
+            lim = g_zeussel.last + 1;
         } else {
             lim = pc;
-            pc = zeussel.last + 1;
+            pc = g_zeussel.last + 1;
         }
         while (pc < lim) {
-            setbit(zeussel.bmap, pc);
+            setbit(g_zeussel.bmap, pc);
             zeusdrawsimop(x11, pc);
             pc++;
         }
-        zeussel.last = pc;
+        g_zeussel.last = pc;
     }
 
     return;
 }
 
 void
-zeusrun(struct zeusx11 *x11, XEvent *event)
+zeusrun(UNUSED struct zeusx11 *x11, UNUSED XEvent *event)
 {
-    long pid = cwmars.curpid;
+    long pid = g_cwmars.curpid;
 
-    cwmars.running = 1;
-    while ((cwmars.running) && (cwmars.nturn[pid])) {
+    g_cwmars.running = 1;
+    while ((g_cwmars.running) && (g_cwmars.nturn[pid])) {
         cwexec(pid);
         pid++;
         pid &= 0x01;
-        cwmars.curpid = pid;
-        cwmars.nturn[pid]--;
+        g_cwmars.curpid = pid;
+        g_cwmars.nturn[pid]--;
     }
-    if (!cwmars.nturn[pid]) {
+    if (!g_cwmars.nturn[pid]) {
         fprintf(stderr, "TIE\n");
         sleep(5);
 
@@ -112,22 +112,24 @@ zeusrun(struct zeusx11 *x11, XEvent *event)
 }
 
 void
-zeusstop(struct zeusx11 *x11, XEvent *event)
+zeusstop(UNUSED struct zeusx11 *x11, UNUSED XEvent *event)
 {
-    cwmars.running = 0;
+    g_cwmars.running = 0;
+
+    return;
 }
 
 void
-zeusstep(struct zeusx11 *x11, XEvent *event)
+zeusstep(UNUSED struct zeusx11 *x11, UNUSED XEvent *event)
 {
-    long pid = cwmars.curpid;
+    long pid = g_cwmars.curpid;
 
-    cwmars.running = 0;
-    if (cwmars.nturn[pid]--) {
+    g_cwmars.running = 0;
+    if (g_cwmars.nturn[pid]--) {
         cwexec(pid);
         pid++;
         pid &= 0x01;
-        cwmars.curpid = pid;
+        g_cwmars.curpid = pid;
     } else {
         fprintf(stderr, "TIE\n");
         sleep(5);
@@ -145,28 +147,30 @@ zeusfence(struct zeusx11 *x11, XEvent *event)
 #endif
 
 void
-zeusclear(struct zeusx11 *x11, XEvent *event)
+zeusclear(struct zeusx11 *x11, UNUSED XEvent *event)
 {
-    if (zeussel.bmap) {
-        memset(zeussel.bmap, 0, CWCORESIZE >> 3);
+    if (g_zeussel.bmap) {
+        memset(g_zeussel.bmap, 0, CWCORESIZE >> 3);
     }
-    zeussel.last = -1;
+    g_zeussel.last = -1;
     zeusdrawsim(x11);
 }
 
+NORETURN
 void
-zeusexit(struct zeusx11 *x11, XEvent *event)
+zeusexit(UNUSED struct zeusx11 *x11, UNUSED XEvent *event)
 {
     exit(0);
 }
 
+PURE
 int
 zeusfindbutton(Window win)
 {
     int    id;
 
     for (id = 0 ; id < ZEUSNBUTTON ; id++) {
-        if (zeusx11buttons.wins[id] == win) {
+        if (g_x11buttons.wins[id] == win) {
 
             break;
         }
@@ -182,9 +186,9 @@ zeusbuttonstring(Window win, int *lenret)
     int    id = zeusfindbutton(win);
 
     if (id < ZEUSNBUTTON) {
-        str = zeusx11buttons.strs[id];
+        str = g_x11buttons.strs[id];
         if (str) {
-            *lenret = zeusx11buttons.strlens[id];
+            *lenret = g_x11buttons.strlens[id];
         }
     }
 
@@ -201,12 +205,13 @@ zeusenterx11button(struct zeusx11 *x11, XEvent *event)
     if (str) {
         XSetWindowBackgroundPixmap(x11->disp,
                                    win,
-                                   zeusx11buttons.pmaps.hover);
+                                   g_x11buttons.pmaps.hover);
         XClearWindow(x11->disp, win);
         XDrawString(x11->disp,
                     win,
                     x11->buttongc,
-                    (ZEUSBUTTONW - len * x11->fontw) >> 1, (ZEUSBUTTONH + x11->fontasc) >> 1,
+                    (ZEUSBUTTONW - len * x11->fontw) >> 1,
+                    (ZEUSBUTTONH + x11->fontasc) >> 1,
                     str,
                     len);
         XSync(x11->disp, False);
@@ -225,12 +230,13 @@ zeusleavex11button(struct zeusx11 *x11, XEvent *event)
     if (str) {
         XSetWindowBackgroundPixmap(x11->disp,
                                    win,
-                                   zeusx11buttons.pmaps.norm);
+                                   g_x11buttons.pmaps.norm);
         XClearWindow(x11->disp, win);
         XDrawString(x11->disp,
                     win,
                     x11->buttongc,
-                    (ZEUSBUTTONW - len * x11->fontw) >> 1, (ZEUSBUTTONH + x11->fontasc) >> 1,
+                    (ZEUSBUTTONW - len * x11->fontw) >> 1,
+                    (ZEUSBUTTONH + x11->fontasc) >> 1,
                     str,
                     len);
         XSync(x11->disp, False);
@@ -250,16 +256,17 @@ zeusclickx11button(struct zeusx11 *x11, XEvent *event)
 
     if (str) {
         win = event->xany.window;
-        func = zeusx11buttons.functab[id];
+        func = g_x11buttons.functab[id];
         func(x11, event);
         XSetWindowBackgroundPixmap(x11->disp,
                                    win,
-                                   zeusx11buttons.pmaps.click);
+                                   g_x11buttons.pmaps.click);
         XClearWindow(x11->disp, win);
         XDrawString(x11->disp,
                     win,
                     x11->buttongc,
-                    (ZEUSBUTTONW - len * x11->fontw) >> 1, (ZEUSBUTTONH + x11->fontasc) >> 1,
+                    (ZEUSBUTTONW - len * x11->fontw) >> 1,
+                    (ZEUSBUTTONH + x11->fontasc) >> 1,
                     str,
                     len);
         XSync(x11->disp, False);
@@ -279,12 +286,13 @@ zeusreleasex11button(struct zeusx11 *x11, XEvent *event)
         win = event->xany.window;
         XSetWindowBackgroundPixmap(x11->disp,
                                    win,
-                                   zeusx11buttons.pmaps.hover);
+                                   g_x11buttons.pmaps.hover);
         XClearWindow(x11->disp, win);
         XDrawString(x11->disp,
                     win,
                     x11->buttongc,
-                    (ZEUSBUTTONW - len * x11->fontw) >> 1, (ZEUSBUTTONH + x11->fontasc) >> 1,
+                    (ZEUSBUTTONW - len * x11->fontw) >> 1,
+                    (ZEUSBUTTONH + x11->fontasc) >> 1,
                     str,
                     len);
         XSync(x11->disp, False);
@@ -303,15 +311,16 @@ zeusexposex11button(struct zeusx11 *x11, XEvent *event)
 
     if (!event->xexpose.count) {
         win = event->xany.window;
-        if (!zeusx11buttons.exposed[id]) {
-            XSetWindowBackgroundPixmap(x11->disp, win, zeusx11buttons.pmaps.norm);
-            zeusx11buttons.exposed[id] = 1;
+        if (!g_x11buttons.exposed[id]) {
+            XSetWindowBackgroundPixmap(x11->disp, win, g_x11buttons.pmaps.norm);
+            g_x11buttons.exposed[id] = 1;
         }
         XClearWindow(x11->disp, win);
         XDrawString(x11->disp,
                     win,
                     x11->buttongc,
-                    (ZEUSBUTTONW - len * x11->fontw) >> 1, (ZEUSBUTTONH + x11->fontasc) >> 1,
+                    (ZEUSBUTTONW - len * x11->fontw) >> 1,
+                    (ZEUSBUTTONH + x11->fontasc) >> 1,
                     str,
                     len);
         XSync(x11->disp, False);
@@ -678,7 +687,7 @@ zeusinitimlib2(struct zeusx11 *x11)
 }
 
 void
-zeusloadx11buttonimgs(struct zeusx11 *x11)
+zeusloadx11buttonimgs(UNUSED struct zeusx11 *x11)
 {
     Imlib_Image *img;
 
@@ -689,8 +698,8 @@ zeusloadx11buttonimgs(struct zeusx11 *x11)
         exit(1);
     }
     imlib_context_set_image(img);
-    imlib_render_pixmaps_for_whole_image_at_size(&zeusx11buttons.pmaps.norm,
-                                                 &zeusx11buttons.pmaps.normmask,
+    imlib_render_pixmaps_for_whole_image_at_size(&g_x11buttons.pmaps.norm,
+                                                 &g_x11buttons.pmaps.normmask,
                                                  ZEUSBUTTONW, ZEUSBUTTONH);
     img = imlib_load_image("buttonhilite.png");
     if (!img) {
@@ -699,8 +708,8 @@ zeusloadx11buttonimgs(struct zeusx11 *x11)
         exit(1);
     }
     imlib_context_set_image(img);
-    imlib_render_pixmaps_for_whole_image_at_size(&zeusx11buttons.pmaps.hover,
-                                                 &zeusx11buttons.pmaps.hovermask,
+    imlib_render_pixmaps_for_whole_image_at_size(&g_x11buttons.pmaps.hover,
+                                                 &g_x11buttons.pmaps.hovermask,
                                                  ZEUSBUTTONW, ZEUSBUTTONH);
 
     img = imlib_load_image("buttonpress.png");
@@ -710,8 +719,8 @@ zeusloadx11buttonimgs(struct zeusx11 *x11)
         exit(1);
     }
     imlib_context_set_image(img);
-    imlib_render_pixmaps_for_whole_image_at_size(&zeusx11buttons.pmaps.click,
-                                                 &zeusx11buttons.pmaps.clickmask,
+    imlib_render_pixmaps_for_whole_image_at_size(&g_x11buttons.pmaps.click,
+                                                 &g_x11buttons.pmaps.clickmask,
                                                  ZEUSBUTTONW, ZEUSBUTTONH);
 
     return;
@@ -732,11 +741,11 @@ zeusaddx11button(struct zeusx11 *x11, int id, const char *str,
 #if defined(ZEUSIMLIB2)
         zeusloadx11buttonimgs(x11);
 #endif
-        zeusx11buttons.funcs.enter = zeusenterx11button;
-        zeusx11buttons.funcs.leave = zeusleavex11button;
-        zeusx11buttons.funcs.click = zeusclickx11button;
-        zeusx11buttons.funcs.release = zeusreleasex11button;
-        zeusx11buttons.funcs.expose = zeusexposex11button;
+        g_x11buttons.funcs.enter = zeusenterx11button;
+        g_x11buttons.funcs.leave = zeusleavex11button;
+        g_x11buttons.funcs.click = zeusclickx11button;
+        g_x11buttons.funcs.release = zeusreleasex11button;
+        g_x11buttons.funcs.expose = zeusexposex11button;
     }
     atr.background_pixel = BlackPixel(x11->disp, x11->screen);
     win = XCreateWindow(x11->disp,
@@ -755,10 +764,10 @@ zeusaddx11button(struct zeusx11 *x11, int id, const char *str,
 
         exit(1);
     }
-    zeusx11buttons.wins[id] = win;
-    zeusx11buttons.strs[id] = (char *)str;
-    zeusx11buttons.strlens[id] = strlen(str);
-    zeusx11buttons.functab[id] = func;
+    g_x11buttons.wins[id] = win;
+    g_x11buttons.strs[id] = (char *)str;
+    g_x11buttons.strlens[id] = strlen(str);
+    g_x11buttons.functab[id] = func;
     XSelectInput(x11->disp,
                  win,
                  ExposureMask
@@ -850,7 +859,7 @@ zeusinitx11(struct zeusx11 *info)
     zeusaddx11button(info, 3, "LOAD", zeusstep);
     zeusaddx11button(info, 4, "EDIT", zeusstep);
     zeusaddx11button(info, 5, "SAVE", zeusstep);
-    zeussel.last = -1;
+    g_zeussel.last = -1;
 #endif
 
     return;
@@ -859,8 +868,8 @@ zeusinitx11(struct zeusx11 *info)
 int
 zeusprintop(struct zeusx11 *x11, long pc, int x, int y)
 {
-    struct cwinstr *op = &cwmars.optab[pc];
-    long            pid = bitset(cwmars.pidmap, pc);
+    struct cwinstr *op = &g_cwmars.optab[pc];
+    long            pid = bitset(g_cwmars.pidmap, pc);
     Window          win = (pid) ? x11->db2win : x11->db1win;
     char           *str;
     int             len;
@@ -915,7 +924,7 @@ zeusprintdb(struct zeusx11 *x11, int simx, int simy)
     simy /= 5;
 //    pc = simy * (x11->w / 5) + simx;
     pc = simy * (x11->simw / 5) + simx;
-    pid = bitset(cwmars.pidmap, pc);
+    pid = bitset(g_cwmars.pidmap, pc);
     if (pid) {
         win = x11->db2win;
     } else {
@@ -926,7 +935,7 @@ zeusprintdb(struct zeusx11 *x11, int simx, int simy)
                    0, 0,
                    x11->dbw, x11->dbh);
     len = zeusprintop(x11, pc, 0, x11->fontasc);
-    op = &cwmars.optab[pc];
+    op = &g_cwmars.optab[pc];
     if (op->op == CWOPDAT) {
         if (!*((uint64_t *)op)) {
             XDrawString(x11->disp, win, x11->datgc,
@@ -1061,23 +1070,23 @@ zeusprocev(struct zeusx11 *x11)
     } else if (id < ZEUSNBUTTON) {
         switch (ev.type) {
             case Expose:
-                zeusx11buttons.funcs.expose(x11, &ev);
+                g_x11buttons.funcs.expose(x11, &ev);
 
                 break;
             case EnterNotify:
-                zeusx11buttons.funcs.enter(x11, &ev);
+                g_x11buttons.funcs.enter(x11, &ev);
 
                 break;
             case LeaveNotify:
-                zeusx11buttons.funcs.leave(x11, &ev);
+                g_x11buttons.funcs.leave(x11, &ev);
 
                 break;
             case ButtonPress:
-                zeusx11buttons.funcs.click(x11, &ev);
+                g_x11buttons.funcs.click(x11, &ev);
 
                 break;
             case ButtonRelease:
-                zeusx11buttons.funcs.release(x11, &ev);
+                g_x11buttons.funcs.release(x11, &ev);
 
                 break;
             default:
@@ -1099,8 +1108,8 @@ zeusdrawsimop(struct zeusx11 *x11, long pc)
     int             x = col * 5;
     int             y = row * 5;
 
-    op = &cwmars.optab[pc];
-    if ((zeussel.bmap) && bitset(zeussel.bmap, pc)) {
+    op = &g_cwmars.optab[pc];
+    if ((g_zeussel.bmap) && bitset(g_zeussel.bmap, pc)) {
         XFillRectangle(x11->disp, x11->pixbuf,
                        x11->selgc,
                        x, y,
