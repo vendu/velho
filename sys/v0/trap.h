@@ -9,20 +9,21 @@
 #define V0_TRAP_OP       0x01 // invalid opcode         - code is PC
 #define V0_TRAP_PF       0x02 // page-fault             - code is ADR + flags
 #define V0_TRAP_DF       0x03 // double-fault
-#define V0_TRAP_TS       0x04 // invalid task state     - code is ADR
-#define V0_TRAP_NP       0x05 // segment not present    - code is ID
-#define V0_TRAP_SS       0x06 // stack-segment full     - code is SP
-#define V0_TRAP_PE       0x07 // protection error       - code is ADR
-#define V0_TRAP_FP       0x08 // floating-point error   - code is PC
-#define V0_TRAP_OF       0x01 // overflow               - code is PC
-#define V0_TRAP_BR       0x02 // bound-range exceeded   - code is ADR
-#define V0_TRAP_AC       0x03 // alignment check        - code is ADR
-#define V0_TRAP_MF       0x05 // memory failure (ECC)   - code is ADR
-#define V0_TRAP_MC       0x06 // machine check          - code is ERROR
-#define V0_TRAP_IO       0x08 // I/O error              - code is ADR + flags
-#define V0_TRAP_DB       0x09 // debug trap             - code is PC
-#define V0_TRAP_BP       0x0a // breakpoint             - code is PC
-#define V0_TRAP_NMI      0x10 // non-maskable interrupt
+#define V0_TRAP_TF       0x04 // triple-fault
+#define V0_TRAP_TS       0x05 // invalid task state     - code is ADR
+#define V0_TRAP_NP       0x06 // segment not present    - code is ID
+#define V0_TRAP_SS       0x07 // stack-segment full     - code is SP
+#define V0_TRAP_PE       0x08 // protection error       - code is ADR
+#define V0_TRAP_FP       0x09 // floating-point error   - code is PC
+#define V0_TRAP_OF       0x0a // overflow               - code is PC
+#define V0_TRAP_BR       0x0b // bound-range exceeded   - code is ADR
+#define V0_TRAP_AC       0x0c // alignment check        - code is ADR
+#define V0_TRAP_MF       0x0d // memory failure (ECC)   - code is ADR
+#define V0_TRAP_MC       0x0e // machine check          - code is ERROR
+#define V0_TRAP_IO       0x0f // I/O error              - code is ADR + flags
+#define V0_TRAP_DB       0x10 // debug trap             - code is PC
+#define V0_TRAP_BP       0x11 // breakpoint             - code is PC
+#define V0_TRAP_NMI      0x12 // non-maskable interrupt
 #define V0_TRAP_LAST_SYS 0x1f
 #define V0_TRAP_IRQ_BIT  0x20
 #define V0_TRAP_IRQ(i)   (V0_TRAP_IRQ_BIT | (i))

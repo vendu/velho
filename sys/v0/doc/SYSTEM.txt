@@ -1,0 +1,53 @@
+V0 SYSTEM ARCHITECTURE DRAFT
+----------------------------
+
+Interrupt Management
+--------------------
+
+The IV register holds the interrupt vector base address. Interrupts 0x00..0x1f
+(0-31) are reserved for system use, whereas the IRQs 0x20..0x3f are for system
+devices. Of these, we have predefined the following.
+
+System Interrupts
+-----------------
+
+Name	Number	Brief					Error Code
+----	------	-----					----------
+DZ      0x00	divizion by zero       			PC
+OP      0x01	invalid opcode				PC
+PF      0x02	page-fault             			ADR + flags
+DF      0x03	double-fault (cannot handle interrupt)	PC
+TF      0x04	triple-fault (cannot handle DF)		PC
+TS      0x05	invalid task state     			ADR
+NP      0x06	segment not present    			ID
+SS      0x07	stack-segment full     			SP
+PE      0x08	protection error       			ADR
+FP      0x09	floating-point error   			PC
+OF      0x0a	overflow               			PC
+BR      0x0b	bound-range exceeded   			ADR
+AC      0x0c	alignment check        			ADR
+MF      0x0d	memory failure (ECC)   			ADR
+MC      0x0e	machine check          			ERROR
+IO      0x0f	I/O error              			ADR + flags
+DB      0x10	debug trap             			PC
+BP      0x11	breakpoint             			PC
+NMI     0x12	non-maskable interrupt
+UNUSED	0x13
+	....
+	0x1f
+
+Device Interrupt Requests (IRQs)
+--------------------------------
+
+Device	Number	Brief
+------	-----	-----
+TMR	0x00	Timer Interrupt
+AUD	0x01	Audio Device
+VID	0x02	Video Device
+KBD	0x03	Keyboard
+PTR	0x04	Pointer such as mouse
+HID	0x05	Other human-interface devices
+NET	0x06	Network interface
+DSK	0x07	Disk/Storage controller
+OPT	0x08	Optical Drives
+USB	0x09	Universal Serial Bus
