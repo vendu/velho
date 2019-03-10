@@ -1,16 +1,14 @@
 Valhalla Processor 0; V0
 ------------------------
 
-This directory contains an on-going implementation of the first version of my
+This directory contains an on-going design of the first version of my
 new Valhalla Processor Architecture.
 
 The reasons for doing this are mostly educational, and of course having fun
-designing and implementing all this.
+doing all this.
 
 V0 is designed to be friendly to the programmers and compiler implementors. The
-instruction set is relatively RISC-like with a few additions here and there;
-most notably, so far, CPL and related instructions to aid the programmers
-as well as compilers in doing function calls in easier ways.
+instruction set is relatively RISC-like with a few additions here and there.
 
 Here's some software I plan to do for the virtual machine (hopefully later to
 be implemented in hardware using FPGA-kits)
