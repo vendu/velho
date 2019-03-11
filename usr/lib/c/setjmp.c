@@ -72,7 +72,6 @@ longjmp(jmp_buf env, int val)
     for ( ; ; ) { ; };
 }
 
-#if 0
 ASMLINK NOINLINE
 int
 #if defined(__GNUC__)
@@ -95,8 +94,6 @@ _longjmp(jmp_buf env,
     /* NOTREACHED */
     for ( ; ; ) { ; };
 }
-
-#endif
 
 #if defined(_POSIX_C_SOURCE) || defined(_XOPEN_SOURCE)
 

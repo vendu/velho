@@ -16,9 +16,8 @@
 #define memhashbuf(hash)                ((void *)((hash)->buf           \
                                                   & MEM_BUF_ADR_MASK))
 #define memhashqid(hash)                ((hash)->buf & MEM_BUF_QUEUE_MASK)
-#define memsethashpage(adr, type, n)    ((uintptr_t)(adr) \
-                                         | ((type) << MEM_HASH_TYPE_SHIFT) \
-                                         | (n))
+#define memsethashpage(adr, type)       ((uintptr_t)(adr)               \
+                                         | ((type) << MEM_HASH_TYPE_SHIFT))
 #define memsethashbuf(buf, qid)         ((uintptr_t)(buf) | (qid))
 /*
  * illustrative little-endian bitfield
@@ -190,15 +189,15 @@ extern struct memglob            g_mem ALIGNED(PAGESIZE);
 #define membufclrpagebit(buf, num)                                      \
     ((buf)->info &= ~(1L << (MEM_BUF_QUEUE_BITS + (num))))
 struct membuf {
-    uint8_t                    *adr;    // address of first allocation
-    size_t                      size;   // mapped buffer size
-    size_t                      ofs;    // current stack offset
-    size_t                      max;    // available # of allocations
-    uintptr_t                   bits;   // allocation page- or run-bitmap
-    struct membufq             *queue;  // queue the buffer is on
-    struct membuf              *prev;   // previous magazine in queue
-    struct membuf              *next;   // next magazine in queue
-    uintptr_t                   tab[VLA];
+    int8_t             *adr;    // address of first allocation
+    size_t              size;   // mapped buffer size
+    size_t              ofs;    // current stack offset
+    size_t              max;    // available # of allocations
+    uintptr_t           bits;   // allocation page- or run-bitmap
+    struct membufq     *queue;  // queue the buffer is on
+    struct membuf      *prev;   // previous magazine in queue
+    struct membuf      *next;   // next magazine in queue
+    uintptr_t           tab[VLA];
 };
 
 struct membufq {
@@ -249,9 +248,6 @@ struct memconf {
 #define MEM_ALLOC_ON_NULL   (1 << 1)
 #define MEM_ERRNO_ON_RESIZE (1 << 2)
 
-void  * memgetblk(long qid, size_t align, struct memtls *tls);
-void  * memgetrun(long qid, size_t align, struct memtls *tls);
-void  * memgetbig(size_t size, size_t align);
 void  * memget(size_t size, size_t align);
 void    memput(void *ptr);
 void  * memresize(void *ptr, size_t size, size_t align, long flg);
@@ -294,7 +290,7 @@ memgetptr(void *ptr)
     long                type = memhashtype(&item);
     struct membuf      *buf = memhashbuf(&item);
     long                qid = memhashqid(&item);
-    uint8_t            *adr = ptr;
+    int8_t             *adr = ptr;
     long                ofs;
     long                bits;
     long                mask;
@@ -306,7 +302,7 @@ memgetptr(void *ptr)
             ofs = buf->max;
             num = memblknum(qid, buf, ptr);
             ofs += num;
-            adr = (uint8_t *)buf->tab[ofs];
+            adr = (int8_t *)buf->tab[ofs];
 
             break;
         case MEM_RUN:
@@ -314,7 +310,7 @@ memgetptr(void *ptr)
             num = memrunnum(qid, buf, ptr);
             bits = buf->bits;
             mask <<= num;
-            adr = (uint8_t *)buf->tab[num];
+            adr = (int8_t *)buf->tab[num];
             bits |= mask;
             buf->bits = bits;
 

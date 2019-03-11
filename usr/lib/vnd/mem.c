@@ -65,8 +65,9 @@ meminitruntab(struct memglob *mem)
 
 /* acquire buffer header */
 static struct membuf *
-memgetbuf(struct membufq *queue, long type)
+memgetbuf(long type)
 {
+    struct membufq               *queue = NULL;
     volatile struct membuf      **hdrq;
     long                          ntry = 32;
     size_t                        bufsz;
@@ -157,112 +158,6 @@ memputbuf(struct membuf *buf, long type)
     return;
 }
 
-/* allocate new block buffer */
-static struct membuf *
-memgetblkbuf(struct membufq *queue)
-{
-    long                qid = queue->qid;
-    struct membuf      *buf = memgetbuf(queue, MEM_BLK);
-    long                ntry = 32;
-    size_t              slabsz = memblkslabsize(qid);
-    size_t              blksz = memblksize(qid);
-    int8_t             *ptr;
-    uintptr_t          *tab;
-    long                nblk;
-    long                n;
-
-    if (!buf) {
-
-        return NULL;
-    }
-    do {
-        ptr = mapanon(-1, slabsz, 0);
-        if (ptr == MAP_FAILED) {
-            m_waitspin();
-        }
-    } while (ptr == MAP_FAILED && --ntry);
-    if (ptr == MAP_FAILED) {
-        memputbuf(buf, MEM_BLK);
-        buf = NULL;
-    } else {
-        /* initialise buffer */
-        nblk = memnblk(qid);
-        buf->adr = ptr;
-        buf->size = slabsz;
-        buf->queue = queue;
-        tab = buf->tab;
-        buf->max = nblk;
-        do {
-            /* initialise allocation stack */
-            n = min(8, nblk);
-            switch (n) {
-                case 8:
-                    tab[7] = (uintptr_t)(ptr + 7 * blksz);
-                case 7:
-                    tab[6] = (uintptr_t)(ptr + 6 * blksz);
-                case 6:
-                    tab[5] = (uintptr_t)(ptr + 5 * blksz);
-                case 5:
-                    tab[4] = (uintptr_t)(ptr + 4 * blksz);
-                case 4:
-                    tab[3] = (uintptr_t)(ptr + 3 * blksz);
-                case 3:
-                    tab[2] = (uintptr_t)(ptr + 2 * blksz);
-                case 2:
-                    tab[1] = (uintptr_t)(ptr + blksz);
-                case 1:
-                    tab[0] = (uintptr_t)ptr;
-                case 0:
-
-                    break;
-            }
-            nblk -= n;
-            ptr += 8 * blksz;
-            tab += 8;
-        } while (nblk);
-    }
-
-    return buf;
-}
-
-static struct membuf *
-memgetrunbuf(struct membufq *queue)
-{
-    long                qid = queue->qid;
-    struct membuf      *buf = memgetbuf(queue, MEM_RUN);
-    long                ntry = 32;
-    size_t              blksz = memrunsize(qid);
-    size_t              nrun = memnrun(qid);
-    size_t              slabsz = blksz * memnrun(qid);
-    long                bits;
-    void               *ptr;
-
-    if (!buf) {
-
-        return NULL;
-    }
-    do {
-        ptr = mapanon(-1, slabsz, 0);
-        if (ptr == MAP_FAILED) {
-            m_waitspin();
-        }
-    } while (ptr == MAP_FAILED && --ntry);
-    if (ptr == MAP_FAILED) {
-        memputbuf(buf, MEM_RUN);
-        buf = NULL;
-    } else {
-        /* initialise run buffer */
-        bits = 1L << nrun;              // shift by run count
-        buf->adr = ptr;                 // buffer base address
-        bits--;                         // free-bitmap for runs
-        buf->size = slabsz;             // buffer total size
-        buf->bits = bits;               // set free-bitmap
-        buf->max = nrun;                // set # of runs in buffer
-    }
-
-    return buf;
-}
-
 /* push buffer in front of queue */
 static void
 mempushbuf(struct membufq *queue, struct membuf *buf)
@@ -278,6 +173,22 @@ mempushbuf(struct membufq *queue, struct membuf *buf)
         queue->tail = buf;
     }
     queue->head = buf;
+
+    return;
+}
+
+static void
+mempopbuf(struct membufq *queue, struct membuf *buf)
+{
+    struct membuf       *next;
+    
+    next = buf->next;
+    if (next) {
+        next->prev = NULL;
+    } else {
+        queue->tail = NULL;
+    }
+    queue->head = next;
 
     return;
 }
@@ -323,6 +234,211 @@ memdequebuf(struct membufq *queue, struct membuf *buf)
     }
 
     return;
+}
+
+/* allocate new block buffer */
+static void *
+memgetblk(long qid, size_t align)
+{
+    int8_t             *ptr = NULL;
+    void               *ret = NULL;
+    struct membuf      *buf = t_memtls->blktab[qid].head;
+    long                ntry = 32;
+    size_t              slabsz;
+    size_t              blksz;
+    uintptr_t          *tab;
+    long                nblk;
+    long                n;
+    size_t              ofs;
+    size_t              lim;
+    TABHASH_ITEM_T      item;
+
+    if (!buf) {
+        mtlkfmtx(&g_mem.blktab[qid].mtx);
+        buf = g_mem.blktab[qid].head;
+        if (!buf) {
+            slabsz = memblkslabsize(qid);
+            mtunlkfmtx(&g_mem.blktab[qid].mtx);
+            buf = memgetbuf(MEM_BLK);
+            do {
+                ptr = mapanon(-1, slabsz, 0);
+                if (ptr == MAP_FAILED) {
+                    m_waitspin();
+                }
+            } while (ptr == MAP_FAILED && --ntry);
+            if (ptr == MAP_FAILED) {
+                memputbuf(buf, MEM_BLK);
+                buf = NULL;
+            } else {
+                /* initialise buffer */
+                nblk = memnblk(qid);
+                buf->adr = ptr;
+                buf->size = slabsz;
+                buf->queue = &t_memtls->blktab[qid];
+                tab = buf->tab;
+                buf->max = nblk;
+                /* initialise allocation stack */
+                n = nblk >> 3;
+                blksz = memblksize(qid);
+                nblk -= 8 * n;
+                while (n--) {
+                    tab[0] = (uintptr_t)ptr;
+                    tab[1] = (uintptr_t)ptr + blksz;
+                    tab[2] = (uintptr_t)ptr + 2 * blksz;
+                    tab[3] = (uintptr_t)ptr + 3 * blksz;
+                    tab[4] = (uintptr_t)ptr + 4 * blksz;
+                    tab[5] = (uintptr_t)ptr + 5 * blksz;
+                    tab[6] = (uintptr_t)ptr + 6 * blksz;
+                    tab[7] = (uintptr_t)ptr + 7 * blksz;
+                    ptr += 8 * blksz;
+                    tab += 8;
+                }
+                n = min(8, nblk);
+                switch (nblk) {
+                    case 8:
+                        tab[7] = (uintptr_t)ptr + 7 * blksz;
+                    case 7:
+                        tab[6] = (uintptr_t)ptr + 6 * blksz;
+                    case 6:
+                        tab[5] = (uintptr_t)ptr + 5 * blksz;
+                    case 5:
+                        tab[4] = (uintptr_t)ptr + 4 * blksz;
+                    case 4:
+                        tab[3] = (uintptr_t)ptr + 3 * blksz;
+                    case 3:
+                        tab[2] = (uintptr_t)ptr + 2 * blksz;
+                    case 2:
+                        tab[1] = (uintptr_t)ptr + blksz;
+                    case 1:
+                        tab[0] = (uintptr_t)ptr;
+                    case 0:
+                        
+                        break;
+                }
+                ptr = (int8_t *)buf->tab[0];
+                buf->ofs = 1;
+                mempushbuf(&t_memtls->blktab[qid], buf);
+            }
+        } else {
+            ofs = buf->ofs;
+            ptr = (int8_t *)buf->tab[ofs];
+            lim = buf->max;
+            ofs++;
+            buf->ofs = ofs;
+            if (ofs == buf->max) {
+                mempopbuf(&g_mem.blktab[qid], buf);
+            }
+            mtunlkfmtx(&g_mem.blktab[qid].mtx);
+        }
+    } else {
+        ofs = buf->ofs;
+        ptr = (int8_t *)buf->tab[ofs];
+        lim = buf->max;
+        ofs++;
+        buf->ofs = ofs;
+        if (ofs == buf->max) {
+            mempopbuf(&t_memtls->blktab[qid], buf);
+        }
+    }
+    if (ptr) {
+        ofs = buf->max;
+        ret = memalignptr(ptr, align);
+        ofs += memblknum(qid, buf, ret);
+        buf->tab[ofs] = (uintptr_t)ptr;
+        item.page = memsethashpage(mempageadr(ret), MEM_BLK);
+        item.buf = memsethashbuf(buf, qid);
+        tabhashadd(g_memhashtab, &item);
+    }
+
+    return ret;
+}
+
+static void *
+memgetrun(long qid, size_t align)
+{
+    int8_t             *ptr = NULL;
+    void               *ret;
+    struct membuf      *buf = t_memtls->runtab[qid].head;
+    long                ntry = 32;
+    size_t              nrun;
+    size_t              slabsz;
+    struct membuf      *next;
+    long                bits;
+    long                mask;
+    long                ofs;
+    TABHASH_ITEM_T      item;
+
+    if (!buf) {
+        mtlkfmtx(&g_mem.runtab[qid].mtx);
+        buf = g_mem.blktab[qid].head;
+        if (!buf) {
+            slabsz = memrunslabsize(qid);
+            nrun = memnrun(qid);
+            do {
+                ptr = mapanon(-1, slabsz, 0);
+                if (ptr == MAP_FAILED) {
+                    m_waitspin();
+                }
+            } while (ptr == MAP_FAILED && --ntry);
+            bits = 1L << nrun;
+            if (ptr == MAP_FAILED) {
+                memputbuf(buf, MEM_RUN);
+                buf = NULL;
+            } else {
+                /* initialise run buffer */
+                bits--;
+                buf->adr = ptr;                 // buffer base address
+                buf->size = slabsz;             // buffer total size
+                buf->bits = bits;               // set free-bitmap
+                buf->max = nrun;                // set # of runs in buffer
+                mempushbuf(&t_memtls->runtab[qid], buf);
+            }
+        } else {
+            bits = buf->bits;
+            ofs = m_ctz(bits);
+            mask = 1L << ofs;
+            ofs <<= PAGESIZELOG2;
+            mask = ~mask;
+            ofs *= qid;
+            bits &= mask;
+            ptr = buf->adr + ofs;
+            buf->bits = bits;
+            if (!bits) {
+                mempopbuf(&g_mem.runtab[qid], buf);
+            }
+            mtunlkfmtx(&g_mem.runtab[qid].mtx);
+        }
+    } else {
+        bits = buf->bits;
+        ofs = m_ctz(bits);
+        mask = 1L << ofs;
+        ofs <<= PAGESIZELOG2;
+        mask = ~mask;
+        ofs *= qid;
+        bits &= mask;
+        ptr = buf->adr + ofs;
+        buf->bits = bits;
+        if (!bits) {
+            mempopbuf(&t_memtls->runtab[qid], buf);
+            next = t_memtls->runtab[qid].head;
+            if (next) {
+                next->prev = NULL;
+            } else {
+              t_memtls->runtab[qid].tail = NULL;
+            }
+            t_memtls->runtab[qid].head = next;
+        }
+    }
+    if (ptr) {
+        ret = memalignptr(ptr, align);
+        ofs = memrunnum(qid, buf, ret);
+        buf->tab[ofs] = (uintptr_t)ptr;
+        item.page = memsethashpage(mempageadr(ret), MEM_RUN);
+        item.buf = memsethashbuf(buf, qid);
+        tabhashadd(g_memhashtab, &item);
+    }
+    
+    return ptr;
 }
 
 /* release allocation block */
@@ -372,134 +488,6 @@ memputblk(struct membuf *buf, void *ptr)
     }
 
     return;
-}
-
-/* acquire allocation block */
-void *
-memgetblk(long qid, size_t align, struct memtls *tls)
-{
-
-    struct membufq     *queue = ((tls)
-                                 ? &tls->blktab[qid]
-                                 : &g_mem.blktab[qid]);
-    void               *ptr = NULL;
-    void               *ret = NULL;
-    long                lim;
-    long                ndx;
-    long                ofs;
-    struct membuf      *buf;
-    long                bits;
-    long                pgbit;
-    long                alloc;
-    uintptr_t           num;
-    TABHASH_ITEM_T      item;
-
-    alloc = 0;
-    if (!tls) {
-        mtlkfmtx(&queue->mtx);
-    }
-    buf = queue->head;
-    if (!buf) {
-        /* allocate new buffer */
-        buf = memgetblkbuf(queue);
-        alloc = 1;
-    }
-    ndx = buf->ofs;                     // top of allocation stack
-    lim = buf->max;                     // # of blocks in buffer
-    ofs = ndx;
-    bits = buf->bits;                   // allocation page-bitmap
-    ofs += lim;                         // offset of book-keeping word
-    ptr = (void *)buf->tab[ndx];        // allocation pointer
-    ret = memalignptr(ptr, align);      // align allocation address
-    pgbit = 1L << ndx;                  // page-bit
-    buf->tab[ofs] = (uintptr_t)ptr;     // store unaligned allocation address
-    ndx++;                              // adjust allocation stack top
-    if (!(bits & pgbit)) {
-        /* no record for the allocation page, hash one */
-        item.page = memsethashpage(mempageadr(ret), MEM_BLK, 0);
-        item.buf = memsethashbuf(buf, qid);
-        bits |= pgbit;
-        tabhashadd(g_memhashtab, &item);
-        buf->bits = bits;
-    }
-    buf->ofs = ndx;
-    if (ndx == lim) {
-        /* fully-allocated buffer, dequeue */
-        memdequebuf(queue, buf);
-    } else if (alloc) {
-        /* first allocation from buffer, queue in front */
-        mempushbuf(queue, buf);
-    }
-    if (!tls) {
-        mtunlkfmtx(&queue->mtx);
-    }
-
-    return ret;
-}
-
-/* acquire allocation run */
-void *
-memgetrun(long qid, size_t align, struct memtls *tls)
-{
-    struct membufq     *queue = ((tls)
-                                 ? &tls->blktab[qid]
-                                 : &g_mem.blktab[qid]);
-    void               *ptr = NULL;
-    long                ntry = 32;
-    long                nrun;
-    long                ndx;
-    long                bits;
-    long                mask;
-    struct membuf      *buf;
-    struct membuf      *head;
-    long                alloc;
-    TABHASH_ITEM_T      item;
-
-    alloc = 0;
-    if (!tls) {
-        mtmtxlk(&queue->mtx);
-    }
-    buf = queue->head;
-    if (buf) {
-        do {
-            bits = buf->bits;
-            if (!bits) {
-                m_waitspin();
-            }
-        } while (!bits && --ntry);
-    } else {
-        buf = memgetrunbuf(queue);
-        alloc = 1;
-        bits = buf->bits;
-    }
-    nrun = buf->max;
-    if (bits) {
-        ndx = m_ctz(bits);
-        mask = 1L << ndx;
-        ndx <<= PAGESIZELOG2;
-        ptr = buf->adr + qid * ndx;
-        mask = ~mask;
-        bits &= mask;
-        buf->bits = bits;
-    }
-    head = queue->head;
-    if (!bits) {
-        if (head) {
-            head->prev = NULL;
-        }
-        queue->head = buf->next;
-    } else if (alloc) {
-        mempushbuf(queue, buf);
-    }
-    if (!tls) {
-        mtunlkfmtx(&queue->mtx);
-    }
-    if (ptr) {
-        item.page = memsethashpage(mempageadr(ptr), MEM_RUN, 0);
-        item.buf = memsethashbuf(buf, qid);
-    }
-
-    return ptr;
 }
 
 /* release allocation run */
@@ -561,7 +549,7 @@ memputrun(struct membuf *buf, void *adr)
 void *
 memmapbig(size_t size, size_t align)
 {
-    struct membuf      *buf = memgetbuf(NULL, MEM_BIG);
+    struct membuf      *buf = memgetbuf(MEM_BIG);
     size_t              mapsz = roundup2(size, PAGESIZE);
     void               *ptr;
     void               *ret;
@@ -578,7 +566,7 @@ memmapbig(size_t size, size_t align)
         ptr = NULL;
     } else {
         ret = memalignptr(ptr, align);
-        item.page = mempageadr(ret);
+        item.page = memsethashpage(mempageadr(ret), MEM_BIG);
         item.buf = memsethashbuf(buf, 0);
         tabhashadd(g_memhashtab, &item);
     }
@@ -611,23 +599,18 @@ memget(size_t size, size_t align)
         case MEM_BLK:
             blksz = roundup2(alnsz, MEM_BLK_MIN);
             qid = memblkqid(blksz);
-            ptr = memgetblk(qid, aln, t_memtls);
+            ptr = memgetblk(qid, aln);
 
             break;
         case MEM_RUN:
             blksz = roundup2(alnsz, PAGESIZE);
             qid = memrunqid(blksz);
-            ptr = memgetrun(qid, aln, t_memtls);
+            ptr = memgetrun(qid, aln);
 
             break;
         case MEM_BIG:
             blksz = roundup2(alnsz, PAGESIZE);
-            qid = membigqid(blksz);
-            if (qid >= MEM_BIG_QUEUES) {
-                ptr = memmapbig(blksz, aln);
-            } else {
-                ptr = memgetbig(qid, aln);
-            }
+            ptr = memmapbig(blksz, aln);
 
             break;
     }
@@ -639,10 +622,16 @@ void *
 memresize(void *ptr, size_t size, size_t align, long flg)
 {
     size_t      alnsz = (align) ? memalnsize(size, align) : size;
-    void       *adr = memmaxsize(ptr) >= alnsz ? ptr : NULL;
+//    void       *adr = memmaxsize(ptr) >= alnsz ? ptr : NULL;
+    void       *adr = memget(size, align);
     size_t      cpysz = 0;
     void       *ret = NULL;
 
+    if (!adr) {
+
+        return NULL;
+    }
+#if 0
     if (!ptr && (flg & MEM_ALLOC_ON_NULL)) {
         adr = memget(size, align);
     } else if (!adr) {
@@ -650,6 +639,7 @@ memresize(void *ptr, size_t size, size_t align, long flg)
     } else {
         adr = ptr;
     }
+#endif
     if (adr) {
         if (!align) {
             ret = adr;
