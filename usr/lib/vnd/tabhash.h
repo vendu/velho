@@ -7,6 +7,7 @@
 #include <mt/lk.h>
 #include <zero/trix.h>
 #include <vnd/unix.h>
+#include <vnd/hash.h>
 
 extern TABHASH_TAB_T   *TABHASH_BUF;
 

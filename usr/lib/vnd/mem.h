@@ -7,14 +7,58 @@
 #include <mach/types.h>
 #include <mt/mtx.h>
 #include <zero/trix.h>
-#include <vnd/hash.h>
-
-#define MEM_ZERO_BIT            (1 << 0)
-
-#define MEM_ALIGN_MIN           CLSIZE
+//#include <vnd/unix.h>
 
 #define MEM_LK_BIT_OFS          0
-#define MEM_LK_BIT              ((m_atomic_t)1L << 0)
+#define MEM_LK_BIT              ((m_atomic_t)1L << MEM_LK_BIT_OFS)
+
+#define memhashtype(hash)               ((hash)->buf & MEM_TYPE_MASK)
+#define memhashbuf(hash)                ((void *)((hash)->buf           \
+                                                  & MEM_BUF_ADR_MASK))
+#define memhashqid(hash)                ((hash)->buf & MEM_BUF_QUEUE_MASK)
+#define memsethashpage(adr, type, n)    ((uintptr_t)(adr) \
+                                         | ((type) << MEM_HASH_TYPE_SHIFT) \
+                                         | (n))
+#define memsethashbuf(buf, qid)         ((uintptr_t)(buf) | (qid))
+/*
+ * illustrative little-endian bitfield
+ * -----------------------------------
+ * struct memhash {
+ *     unsigned nref    : MEM_HASH_NREF_BITS;
+ *     unsigned page    : PTRBITS - MEM_HASH_NREF_BITS;
+ *     unsigned qid     : MEM_BUF_QUEUE_BITS;
+ *     unsigned buf     : PTRBITS;
+ * };
+ */
+
+struct memhash {
+    uintptr_t   page;           // block page address + reference count
+    uintptr_t   buf;            // queue ID + allocation buffer address + flags
+};
+
+#define TABHASH_SLOTS           16384
+#define TABHASH_INVALID         { 0, 0 }
+#define TABHASH_BUF             g_memhashbuf
+#define TABHASH_TAB_T           struct tabhashtab
+#define TABHASH_ITEM_T          struct memhash
+#define TABHASH_ITEM_WORDS      2
+#define TABHASH_HDR_WORDS       4
+#define TABHASH_ITEM_WORDS      2
+#define TABHASH_TAB_ITEMS       ((64 - TABHASH_HDR_WORDS) / TABHASH_ITEM_WORDS)
+#define TABHASH_KEY(item)       ((item)->page)
+#if (WORDSIZE == 8)
+#define TABHASH_HASH(key)       tmhash64(key)
+#define TABHASH_HASH_ITEM(item) TABHASH_HASH((item)->page)
+#else
+#define TABHASH_HASH_ITEM(item) tmhash32((item)->page)
+#endif
+#define TABHASH_CMP(item, key)  ((item)->page == key)
+#include <vnd/tabhash.h>
+
+extern struct tabhashtab        *g_memhashtab[TABHASH_SLOTS];
+extern struct memglob            g_mem ALIGNED(PAGESIZE);
+
+#define MEM_ALIGN_MIN           CLSIZE
 
 #if defined(__GNUC__) || defined(__clang__)
 #define PTRALIGNED(ptr, aln)    __builtin_assume_aligned(ptr, aln)
@@ -123,32 +167,9 @@
 #define MEM_BUF_QUEUE_BITS              8
 #define MEM_BUF_TLS_SHIFT               MEM_QUEUE_BITS
 #define MEM_BUF_TLS_BIT                 ((uintptr_t)1 << MEM_BUF_TLS_SHIFT)
-#define memhashtype(hash)               ((hash)->buf & MEM_TYPE_MASK)
-#define memhashbuf(hash)                ((void *)((hash)->buf           \
-                                                  & MEM_BUF_ADR_MASK))
-#define memhashqid(hash)                ((hash)->buf & MEM_BUF_QUEUE_MASK)
-#define memsethashpage(adr, type, n)    ((uintptr_t)(adr) \
-                                         | ((type) << MEM_HASH_TYPE_SHIFT) \
-                                         | (n))
-#define memsethashbuf(buf, qid)         ((uintptr_t)(buf) | (qid))
-/*
- * illustrative little-endian bitfield
- * -----------------------------------
- * struct memhash {
- *     unsigned nref    : MEM_HASH_NREF_BITS;
- *     unsigned page    : PTRBITS - MEM_HASH_NREF_BITS;
- *     unsigned qid     : MEM_BUF_QUEUE_BITS;
- *     unsigned buf     : PTRBITS;
- * };
- */
 
-struct memhash {
-    uintptr_t   page;           // block page address + reference count
-    uintptr_t   buf;            // queue ID + allocation buffer address + flags
-};
-
- #define MEM_CACHE_BLK_BUFS      16
- #define MEM_CACHE_BUFS          32
+#define MEM_CACHE_BLK_BUFS      16
+#define MEM_CACHE_BUFS          32
  /* must be power of two size/alignment at least a page */
 #define membufsize()            PAGESIZE
 #define memblkbufsize()                                                 \
@@ -236,11 +257,6 @@ void    memput(void *ptr);
 void  * memresize(void *ptr, size_t size, size_t align, long flg);
 void    memrel(void *adr);
 
-#include <vnd/bits/mem.h>
-
-extern struct tabhashtab        *g_memhashtab[TABHASH_SLOTS];
-extern struct memglob            g_mem ALIGNED(PAGESIZE);
-
 static __inline__ size_t
 memalnsize(size_t size, size_t align)
 {
@@ -315,6 +331,8 @@ memgetptr(void *ptr)
 
     return adr;
 }
+
+#include <vnd/bits/mem.h>
 
 #endif /* __VND_MEM_H__ */
 

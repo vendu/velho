@@ -1,14 +1,19 @@
 #ifndef __MT_MTX_H__
 #define __MT_MTX_H__
 
-#define MTMTX     1
+#define MTPTHREAD       1
+
+#define MTMTX           1
 #if !defined(MTFMTX)
-#define MTFMTX    1
+#define MTFMTX          1
 #endif
 
 //#include <mt/conf.h>
 #include <stddef.h>
 #include <stdint.h>
+#if defined(MTPTHREAD)
+#include <pthread.h>
+#endif
 #include <zero/cdefs.h>
 #include <mach/param.h>
 #include <mach/asm.h>

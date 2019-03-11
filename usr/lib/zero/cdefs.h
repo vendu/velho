@@ -18,6 +18,12 @@
 #endif /* __STDC_VERSION__ */
 
 #if defined(__GNUC__) || defined(__clang__)
+#if (defined(__i386__) || defined(__i486__)                             \
+     || defined(__i586__) || defined(__i686__))
+#define ASMLINK         regparm(0)
+#else
+#define ASMLINK
+#endif
 #if !defined(ALIGNED)
 #define ALIGNED(a)      __attribute__ ((__aligned__(a)))
 #endif

@@ -1,27 +1,10 @@
 #ifndef __VND_BITS_MEM_H__
 #define __VND_BITS_MEM_H__
 
-#define TABHASH_SLOTS           16384
-#define TABHASH_INVALID         { 0, 0 }
-#define TABHASH_BUF             g_memhashbuf
-#define TABHASH_TAB_T           struct tabhashtab
-#define TABHASH_ITEM_T          struct memhash
-#define TABHASH_ITEM_WORDS      2
-#define TABHASH_HDR_WORDS       4
-#define TABHASH_ITEM_WORDS      2
-#define TABHASH_TAB_ITEMS       ((64 - TABHASH_HDR_WORDS) / TABHASH_ITEM_WORDS)
-#define TABHASH_KEY(item)       ((item)->page)
-#if (WORDSIZE == 8)
-#define TABHASH_HASH(key)       tmhash64(key)
-#define TABHASH_HASH_ITEM(item) TABHASH_HASH((item)->page)
-#else
-#define TABHASH_HASH_ITEM(item) tmhash32((item)->page)
-#endif
-#define TABHASH_CMP(item, key)  ((item)->page == key)
 #include <mach/param.h>
+#include <vnd/unix.h>
 #include <vnd/hash.h>
 #include <vnd/tabhash.h>
-#include <vnd/unix.h>
 
 extern struct memglob   g_mem ALIGNED(PAGESIZE);
 
