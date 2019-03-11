@@ -29,9 +29,9 @@
 #define MEM_RUN                 1
 #define MEM_BIG                 2
 #define MEM_TYPE_MASK           0x03
-#define MEM_BLK_BIG_SLAB        (16 * PAGESIZE)
-#define MEM_BLK_MID_SLAB        (8 * PAGESIZE)
-#define MEM_BLK_MIN_SLAB        (4 * PAGESIZE)
+#define MEM_BLK_BIG_SLAB        (16L * PAGESIZE)
+#define MEM_BLK_MID_SLAB        (8L * PAGESIZE)
+#define MEM_BLK_MIN_SLAB        (4L * PAGESIZE)
 #define MEM_BLK_UNIT            CLSIZE
 #define MEM_BLK_MIN     	MEM_BLK_UNIT
 #define MEM_BLK_MAX     	PAGESIZE
@@ -42,10 +42,13 @@
 #define MEM_BLK_BIG_QUEUE_MIN   (MEM_BLK_QUEUES >> 1)
 #define MEM_BLK_MAX_BLOCKS      max(MEM_BLK_MIN_SLAB / MEM_BLK_MIN,     \
                                     max(MEM_BLK_MID_SLAB / MEM_BLK_MID, \
-                                        MEM_BLK_SLAB / MEM_BLK_BIG))
-#define MEM_RUN_BIG_SLAB         (2 * MEM_RUN_QUEUES * PAGESIZE)
-#define MEM_RUN_MID_SLAB         (MEM_RUN_QUEUES * PAGESIZE)
-#define MEM_RUN_MIN_SLAB         (MEM_RUN_QUEUES * PAGESIZE >> 1)
+                                        MEM_BLK_BIG_SLAB / MEM_BLK_BIG))
+#define MEM_RUN_BIG_SLAB        (2 * MEM_RUN_QUEUES * PAGESIZE)
+#define MEM_RUN_MID_SLAB        (MEM_RUN_QUEUES * PAGESIZE)
+#define MEM_RUN_MIN_SLAB        (MEM_RUN_QUEUES * PAGESIZE >> 1)
+#define MEM_RUN_UNIT            PAGESIZE
+#define MEM_RUN_MIN             MEM_RUN_UNIT
+#define MEM_RUN_MAX             (MEM_RUN_QUEUES * MEM_RUN_UNIT)
 /* fixed for run allocation bitmap of a single long */
 #define MEM_RUN_QUEUES          MEM_BUF_MAP_BITS
 #define MEM_RUN_MID_QUEUE_MIN   (MEM_RUN_QUEUES >> 2)
@@ -62,16 +65,16 @@
 #define membuftype(sz)                                                  \
     (((sz) <= MEM_BLK_MAX)                                              \
      ? MEM_BLK                                                          \
-     (((sz) <= MEM_RUN_MAX)                                             \
-      ? MEM_RUN                                                         \
-      : MEM_BIG))
+     : (((sz) <= MEM_RUN_MAX)                                           \
+        ? MEM_RUN                                                       \
+        : MEM_BIG))
 #define memblkqid(sz)           (((sz) + MEM_BLK_MIN - 1) >> CLSIZELOG2)
-#define memblksize(qid)         (CLSIZE << (qid))
+#define memblksize(qid)         (CLSIZE * (qid))
 #define memrunqid(sz)           (((sz) + PAGESIZE - 1) >> PAGESIZELOG2)
-#define memrunsize(qid)         (PAGESIZE << (qid))
+#define memrunsize(qid)         (PAGESIZE * (qid))
 #define membigqid(sz)           (((sz) + MEM_BIG_UNIT - 1)              \
                                  >> (PAGESIZELOG2 + MEM_BIG_SHIFT))
-#define membigsize(qid)         (MEM_BIG_UNIT << (qid))
+#define membigsize(qid)         (MEM_BIG_UNIT * (qid))
 #define memnblk(qid)            (g_mem.nblktab[(qid)])
 #define memblknum(qid, buf, ptr)                                        \
     ((long)(((uintptr_t)(ptr) - (uintptr_t)((buf)->adr))                \
@@ -81,9 +84,9 @@
     ((long)(((uintptr_t)(ptr) - (uintptr_t)((buf)->adr))                \
             * g_mem.rundivtab[(qid)]))
 #define memnblktlsbuf(qid)                                              \
-    (((qid) <= MEM_BLK_SMALL_MAX)                                       \
+    (((qid) <= MEM_BLK_MID_QUEUE_MIN)                                   \
      ? 4                                                                \
-     : (((qid) <= MEM_BLK_BIG_MIN)                                      \
+     : (((qid) <= MEM_BLK_BIG_QUEUE_MIN)                                \
         ? 2                                                             \
         : 1))
 #define memnblkbuf(qid)                                                 \
@@ -114,7 +117,7 @@
 #define MEM_HASH_TYPE_BIG               (MEM_BIG << MEM_HASH_TYPE_SHIFT)
 #define MEM_HASH_PAGE_MASK              (PAGESIZE - 1)
 /* buf-member */
-#define MEM_BUF_ADR_MASK                (~MEM_HASH_QUEUE_MASK)
+#define MEM_BUF_ADR_MASK                (~MEM_BUF_QUEUE_MASK)
 #define MEM_BUF_QUEUE_MASK              (((uintptr_t)1 << MEM_BUF_QUEUE_BITS) \
                                          - 1)
 #define MEM_BUF_QUEUE_BITS              8
@@ -122,8 +125,8 @@
 #define MEM_BUF_TLS_BIT                 ((uintptr_t)1 << MEM_BUF_TLS_SHIFT)
 #define memhashtype(hash)               ((hash)->buf & MEM_TYPE_MASK)
 #define memhashbuf(hash)                ((void *)((hash)->buf           \
-                                                  & MEM_HASH_ADR_MASK))
-#define memhashqid(hash)                ((hash)->buf & MEM_HASH_QUEUE_MASK)
+                                                  & MEM_BUF_ADR_MASK))
+#define memhashqid(hash)                ((hash)->buf & MEM_BUF_QUEUE_MASK)
 #define memsethashpage(adr, type, n)    ((uintptr_t)(adr) \
                                          | ((type) << MEM_HASH_TYPE_SHIFT) \
                                          | (n))
@@ -137,10 +140,12 @@
  *     unsigned qid     : MEM_BUF_QUEUE_BITS;
  *     unsigned buf     : PTRBITS;
  * };
- struct memhash {
- uintptr_t   page;           // block page address + reference count
- uintptr_t   buf;            // queue ID + allocation buffer address + flags
- };
+ */
+
+struct memhash {
+    uintptr_t   page;           // block page address + reference count
+    uintptr_t   buf;            // queue ID + allocation buffer address + flags
+};
 
  #define MEM_CACHE_BLK_BUFS      16
  #define MEM_CACHE_BUFS          32
@@ -154,8 +159,6 @@
 
 /* buf-word bits */
 #define MEM_BUF_QUEUE_BITS      8
-#define MEM_BUF_TLS_SHIFT       MEM_BUF_QUEUE_BITS
-#define MEM_BUF_TLS_BIT         ((uintptr_1)1 << MEM_BUF_QUEUE_BITS)
 #define MEM_BUF_MAP_BITS        (CHAR_BIT * sizeof(uintptr_t))
 #define membufpagenum(buf, ptr)                                         \
     (((uintptr_t)(ptr) - (uintptr_t)(buf)->adr) >> PAGESIZELOG2)
@@ -225,10 +228,11 @@ struct memconf {
 #define MEM_ALLOC_ON_NULL   (1 << 1)
 #define MEM_ERRNO_ON_RESIZE (1 << 2)
 
-void  * memgetblk(struct membufq *queue, size_t align);
-void  * memgetrun(struct membufq *queue, size_t align);
+void  * memgetblk(long qid, size_t align, struct memtls *tls);
+void  * memgetrun(long qid, size_t align, struct memtls *tls);
 void  * memgetbig(size_t size, size_t align);
 void  * memget(size_t size, size_t align);
+void    memput(void *ptr);
 void  * memresize(void *ptr, size_t size, size_t align, long flg);
 void    memrel(void *adr);
 

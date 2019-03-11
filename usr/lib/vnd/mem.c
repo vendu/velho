@@ -7,13 +7,14 @@
 struct tabhashtab              *g_memhashtab[TABHASH_SLOTS];
 struct memglob                  g_mem ALIGNED(PAGESIZE);
 THREADLOCAL struct memtls      *t_memtls;
+struct tabhashtab              *g_memhashbuf;
 
 #define memblkslabsize(qid)                                             \
     (((qid) <= MEM_BLK_MID_QUEUE_MIN)                                   \
-     ? (MEM_BLK_SLAB >> 2)                                              \
+     ? (MEM_BLK_MIN_SLAB >> 2)                                          \
      : (((qid) <= MEM_BLK_BIG_QUEUE_MIN)                                \
-        ? (MEM_BLK_SLAB >> 1)                                           \
-        : MEM_BLK_SLAB))
+        ? (MEM_BLK_MID_SLAB >> 1)                                       \
+        : MEM_BLK_BIG_SLAB))
 static void
 meminitblktabs(struct memglob *mem)
 {
@@ -163,7 +164,7 @@ memgetblkbuf(struct membufq *queue)
     long                qid = queue->qid;
     struct membuf      *buf = memgetbuf(queue, MEM_BLK);
     long                ntry = 32;
-    size_t              slabsz = MEM_BLK_SLAB;
+    size_t              slabsz = memblkslabsize(qid);
     size_t              blksz = memblksize(qid);
     int8_t             *ptr;
     uintptr_t          *tab;
@@ -393,7 +394,6 @@ memgetblk(long qid, size_t align, struct memtls *tls)
     uintptr_t           num;
     TABHASH_ITEM_T      item;
 
-    lock = 0;
     alloc = 0;
     if (!tls) {
         mtlkfmtx(&queue->mtx);
@@ -416,7 +416,7 @@ memgetblk(long qid, size_t align, struct memtls *tls)
     ndx++;                              // adjust allocation stack top
     if (!(bits & pgbit)) {
         /* no record for the allocation page, hash one */
-        item.page = memsethashpage(mempageadr(ret), 0);
+        item.page = memsethashpage(mempageadr(ret), MEM_BLK, 0);
         item.buf = memsethashbuf(buf, qid);
         bits |= pgbit;
         tabhashadd(g_memhashtab, &item);
@@ -495,7 +495,7 @@ memgetrun(long qid, size_t align, struct memtls *tls)
         mtunlkfmtx(&queue->mtx);
     }
     if (ptr) {
-        item.page = memsethashpage(mempageadr(ptr), type, 0);
+        item.page = memsethashpage(mempageadr(ptr), MEM_RUN, 0);
         item.buf = memsethashbuf(buf, qid);
     }
 
@@ -537,10 +537,10 @@ memputrun(struct membuf *buf, void *adr)
                 memfreebuf(buf);
             } else {
                 glob = &g_mem.runtab[qid];
-                nrun = glob->max;
+                nrun = glob->nbuf;
                 nbuf = glob->nbuf;
                 mask = (uintptr_t)1 << nrun;
-                lim = glob->max;
+                lim = memnrunbuf(qid);
                 mask--;
                 if (bits == mask && nbuf > lim) {
                     memfreebuf(buf);
@@ -611,13 +611,13 @@ memget(size_t size, size_t align)
         case MEM_BLK:
             blksz = roundup2(alnsz, MEM_BLK_MIN);
             qid = memblkqid(blksz);
-            ptr = memgetblk(qid, aln, tls);
+            ptr = memgetblk(qid, aln, t_memtls);
 
             break;
         case MEM_RUN:
             blksz = roundup2(alnsz, PAGESIZE);
             qid = memrunqid(blksz);
-            ptr = memgetrun(qid, aln, tls);
+            ptr = memgetrun(qid, aln, t_memtls);
 
             break;
         case MEM_BIG:

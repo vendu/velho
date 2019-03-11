@@ -3,7 +3,12 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <mach/param.h>
 #include <mt/lk.h>
+#include <zero/trix.h>
+#include <vnd/unix.h>
+
+extern TABHASH_TAB_T   *TABHASH_BUF;
 
 #define tabhashfind(hash, key)  tabhashget(hash, key, 0)
 #define tabhashrm(hash, key)    tabhashget(hash, key, 1)
@@ -19,6 +24,10 @@
 #define TABHASH_CLEAR(ptr)      memset(ptr, 0, sizeof(TABHASH_ITEM_T))
 #endif
 
+struct tabhashtab;
+#define TABHASH_TAB_SIZE        (roundup2(sizeof(struct tabhashtab), CLSIZE))
+#define TABHASH_BUF_SIZE        (2 * PAGESIZE)
+#define TABHASH_CACHE_TABS      (TABHASH_BUF_SIZE / TABHASH_TAB_SIZE)
 struct tabhashtab {
     long                ncur;
     long                nmax;
@@ -26,6 +35,51 @@ struct tabhashtab {
     TABHASH_TAB_T      *next;
     TABHASH_ITEM_T      items[TABHASH_TAB_ITEMS];
 };
+
+static __inline__ TABHASH_TAB_T *
+tabhashgettab(void)
+{
+    TABHASH_TAB_T      *head = NULL;
+    TABHASH_TAB_T      *tab;
+    long                ntab;
+
+    mtlkbit((m_atomic_t *)&TABHASH_BUF, MEM_LK_BIT_OFS);
+    tab = TABHASH_BUF;
+    tab = (void *)((uintptr_t)tab & ~MEM_LK_BIT);
+    if (!tab) {
+        uint8_t        *ptr = mapanon(-1, TABHASH_BUF_SIZE, 0);
+        TABHASH_TAB_T  *cur;
+        TABHASH_TAB_T  *prev;
+        
+        if (ptr == MAP_FAILED) {
+            ptr = NULL;
+            mtunlkbit((m_atomic_t *)&TABHASH_BUF, MEM_LK_BIT_OFS);
+        } else {
+            tab = (TABHASH_TAB_T *)ptr;
+            ntab = TABHASH_CACHE_TABS - 1;
+            head = (TABHASH_TAB_T *)(ptr + TABHASH_TAB_SIZE);
+            prev = head;
+            while (--ntab) {
+                ptr += TABHASH_TAB_SIZE;
+                cur = (TABHASH_TAB_T *)ptr;
+                prev->next = cur;
+                cur->prev = prev;
+                prev = cur;
+            }
+            prev->next = NULL;
+        }
+    } else {
+        head = tab->next;
+    }
+    m_atomwrite(&TABHASH_BUF, head);
+    if (tab) {
+        tab->nmax = TABHASH_TAB_ITEMS;
+        ntab = TABHASH_TAB_ITEMS;
+        memset(&tab->items, 0, sizeof(tab->items));
+    }
+
+    return tab;
+}
 
 static __inline__ long
 tabhashadd(TABHASH_TAB_T **hashtab, TABHASH_ITEM_T *item)

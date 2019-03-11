@@ -137,7 +137,7 @@ mtlkrecfmtx(volatile m_atomic_t *lp)
  * - must use full memory barrier to guarantee proper write-ordering
  */
 static INLINE void
-mtunlkfmtx(volatile m_atomic_t *lp)
+mtunlkrecfmtx(volatile m_atomic_t *lp)
 {
     m_membar();         // full memory barrier
     *lp = MTMTXINITVAL;  // lazy-write

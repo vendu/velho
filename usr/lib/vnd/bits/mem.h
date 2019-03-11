@@ -3,6 +3,7 @@
 
 #define TABHASH_SLOTS           16384
 #define TABHASH_INVALID         { 0, 0 }
+#define TABHASH_BUF             g_memhashbuf
 #define TABHASH_TAB_T           struct tabhashtab
 #define TABHASH_ITEM_T          struct memhash
 #define TABHASH_ITEM_WORDS      2
