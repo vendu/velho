@@ -31,243 +31,118 @@ const unsigned char    *collnametab[STRING_LANGS]
 
 #endif /* __GLIBC__ */
 
-#if 0
 /* TESTED OK */
 void *
 memcpy(void *dest,
        const void *src,
-       size_t n)
+       size_t nb)
 {
-    long       *lptr1;
-    long       *lptr2;
-    int8_t     *i8ptr1;
-    int8_t     *i8ptr2;
-    size_t       cnt;
+    long       *lsrc;
+    long       *ldest;
+    int8_t     *bsrc;
+    int8_t     *bdest;
+    size_t       n;
     size_t       nleft;
-    size_t       val;
 
     if (!n) {
 
         return dest;
     }
-    nleft = n;
-    u8ptr1 = (void *)src;
-    u8ptr2 = dest;
-    val = sizeof(long);
-    if (nleft > (val << 3)
-        && (((uintptr_t)u8ptr1 & (val - 1))
-            == ((uintptr_t)u8ptr2 & (val - 1)))) {
-        cnt = (uintptr_t)u8ptr1 & (val - 1);
-        if (cnt) {
-            cnt = val - cnt;
-            nleft -= cnt;
-            while (cnt--) {
-                *i8ptr2++ = *i8ptr1++;
+    bsrc = (void *)src;
+    n = (uintptr_t)n & (sizeof(long) - 1);
+    bdest = dest;
+    if (nleft > (8 * sizeof(long))
+        && (n == ((uintptr_t)bdest & (sizeof(long) - 1)))) {
+        /*
+         * try fast copy if size is above treshold and the alignment of dest and
+         * src are the same
+         /* copy byte by byte until aligned */
+        if (n) {
+            n = sizeof(long) - n;
+            nleft -= n;
+            while (n--) {
+                *bdest++ = *bsrc++;
             }
         }
-        val = LONGSIZELOG2 + 3;
-        lptr2 = (long *)u8ptr2;
-        cnt = nleft >> val;
-        lptr1 = (long *)u8ptr1;
-        nleft -= cnt << val;
-        val = 8;
-        while (cnt--) {
-            lptr2[0] = lptr1[0];
-            lptr2[1] = lptr1[1];
-            lptr2[2] = lptr1[2];
-            lptr2[3] = lptr1[3];
-            lptr2[4] = lptr1[4];
-            lptr2[5] = lptr1[5];
-            lptr2[6] = lptr1[6];
-            lptr2[7] = lptr1[7];
-            lptr2 += val;
-            lptr1 += val;
+        ldest = (long *)bdest;
+        n = nleft >> (LONGSIZELOG2 + 3);
+        lsrc = (long *)bsrc;
+        nleft -= 8 * n * sizeof(long);
+        while (n--) {
+            /* aligned copy of 8 words per loop iteration */
+            ldest[0] = lsrc[0];
+            ldest[1] = lsrc[1];
+            ldest[2] = lsrc[2];
+            ldest[3] = lsrc[3];
+            ldest[4] = lsrc[4];
+            ldest[5] = lsrc[5];
+            ldest[6] = lsrc[6];
+            ldest[7] = lsrc[7];
+            ldest += 8;
+            lsrc += 8;
         }
-        u8ptr2 = (int8_t *)lptr2;
-        u8ptr1 = (int8_t *)lptr1;
+        bdest = (int8_t *)ldest;
+        bsrc = (int8_t *)lsrc;
     }
     while (nleft--) {
-        *i8ptr2++ = *i8ptr1++;
+        /* copy tail byte by byte */
+        *bdest++ = *bsrc++;
     }
 
     return dest;
 }
-#endif
 
-/* TESTED OK */
 static void *
 _memcpybk(void *dest, const void *src, size_t len)
 {
     int8_t     *bsrc = (int8_t *)src + len;
     int8_t     *bdest = (int8_t *)dest + len;
-    size_t      nb = len;
+    size_t      nleft = len;
     size_t      nw;
     long       *lsrc;
     long       *ldest;
+    size_t      cnt;
     size_t      n;
 
     n = (uintptr_t)bdest & (sizeof(long) - 1);
-    if (n == ((uintptr_t)bsrc & (sizeof(long) - 1))) {
-        n = sizeof(long) - n;
-        n = min(n, nb);
-        nb -= n;
+    if (nleft > 8 * sizeof(long)
+        && (n == ((uintptr_t)bsrc & (sizeof(long) - 1)))) {
         if (n) {
-            switch (n) {
-                case 8:
-                    bdest[-1] = bsrc[-1];
-                case 7:
-                    bdest[-2] = bsrc[-2];
-                case 6:
-                    bdest[-3] = bsrc[-3];
-                case 5:
-                    bdest[-4] = bsrc[-4];
-                case 4:
-                    bdest[-5] = bsrc[-5];
-                case 3:
-                    bdest[-6] = bsrc[-6];
-                case 2:
-                    bdest[-7] = bsrc[-7];
-                case 1:
-                    bdest[-8] = bsrc[-8];
-                case 0:
-
-                    break;
-            }
-            bdest -= n;
-            bsrc -= n;
-        }
-        nw = nb / sizeof(long);
-        if (nw) {
-            ldest = (long *)bdest;
-            lsrc = (long *)bsrc;
-            nb -= nw * sizeof(long);
-            while (nw--) {
-                n = min(nw, 8);
-                switch (n) {
-                    case 8:
-                        ldest[-1] = lsrc[-1];
-                    case 7:
-                        ldest[-2] = lsrc[-2];
-                    case 6:
-                        ldest[-3] = lsrc[-3];
-                    case 5:
-                        ldest[-4] = lsrc[-4];
-                    case 4:
-                        ldest[-5] = lsrc[-5];
-                    case 3:
-                        ldest[-6] = lsrc[-6];
-                    case 2:
-                        ldest[-7] = lsrc[-7];
-                    case 1:
-                        ldest[-8] = lsrc[-8];
-                    case 0:
-
-                        break;
-                }
-                nw -= n;
-                ldest -= n;
-                lsrc -= n;
-            }
-            bdest = (int8_t *)ldest;
-            bsrc = (int8_t *)lsrc;
-        }
-    }
-    while (nb) {
-        n = min(nb, 8);
-        switch (n) {
-            case 8:
-                bdest[-1] = bsrc[-1];
-            case 7:
-                bdest[-2] = bsrc[-2];
-            case 6:
-                bdest[-3] = bsrc[-3];
-            case 5:
-                bdest[-4] = bsrc[-4];
-            case 4:
-                bdest[-5] = bsrc[-5];
-            case 3:
-                bdest[-6] = bsrc[-6];
-            case 2:
-                bdest[-7] = bsrc[-7];
-            case 1:
-                bdest[-8] = bsrc[-8];
-            case 0:
-
-                break;
-        }
-        nb -= n;
-        bdest -= n;
-        bsrc -= n;
-    }
-
-    return dest;
-}
-
-#if 0
-/* TESTED OK */
-static void *
-_memcpybk(void *dest,
-          const void *src,
-          size_t n)
-{
-    long               *lptr1;
-    long               *lptr2;
-    const int8_t       *i8ptr1;
-    int8_t             *i8ptr2;
-    size_t              cnt;
-    size_t              nleft;
-    size_t              val;
-
-    if (!n) {
-
-        return dest;
-    }
-    nleft = n;
-    i8ptr1 = src;
-    i8ptr2 = dest;
-    i8ptr1 += n;
-    i8ptr2 += n;
-    val = sizeof(long);
-    if (labs(i8ptr1 - i8ptr2) >= (long)(val << 3)
-        && nleft >= (val << 3)
-        && (((uintptr_t)i8ptr1 & (val - 1))
-            == ((uintptr_t)i8ptr2 & (val - 1)))) {
-        cnt = (uintptr_t)i8ptr1 & (val - 1);
-        if (cnt) {
-            //            cnt = val - cnt;
-            nleft -= cnt;
-            while (cnt--) {
-                *--i8ptr2 = *--i8ptr1;
+            nleft -= n;
+            while (n--) {
+                *bdest-- = *bsrc--;
             }
         }
-        val = LONGSIZELOG2 + 3;
-        lptr2 = (long *)i8ptr2;
-        cnt = nleft >> val;
-        lptr1 = (long *)i8ptr1;
-        nleft -= cnt << val;
-        val = 8;
-        while (cnt--) {
-            lptr2 -= val;
-            lptr1 -= val;
-            lptr2[0] = lptr1[0];
-            lptr2[1] = lptr1[1];
-            lptr2[2] = lptr1[2];
-            lptr2[3] = lptr1[3];
-            lptr2[4] = lptr1[4];
-            lptr2[5] = lptr1[5];
-            lptr2[6] = lptr1[6];
-            lptr2[7] = lptr1[7];
+        ldest = (long *)bdest;
+        n = nleft >> (LONGSIZELOG2 + 3);
+        lptr1 = (long *)bsrc;
+        nleft -= 8 * n * sizeof(long);
+        while (n--) {
+            ldest[-1] = lsrc[-1];
+            ldest[-2] = lsrc[-2];
+            ldest[-3] = lsrc[-3];
+            ldest[-4] = lsrc[-4];
+            ldest[-5] = lsrc[-5];
+            ldest[-6] = lsrc[-6];
+            ldest[-7] = lsrc[-7];
+            ldest[-8] = lsrc[-8];
+            ldest -= 8;
+            lsrc -= 8;
         }
-        i8ptr2 = (int8_t *)lptr2;
-        i8ptr1 = (int8_t *)lptr1;
+        n = nleft >> LONGSIZELOG2;
+        nleft -= n * sizeof(long);
+        while (n--) {
+            *--ldest = *--lsrc;
+        }
+        bdest = (int8_t *)ldest;
+        bsrc = (int8_t *)lsrc;
     }
     while (nleft--) {
-        *--i8ptr2 = *--i8ptr1;
+        *--bdest = *--bsrc;
     }
 
     return dest;
 }
-#endif
 
 /* TESTED OK */
 void *
@@ -275,15 +150,13 @@ memmove(void *RESTRICT dest,
         const void *RESTRICT src,
         size_t n)
 {
-    if (!n) {
-
-        return dest;
-    }
-    if ((uintptr_t)dest < (uintptr_t)src
-        || (uintptr_t)src + n < (uintptr_t)dest) {
-        memcpy(dest, src, n);
-    } else {
-        _memcpybk(dest, src, n);
+    if (n) {
+        if ((uintptr_t)dest < (uintptr_t)src
+            || (uintptr_t)src + n < (uintptr_t)dest) {
+            memcpy(dest, src, n);
+        } else {
+            _memcpybk(dest, src, n);
+        }
     }
 
     return dest;
@@ -294,12 +167,12 @@ char *
 strcpy(char *dest,
        const char *RESTRICT src)
 {
-    char *RESTRICT      cptr = dest;
+    char *RESTRICT      cdest = dest;
 
     while (*src) {
-        *cptr++ = *src++;
+        *cdest++ = *src++;
     }
-    *cptr = *src;
+    *cdest = *src;
 
     return dest;
 }
@@ -310,16 +183,19 @@ strncpy(char *dest,
         const char *src,
         size_t n)
 {
-    char *RESTRICT      cptr = dest;
+    char *RESTRICT      bdest = dest;
 
     if (n) {
         while ((*src) && (n--)) {
-            *cptr++ = *src++;
+            *bdest++ = *src++;
         }
         if (n) {
-            *cptr = *src;
+            *bdest = *src;
         }
     }
+
+    returnb dest;
+}
 
     return dest;
 }
@@ -329,15 +205,15 @@ char *
 strcat(char *RESTRICT dest,
        const char *src)
 {
-    char *RESTRICT      cptr = dest;
+    char *RESTRICT      bdest = dest;
 
-    while (*cptr) {
-        cptr++;
+    while (*bdest) {
+        bdest++;
     }
     while (*src) {
-        *cptr++ = *src++;
+        *bdest++ = *src++;
     }
-    *cptr = *src;
+    *bdest = *src;
 
     return dest;
 }
@@ -348,17 +224,17 @@ strncat(char *dest,
         const char *src,
         size_t n)
 {
-    char *RESTRICT 	cptr = dest;
+    char *RESTRICT 	bdest = dest;
 
     if (n) {
-        while (*cptr) {
-            cptr++;
+        while (*bdest) {
+            bdest++;
         }
         while ((*src) && (n--)) {
-            *cptr++ = *src++;
+            *bdest++ = *src++;
         }
         if (n) {
-            *cptr = *src;
+            *bdest = *src;
         }
     }
 
@@ -373,14 +249,13 @@ memcmp(const void *ptr1,
        const void *ptr2,
        size_t len)
 {
-    const unsigned char *ucptr1 = ptr1;
-    const unsigned char *ucptr2 = ptr2;
-    size_t               nb = len;
-    size_t               nw;
-    const unsigned long *ulptr1;
-    const unsigned long *ulptr2;
-    int                  byte;
-    size_t               n;
+    const unsigned char        *ucptr1 = ptr1;
+    const unsigned char        *ucptr2 = ptr2;
+    size_t                      nleft = len;
+    const unsigned long        *ulptr1;
+    const unsigned long        *ulptr2;
+    size_t                      n;
+    int                         retval;
 
     if (!len) {
 
@@ -388,41 +263,47 @@ memcmp(const void *ptr1,
     }
     n = (uintptr_t)ucptr1 & (sizeof(long) - 1);
     if (n == ((uintptr_t)ucptr2 & (sizeof(long) - 1))) {
-        n = sizeof(long) - n;
-        nb -= min(n, nb);
-        while (n--) {
-            byte = *ucptr1 - *ucptr2;
-            ucptr1++;
-            ucptr2++;
-            if (byte) {
-
-                return byte;
+        if (n) {
+            n = sizeof(long) - n;
+            nleft -= n;
+            while (n--) {
+                retval = *ucptr1 - *ucptr2;
+                ucptr1++;
+                ucptr2++;
+                if (retval) {
+                    
+                    return retval;
+                }
             }
         }
-        nw = nb / sizeof(long);
+        n = nleft >> LONGSIZELOG2;
         ulptr1 = (const unsigned long *)ucptr1;
+        nleft -= n * sizeof(long);
         ulptr2 = (const unsigned long *)ucptr2;
-        nb -= nw * sizeof(long);
-        while (nw--) {
+        while (n---) {
             if (*ulptr1 != *ulptr2) {
                 ucptr1 = (const unsigned char *)ulptr1;
                 ucptr2 = (const unsigned char *)ulptr2;
                 do {
-                    byte = *ucptr1 - *ucptr2;
-                } while (!byte);
+                    retval = *ucptr1 - *ucptr2;
+                    ucptr2++;
+                    ucptr1++;
+                } while (!retval);
 
-                return byte;
+                return retval;
             }
             ulptr1++;
             ulptr2++;
         }
     }
-    if (nb) {
-        do {
+    while (nleft--) {
+        if (*ucptr1 != *ucptr2) {
             byte = *ucptr1 - *ucptr2;
-            ucptr1++;
-            ucptr2++;
-        } while (!byte && --nb);
+
+            return byte;
+        } while (!byte && --nleft);
+        ucptr1++;
+        ucptr2++;
     }
 
     return byte;
@@ -435,16 +316,16 @@ PURE int
 strcmp(const char *str1,
        const char *str2)
 {
-    char       *ptr1 = (char *)str1;
-    char       *cptr2 = (char *)str2;
-    int         retval = 0;
+    unsigned char      *ucptr1 = (unsigned char *)str1;
+    char               *ucptr2 = (unsigned char *)str2;
+    int                 retval = 0;
 
-    while ((*cptr1) && *cptr1 == *cptr2) {
-        cptr1++;
-        cptr2++;
+    while ((*ucptr1) && *ucptr1 == *ucptr2) {
+        ucptr1++;
+        ucptr2++;
     }
-    if (*cptr1) {
-        retval = (int)*cptr1 - (int)*cptr2;
+    if (*ucptr1) {
+        retval = *ucptr1 - *ucptr2;
     }
 
     return retval;
@@ -456,17 +337,17 @@ strncmp(const char *str1,
         const char *str2,
         size_t n)
 {
-    char       *cptr1 = (char *)str1;
-    char       *cptr2 = (char *)str2;
-    int         retval = 0;
+    unsigned char      *cptr1 = (unsigned char *)str1;
+    unsigned char      *cptr2 = (unsigned char *)str2;
+    int                 retval = 0;
 
     if (n) {
-        while ((*cptr1) && (*cptr1 == *cptr2) && (n--)) {
-            cptr1++;
-            cptr2++;
+        while ((*ucptr1) && (*ucptr1 == *ucptr2) && (n--)) {
+            ucptr1++;
+            ucptr2++;
         }
         if (n) {
-            retval = (int)*cptr1 - (int)*cptr2;
+            retval = *ucptr1 - *ucptr2;
         }
     }
 
@@ -475,6 +356,7 @@ strncmp(const char *str1,
 
 #endif /* !__GLIBC__ */
 
+#if 0
 PURE int
 strcoll(const char *str1,
         const char *str2)
@@ -490,6 +372,7 @@ strxfrm(char *dest, const char *src, size_t n)
 
     return 0;
 }
+#endif
 
 /* TESTED OK */
 void *
@@ -497,23 +380,60 @@ memchr(const void *ptr,
        int ch,
        size_t n)
 {
-    char       *cptr = (char *)ptr;
-    char        uc = (char)ch;
-    void       *retval = NULL;
+    unsigned char      *ucptr = (unsigned char *)ptr;
+    char                uc = (unsigned char)ch;
+    void               *retval = NULL;
 
     if (n) {
-        while ((*cptr != uc) && (n--)) {
-            cptr++;
+        while ((*ucptr != uc) && (n--)) {
+            ucptr++;
         }
-        if (*cptr == uc && (n)) {
-            retval = cptr;
+        if (*ucptr == uc && (n)) {
+            retval = ucptr;
         }
     }
 
     return retval;
 }
 
-#if !defined(__GLIBC__)
+void *
+memrchr(const void *ptr,
+        int ch,
+        size_t n)
+{
+    unsigned char      *ucptr = (unsigned char *)ptr + n;
+    char                uc = (unsigned char)ch;
+
+    if (n) {
+        do {
+            ucptr--;
+            if (*ucptr == uc) {
+
+                return ucptr;
+            }
+        } while (--n);
+    }
+
+    return NULL;
+}
+
+#if defined(_GNU_SOURCE)
+
+void *
+rawmemchr(const void *ptr,
+          int ch)
+{
+    unsigned char      *ucptr = (unsigned char *)ptr;
+    char                uc = (unsigned char)ch;
+
+    while (*ucptr != uc) {
+        ucptr++;
+    }
+
+    return ucptr;
+}
+
+#endif
 
 /* TESTED OK */
 void *
@@ -534,7 +454,48 @@ strchr(const char *str,
     return retval;
 }
 
-#endif /* !__GLIBC__ */
+void *
+strrchr(const char *str,
+       int ch)
+{
+    char       *cptr = (char *)str;
+    char        c = (char)ch;
+    void       *retval = NULL;
+
+    while (*cptr) {
+        if (*cptr != c) {
+            retval = cptr;
+        }
+        cptr++;
+    }
+
+    return retval;
+}
+
+#if defined(_GNU_SOURCE)
+
+void *
+strchrnul(const char *str,
+          int ch)
+{
+    char       *cptr = (char *)str;
+    char        c = (char)ch;
+    void       *retval = NULL;
+
+    while ((*cptr) && *cptr != c) {
+        cptr++;
+    }
+    if (*cptr == c) {
+        retval = cptr;
+    } else {
+
+        return cptr;
+    }
+        
+    return retval;
+}
+
+#endif
 
 /* TESTED OK */
 size_t
@@ -656,8 +617,6 @@ strstr(const char *str1,
     return retptr;
 }
 
-#if !defined(__GLIBC__)
-
 char *
 strtok(char *str1,
        const char *str2)
@@ -696,8 +655,6 @@ strtok(char *str1,
     return retptr;
 }
 
-#endif /* !__GLIBC__ */
-
 /* TESTED OK */
 void *
 memset(void *ptr, int byte, size_t len)
@@ -706,7 +663,7 @@ memset(void *ptr, int byte, size_t len)
     char        bval = (char)byte;
     long        val = bval;
     long        tmp = bval;
-    size_t      nb = len;
+    size_t      nleft = len;
     size_t      nw;
     long       *lptr;
     size_t      n;
@@ -727,7 +684,7 @@ memset(void *ptr, int byte, size_t len)
     n = (uintptr_t)bptr & (sizeof(long) - 1);
     if (n) {
         n = sizeof(long) - n;
-        n = min(n, nb);
+        n = min(n, nleft);
         switch (n) {
             case 8:
                 bptr[7] = bval;
@@ -750,11 +707,11 @@ memset(void *ptr, int byte, size_t len)
                 break;
         }
         total += n;
-        nb -= n;
+        nleft -= n;
         bptr += n;
     }
-    nw = nb / sizeof(long);
-    nb -= nw * sizeof(long);
+    nw = nleft / sizeof(long);
+    nleft -= nw * sizeof(long);
     if (nw) {
         total += nw * sizeof(long);
         lptr = (long *)bptr;
@@ -786,8 +743,8 @@ memset(void *ptr, int byte, size_t len)
         }
         bptr = (int8_t *)lptr;
     }
-    if (nb) {
-        switch (nb) {
+    if (nleft) {
+        switch (nleft) {
             case 8:
                 bptr[7] = bval;
             case 7:
@@ -808,7 +765,7 @@ memset(void *ptr, int byte, size_t len)
 
                 break;
         }
-        total += nb;
+        total += nleft;
     }
 
     return ptr;
@@ -873,8 +830,6 @@ strdup(const char *str)
 }
 #endif
 
-#if !defined(__GLIBC__)
-
 #if ((defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200809L)           \
      || (defined(_XOPEN_SOURCE) && _XOPEN_SOURCE >= 700))
 char *
@@ -896,8 +851,6 @@ strndup(const char *str, size_t maxlen)
     return buf;
 }
 #endif
-
-#endif /* !__GLIBC__ */
 
 #if defined(_GNU_SOURCE)
 
