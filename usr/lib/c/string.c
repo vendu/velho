@@ -35,27 +35,28 @@ const unsigned char    *collnametab[STRING_LANGS]
 void *
 memcpy(void *dest,
        const void *src,
-       size_t nb)
+       size_t len)
 {
+    size_t      nleft = len;
     long       *lsrc;
     long       *ldest;
     int8_t     *bsrc;
     int8_t     *bdest;
-    size_t       n;
-    size_t       nleft;
+    size_t      n;
 
-    if (!n) {
+    if (!len) {
 
         return dest;
     }
     bsrc = (void *)src;
-    n = (uintptr_t)n & (sizeof(long) - 1);
+    n = (uintptr_t)len & (sizeof(long) - 1);
     bdest = dest;
-    if (nleft > (8 * sizeof(long))
+    if (len > (8 * sizeof(long))
         && (n == ((uintptr_t)bdest & (sizeof(long) - 1)))) {
         /*
          * try fast copy if size is above treshold and the alignment of dest and
          * src are the same
+         */
          /* copy byte by byte until aligned */
         if (n) {
             n = sizeof(long) - n;
@@ -98,10 +99,8 @@ _memcpybk(void *dest, const void *src, size_t len)
     int8_t     *bsrc = (int8_t *)src + len;
     int8_t     *bdest = (int8_t *)dest + len;
     size_t      nleft = len;
-    size_t      nw;
     long       *lsrc;
     long       *ldest;
-    size_t      cnt;
     size_t      n;
 
     n = (uintptr_t)bdest & (sizeof(long) - 1);
@@ -115,7 +114,7 @@ _memcpybk(void *dest, const void *src, size_t len)
         }
         ldest = (long *)bdest;
         n = nleft >> (LONGSIZELOG2 + 3);
-        lptr1 = (long *)bsrc;
+        lsrc = (long *)bsrc;
         nleft -= 8 * n * sizeof(long);
         while (n--) {
             ldest[-1] = lsrc[-1];
@@ -193,9 +192,6 @@ strncpy(char *dest,
             *bdest = *src;
         }
     }
-
-    returnb dest;
-}
 
     return dest;
 }
@@ -280,7 +276,7 @@ memcmp(const void *ptr1,
         ulptr1 = (const unsigned long *)ucptr1;
         nleft -= n * sizeof(long);
         ulptr2 = (const unsigned long *)ucptr2;
-        while (n---) {
+        while (n--) {
             if (*ulptr1 != *ulptr2) {
                 ucptr1 = (const unsigned char *)ulptr1;
                 ucptr2 = (const unsigned char *)ulptr2;
@@ -298,15 +294,15 @@ memcmp(const void *ptr1,
     }
     while (nleft--) {
         if (*ucptr1 != *ucptr2) {
-            byte = *ucptr1 - *ucptr2;
+            retval = *ucptr1 - *ucptr2;
 
-            return byte;
-        } while (!byte && --nleft);
+            return retval;
+        } while (!retval);
         ucptr1++;
         ucptr2++;
     }
 
-    return byte;
+    return retval;
 }
 
 #if !defined(__GLIBC__)
@@ -436,7 +432,7 @@ rawmemchr(const void *ptr,
 #endif
 
 /* TESTED OK */
-void *
+char *
 strchr(const char *str,
        int ch)
 {
@@ -454,9 +450,9 @@ strchr(const char *str,
     return retval;
 }
 
-void *
+char *
 strrchr(const char *str,
-       int ch)
+        int ch)
 {
     char       *cptr = (char *)str;
     char        c = (char)ch;
@@ -546,6 +542,7 @@ strpbrk(const char *str1,
     return retptr;
 }
 
+#if 0
 /* TESTED OK */
 char *
 strrchr(const char *str,
@@ -566,6 +563,7 @@ strrchr(const char *str,
 
     return cptr;
 }
+#endif
 
 /* TESTED OK */
 size_t
@@ -660,14 +658,12 @@ void *
 memset(void *ptr, int byte, size_t len)
 {
     int8_t     *bptr = ptr;
+    long        val = byte;
+    long        tmp = byte;
     char        bval = (char)byte;
-    long        val = bval;
-    long        tmp = bval;
     size_t      nleft = len;
-    size_t      nw;
     long       *lptr;
     size_t      n;
-    size_t      total = 0;
 
     if (byte) {
         val <<= 8;
@@ -684,10 +680,7 @@ memset(void *ptr, int byte, size_t len)
     n = (uintptr_t)bptr & (sizeof(long) - 1);
     if (n) {
         n = sizeof(long) - n;
-        n = min(n, nleft);
         switch (n) {
-            case 8:
-                bptr[7] = bval;
             case 7:
                 bptr[6] = bval;
             case 6:
@@ -706,66 +699,55 @@ memset(void *ptr, int byte, size_t len)
 
                 break;
         }
-        total += n;
         nleft -= n;
         bptr += n;
     }
-    nw = nleft / sizeof(long);
-    nleft -= nw * sizeof(long);
-    if (nw) {
-        total += nw * sizeof(long);
+    n = nleft >> (LONGSIZELOG2 + 3);
+    lptr = (long *)bptr;
+    nleft -= 8 * n * sizeof(long);
+    if (n) {
         lptr = (long *)bptr;
-        while (nw--) {
-            n = min(nw, 8);
-            switch (n) {
-                case 8:
-                    lptr[7] = val;
-                case 7:
-                    lptr[6] = val;
-                case 6:
-                    lptr[5] = val;
-                case 5:
-                    lptr[4] = val;
-                case 4:
-                    lptr[3] = val;
-                case 3:
-                    lptr[2] = val;
-                case 2:
-                    lptr[1] = val;
-                case 1:
-                    lptr[0] = val;
-                case 0:
-
-                    break;
-            }
-            nw -= n;
-            lptr += n;
+        while (n--) {
+            lptr[0] = val;
+            lptr[1] = val;
+            lptr[2] = val;
+            lptr[3] = val;
+            lptr[4] = val;
+            lptr[5] = val;
+            lptr[6] = val;
+            lptr[7] = val;
+            lptr += 8;
         }
         bptr = (int8_t *)lptr;
     }
-    if (nleft) {
-        switch (nleft) {
-            case 8:
-                bptr[7] = bval;
+    n = nleft >> LONGSIZELOG2;
+    lptr = (long *)bptr;
+    nleft -= n * sizeof(long);
+    if (n) {
+        switch (n) {
             case 7:
-                bptr[6] = bval;
+                lptr[6] = val;
             case 6:
-                bptr[5] = bval;
+                lptr[5] = val;
             case 5:
-                bptr[4] = bval;
+                lptr[4] = val;
             case 4:
-                bptr[3] = bval;
+                lptr[3] = val;
             case 3:
-                bptr[2] = bval;
+                lptr[2] = val;
             case 2:
-                bptr[1] = bval;
+                lptr[1] = val;
             case 1:
-                bptr[0] = bval;
+                lptr[0] = val;
             case 0:
 
                 break;
         }
-        total += nleft;
+        lptr += n;
+        bptr = (int8_t *)lptr;
+    }
+    while (nleft--) {
+        *bptr++ = 0;
     }
 
     return ptr;
