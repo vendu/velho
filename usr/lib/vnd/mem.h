@@ -221,7 +221,6 @@ struct memconf {
 void  * memget(size_t size, size_t align);
 void    memput(void *ptr);
 void  * memresize(void *ptr, size_t size, size_t align, long flg);
-void    memrel(void *adr);
 
 /*
  * illustrative little-endian bitfield

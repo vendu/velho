@@ -14,14 +14,12 @@
  * return address <- stack pointer
  */
 alloca:
-	subq	$8, %rdi	// adjust for popped return address
-	/* <FIXME> */
-	addq	$7, %rdi
+	movq	%rsp, %rax			// copy stack pointer
+	subq	$0x08, %rdi			// adjust for popped return address
+	addq	$0x07, %rdi
 	andq	$0xfffffffffffffff8, %rdi
-	/* </FIXME> */
-	movq	%rsp, %rax	// copy stack pointer
-	subq	%rdi, %rax	// reserve space; return value is in RAX
-	ret			// return
+	subq	%rdi, %rax			// reserve space; return value is in RAX
+	ret
 
 #endif
 

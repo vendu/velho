@@ -11,15 +11,12 @@
  * sp	- stack pointer
  * lr	- return address
  */
-	/* TODO: round size to a multiple of 4 */
 alloca:
-	/* <FIXME> */
-	add	r0, r0, $3
+	add	r0, r0, $0x3
 	and	r0, r0, $0xfffffffc
-	/* </FIXME> */
-	sub	sp, sp, r0	// subtract size from stack pointer
-	mov	r0, sp		// set return value
-	bx	lr		// return
+	sub	sp, sp, r0				// subtract size from stack pointer
+	mov	r0, sp					// set return value
+	bx	lr						// return
 
 #endif
 
