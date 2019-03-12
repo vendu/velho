@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <errno.h>
 #include <mt/mtx.h>
 #include <vnd/mem.h>
@@ -43,7 +44,7 @@ meminitblktabs(struct memglob *mem)
         ? MEM_RUN_MID_SLAB                                              \
         : MEM_RUN_BIG_SLAB))
 static void
-meminitruntab(struct memglob *mem)
+meminitruntabs(struct memglob *mem)
 {
     double      slabsz;
     double      runsz;
@@ -59,6 +60,19 @@ meminitruntab(struct memglob *mem)
         mem->nruntab[qid] = (long)nrun;
         mem->rundivtab[qid] = multi;
     }
+
+    return;
+}
+
+void
+meminit(struct memglob *mem)
+{
+    mtlkfmtx(&mem->mtx);
+    if (!(mem->flg & MEM_INIT_BIT)) {
+        meminitblktabs(mem);
+        meminitruntabs(mem);
+    }
+    mtunlkfmtx(&mem->mtx);
 
     return;
 }
@@ -181,7 +195,7 @@ static void
 mempopbuf(struct membufq *queue, struct membuf *buf)
 {
     struct membuf       *next;
-    
+
     next = buf->next;
     if (next) {
         next->prev = NULL;
@@ -251,7 +265,8 @@ memgetblk(long qid, size_t align)
     long                n;
     size_t              ofs;
     size_t              lim;
-    TABHASH_ITEM_T      item;
+    uintptr_t           page;
+    uintptr_t           val;
 
     if (!buf) {
         mtlkfmtx(&g_mem.blktab[qid].mtx);
@@ -312,7 +327,7 @@ memgetblk(long qid, size_t align)
                     case 1:
                         tab[0] = (uintptr_t)ptr;
                     case 0:
-                        
+
                         break;
                 }
                 ptr = (int8_t *)buf->tab[0];
@@ -345,9 +360,9 @@ memgetblk(long qid, size_t align)
         ret = memalignptr(ptr, align);
         ofs += memblknum(qid, buf, ret);
         buf->tab[ofs] = (uintptr_t)ptr;
-        item.page = memsethashpage(mempageadr(ret), MEM_BLK);
-        item.buf = memsethashbuf(buf, qid);
-        tabhashadd(g_memhashtab, &item);
+        page = memsethashpage(mempageadr(ret), MEM_BLK);
+        val = memsethashbuf(buf, qid);
+        tabhashadd(g_memhashtab, page, val);
     }
 
     return ret;
@@ -366,7 +381,8 @@ memgetrun(long qid, size_t align)
     long                bits;
     long                mask;
     long                ofs;
-    TABHASH_ITEM_T      item;
+    uintptr_t           page;
+    uintptr_t           val;
 
     if (!buf) {
         mtlkfmtx(&g_mem.runtab[qid].mtx);
@@ -433,11 +449,11 @@ memgetrun(long qid, size_t align)
         ret = memalignptr(ptr, align);
         ofs = memrunnum(qid, buf, ret);
         buf->tab[ofs] = (uintptr_t)ptr;
-        item.page = memsethashpage(mempageadr(ret), MEM_RUN);
-        item.buf = memsethashbuf(buf, qid);
-        tabhashadd(g_memhashtab, &item);
+        page = memsethashpage(mempageadr(ret), MEM_RUN);
+        val = memsethashbuf(buf, qid);
+        tabhashadd(g_memhashtab, page, val);
     }
-    
+
     return ptr;
 }
 
@@ -525,7 +541,6 @@ memputrun(struct membuf *buf, void *adr)
                 memfreebuf(buf);
             } else {
                 glob = &g_mem.runtab[qid];
-                nrun = glob->nbuf;
                 nbuf = glob->nbuf;
                 mask = (uintptr_t)1 << nrun;
                 lim = memnrunbuf(qid);
@@ -553,7 +568,8 @@ memmapbig(size_t size, size_t align)
     size_t              mapsz = roundup2(size, PAGESIZE);
     void               *ptr;
     void               *ret;
-    TABHASH_ITEM_T      item;
+    uintptr_t           page;
+    uintptr_t           val;
 
     if (!buf) {
 
@@ -566,9 +582,9 @@ memmapbig(size_t size, size_t align)
         ptr = NULL;
     } else {
         ret = memalignptr(ptr, align);
-        item.page = memsethashpage(mempageadr(ret), MEM_BIG);
-        item.buf = memsethashbuf(buf, 0);
-        tabhashadd(g_memhashtab, &item);
+        page = memsethashpage(mempageadr(ret), MEM_BIG);
+        val = memsethashval(mapsz);
+        tabhashadd(g_memhashtab, page, val);
     }
 
     return ptr;
@@ -595,6 +611,9 @@ memget(size_t size, size_t align)
     size_t              blksz;
     long                qid;
 
+    if (!(g_mem.flg & MEM_INIT_BIT)) {
+        meminit(&g_mem);
+    }
     switch (type) {
         case MEM_BLK:
             blksz = roundup2(alnsz, MEM_BLK_MIN);
@@ -621,7 +640,6 @@ memget(size_t size, size_t align)
 void *
 memresize(void *ptr, size_t size, size_t align, long flg)
 {
-    size_t      alnsz = (align) ? memalnsize(size, align) : size;
 //    void       *adr = memmaxsize(ptr) >= alnsz ? ptr : NULL;
     void       *adr = memget(size, align);
     size_t      cpysz = 0;
@@ -666,12 +684,15 @@ void
 memput(void *ptr)
 {
     uintptr_t           page = mempageadr(ptr);
-    struct memhash      hash = tabhashfind(g_memhashtab, page);
+    struct memhash      hash = tabhashop(g_memhashtab, page, TABHASH_REMOVE);
 
+    if (!(g_mem.flg & MEM_INIT_BIT)) {
+        abort();
+    }
     if (hash.page) {
         struct membuf  *buf = memhashbuf(&hash);
-        long            type = memhashbuftype(&hash);
-        size_t          size = memhashbufsize(&hash);
+        long            type = memhashtype(&hash);
+        size_t          size = memhashsize(&hash);
 
         switch (type) {
             case MEM_BLK:

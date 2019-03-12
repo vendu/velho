@@ -12,50 +12,17 @@
 #define MEM_LK_BIT_OFS          0
 #define MEM_LK_BIT              ((m_atomic_t)1L << MEM_LK_BIT_OFS)
 
-#define memhashtype(hash)               ((hash)->buf & MEM_TYPE_MASK)
-#define memhashbuf(hash)                ((void *)((hash)->buf           \
+#define memfreebuf(buf)                 unmapanon(buf->adr, buf->size)
+
+#define memhashtype(hash)               ((hash)->val & MEM_TYPE_MASK)
+#define memhashbuf(hash)                ((void *)((hash)->val           \
                                                   & MEM_BUF_ADR_MASK))
-#define memhashqid(hash)                ((hash)->buf & MEM_BUF_QUEUE_MASK)
+#define memhashsize(hash)               ((hash)->val)
+#define memhashqid(hash)                ((hash)->val & MEM_BUF_QUEUE_MASK)
 #define memsethashpage(adr, type)       ((uintptr_t)(adr)               \
                                          | ((type) << MEM_HASH_TYPE_SHIFT))
 #define memsethashbuf(buf, qid)         ((uintptr_t)(buf) | (qid))
-/*
- * illustrative little-endian bitfield
- * -----------------------------------
- * struct memhash {
- *     unsigned nref    : MEM_HASH_NREF_BITS;
- *     unsigned page    : PTRBITS - MEM_HASH_NREF_BITS;
- *     unsigned qid     : MEM_BUF_QUEUE_BITS;
- *     unsigned buf     : PTRBITS;
- * };
- */
-
-struct memhash {
-    uintptr_t   page;           // block page address + reference count
-    uintptr_t   buf;            // queue ID + allocation buffer address + flags
-};
-
-#define TABHASH_SLOTS           16384
-#define TABHASH_INVALID         { 0, 0 }
-#define TABHASH_BUF             g_memhashbuf
-#define TABHASH_TAB_T           struct tabhashtab
-#define TABHASH_ITEM_T          struct memhash
-#define TABHASH_ITEM_WORDS      2
-#define TABHASH_HDR_WORDS       4
-#define TABHASH_ITEM_WORDS      2
-#define TABHASH_TAB_ITEMS       ((64 - TABHASH_HDR_WORDS) / TABHASH_ITEM_WORDS)
-#define TABHASH_KEY(item)       ((item)->page)
-#if (WORDSIZE == 8)
-#define TABHASH_HASH(key)       tmhash64(key)
-#define TABHASH_HASH_ITEM(item) TABHASH_HASH((item)->page)
-#else
-#define TABHASH_HASH_ITEM(item) tmhash32((item)->page)
-#endif
-#define TABHASH_CMP(item, key)  ((item)->page == key)
-#include <vnd/tabhash.h>
-
-extern struct tabhashtab        *g_memhashtab[TABHASH_SLOTS];
-extern struct memglob            g_mem ALIGNED(PAGESIZE);
+#define memsethashval(sz)               (sz)
 
 #define MEM_ALIGN_MIN           CLSIZE
 
@@ -71,7 +38,8 @@ extern struct memglob            g_mem ALIGNED(PAGESIZE);
 #define MEM_BLK                 0
 #define MEM_RUN                 1
 #define MEM_BIG                 2
-#define MEM_TYPE_MASK           0x03
+#define MEM_TYPE_BITS           2
+#define MEM_TYPE_MASK           ((1L << MEM_TYPE_BITS) - 1)
 #define MEM_BLK_BIG_SLAB        (16L * PAGESIZE)
 #define MEM_BLK_MID_SLAB        (8L * PAGESIZE)
 #define MEM_BLK_MIN_SLAB        (4L * PAGESIZE)
@@ -152,7 +120,9 @@ extern struct memglob            g_mem ALIGNED(PAGESIZE);
         : 1))
 
 /* page-member */
-#define MEM_HASH_NREF_BITS              8
+#define MEM_HASH_NREF_BITS              (PAGESIZELOG2 - MEM_TYPE_BITS)
+#define MEM_HASH_NREF_MASK              (((uintptr_t)1 << MEM_HASH_NREF_BITS) \
+                                         - 1)
 #define MEM_HASH_TYPE_SHIFT             MEM_HASH_NREF_BITS
 #define MEM_HASH_TYPE_MASK              (MEM_TYPE_MASK << MEM_HASH_TYPE_SHIFT)
 #define MEM_HASH_TYPE_BLK               (MEM_BLK << MEM_HASH_TYPE_SHIFT)
@@ -252,6 +222,49 @@ void  * memget(size_t size, size_t align);
 void    memput(void *ptr);
 void  * memresize(void *ptr, size_t size, size_t align, long flg);
 void    memrel(void *adr);
+
+/*
+ * illustrative little-endian bitfield
+ * -----------------------------------
+ * struct memhash {
+ *     unsigned nref    : MEM_HASH_NREF_BITS;
+ *     unsigned page    : PTRBITS - MEM_HASH_NREF_BITS;
+ *     unsigned qid     : MEM_BUF_QUEUE_BITS;
+ *     unsigned buf     : PTRBITS;
+ * };
+ */
+
+struct memhash {
+    uintptr_t   page;           // block page address + reference count
+    uintptr_t   val;            // queue ID + allocation buffer address + flags
+};
+
+#define TABHASH_SLOTS           16384
+#define TABHASH_INVALID         { 0, 0 }
+#define TABHASH_BUF             g_memhashbuf
+#define TABHASH_TAB_T           struct tabhashtab
+#define TABHASH_ITEM_T          struct memhash
+#define TABHASH_ITEM_WORDS      2
+#define TABHASH_HDR_WORDS       4
+#define TABHASH_ITEM_WORDS      2
+#define TABHASH_TAB_ITEMS       ((64 - TABHASH_HDR_WORDS) / TABHASH_ITEM_WORDS)
+#define TABHASH_KEY(item)       ((item)->page)
+#if (WORDSIZE == 8)
+#define TABHASH_HASH(key)       tmhash64(key)
+#define TABHASH_HASH_ITEM(item) TABHASH_HASH((item)->page)
+#else
+#define TABHASH_HASH_ITEM(item) tmhash32((item)->page)
+#endif
+#define TABHASH_CMP(item, key)  ((item)->page == key)
+#define TABHASH_COPY(src, dest) (*(dest) = *(src))
+#define TABHASH_GET_NREF(item)  ((item)->page & MEM_HASH_NREF_MASK)
+#define TABHASH_PUT_NREF(item, n)                                       \
+    ((item)->page |= (n))
+#define TABHASH_CHK(item)       ((item)->page && (item)->val)
+#include <vnd/tabhash.h>
+
+extern struct tabhashtab        *g_memhashtab[TABHASH_SLOTS];
+extern struct memglob            g_mem ALIGNED(PAGESIZE);
 
 static __inline__ size_t
 memalnsize(size_t size, size_t align)
