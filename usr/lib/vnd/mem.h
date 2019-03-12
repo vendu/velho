@@ -7,13 +7,13 @@
 #include <mach/types.h>
 #include <mt/mtx.h>
 #include <zero/trix.h>
-//#include <vnd/unix.h>
 
-#define MEM_LK_BIT_OFS          0
-#define MEM_LK_BIT              ((m_atomic_t)1L << MEM_LK_BIT_OFS)
+#define MEM_LK_BIT_OFS                  0
+#define MEM_LK_BIT                      ((m_atomic_t)1L << MEM_LK_BIT_OFS)
 
 #define memfreebuf(buf)                 unmapanon(buf->adr, buf->size)
 
+#define memhashpage(hash)               ((hash)->page & MEM_HASH_PAGE_MASK)
 #define memhashtype(hash)               ((hash)->val & MEM_TYPE_MASK)
 #define memhashbuf(hash)                ((void *)((hash)->val           \
                                                   & MEM_BUF_ADR_MASK))
@@ -24,7 +24,7 @@
 #define memsethashbuf(buf, qid)         ((uintptr_t)(buf) | (qid))
 #define memsethashval(sz)               (sz)
 
-#define MEM_ALIGN_MIN           CLSIZE
+#define MEM_ALIGN_MIN                   CLSIZE
 
 #if defined(__GNUC__) || defined(__clang__)
 #define PTRALIGNED(ptr, aln)    __builtin_assume_aligned(ptr, aln)
@@ -128,7 +128,7 @@
 #define MEM_HASH_TYPE_BLK               (MEM_BLK << MEM_HASH_TYPE_SHIFT)
 #define MEM_HASH_TYPE_RUN               (MEM_RUN << MEM_HASH_TYPE_SHIFT)
 #define MEM_HASH_TYPE_BIG               (MEM_BIG << MEM_HASH_TYPE_SHIFT)
-#define MEM_HASH_PAGE_MASK              (PAGESIZE - 1)
+#define MEM_HASH_PAGE_MASK              (~(PAGESIZE - 1))
 /* buf-member */
 #define MEM_BUF_ADR_MASK                (~MEM_BUF_QUEUE_MASK)
 #define MEM_BUF_QUEUE_MASK              (((uintptr_t)1 << MEM_BUF_QUEUE_BITS) \
@@ -163,7 +163,7 @@ struct membuf {
     size_t              size;   // mapped buffer size
     size_t              ofs;    // current stack offset
     size_t              max;    // available # of allocations
-    uintptr_t           bits;   // allocation page- or run-bitmap
+    uintptr_t           bits;   // run-bitmap (or flags?)
     struct membufq     *queue;  // queue the buffer is on
     struct membuf      *prev;   // previous magazine in queue
     struct membuf      *next;   // next magazine in queue
@@ -254,7 +254,7 @@ struct memhash {
 #else
 #define TABHASH_HASH_ITEM(item) tmhash32((item)->page)
 #endif
-#define TABHASH_CMP(item, key)  ((item)->page == key)
+#define TABHASH_CMP(item, key)  (memhashpage(item) == key)
 #define TABHASH_COPY(src, dest) (*(dest) = *(src))
 #define TABHASH_GET_NREF(item)  ((item)->page & MEM_HASH_NREF_MASK)
 #define TABHASH_PUT_NREF(item, n)                                       \
