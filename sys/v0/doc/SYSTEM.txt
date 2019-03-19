@@ -1,6 +1,19 @@
 V0 SYSTEM ARCHITECTURE DRAFT
 ----------------------------
 
+PCI Bus Support
+---------------
+
+VIOS	Velho I/O Subsystem
+----
+- devprobe	probe device
+- busprobe	probe bus
+- bootsel	select boot device
+
+Bootstrap Process
+-----------------
+- load 4096-byte boot sector from chosen boot device
+
 Interrupt Management
 --------------------
 

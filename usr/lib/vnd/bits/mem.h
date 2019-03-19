@@ -2,7 +2,7 @@
 #define __VND_BITS_MEM_H__
 
 #include <mach/param.h>
-#include <vnd/unix.h>
+#include <vnd/sys/unix.h>
 #include <vnd/hash.h>
 #include <vnd/tabhash.h>
 

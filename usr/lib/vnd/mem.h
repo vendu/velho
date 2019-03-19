@@ -206,21 +206,22 @@ struct memglob {
 #define MEM_CONF_MAX_BLK        2
 #define MEM_CONF_MAX_RUN        3
 
-#define MEM_CONF_ALIGN  (1L << 0)
-#define MEM_CONF_SIZE   (1L << 1)
+#define MEM_CONF_ALIGN          (1L << 0)
+#define MEM_CONF_SIZE           (1L << 1)
 struct memconf {
     long        flg;
     size_t      align;
     size_t      size;
 };
 
-#define MEM_FREE_ON_FAILURE (1 << 0)
-#define MEM_ALLOC_ON_NULL   (1 << 1)
-#define MEM_ERRNO_ON_RESIZE (1 << 2)
+#define MEM_FREE_ON_FAILURE     (1 << 0)
+#define MEM_ALLOC_ON_NULL       (1 << 1)
+#define MEM_ERRNO_ON_RESIZE     (1 << 2)
 
 void  * memget(size_t size, size_t align);
 void    memput(void *ptr);
 void  * memresize(void *ptr, size_t size, size_t align, long flg);
+void    memput(void *ptr);
 
 /*
  * illustrative little-endian bitfield

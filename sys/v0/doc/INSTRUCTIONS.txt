@@ -107,6 +107,12 @@ A	memory address formed after one of the addressing modes
 SYS-UNIT	0x00
 --------
 
+HLT		0x00
+- halt system until interrupt is received
+
+RST		0x01
+- reset system
+
 OP	CODE	ARGUMENTS	FLAGS	MODE	BRIEF
 --	----	---------	-----	----	-----
 HLT	0x00			------	---	halt system (wait for interrupt)
@@ -169,7 +175,7 @@ UINC		R1		U-HB--	---	unsigned increment by one
 DEC	0x01	R1		--HB--	---	decrement by one
 UDEC		R1		U-HB--	---	unsigned decrement by one
 ADD	0x02	RI1, R2		-IHB--	---	addition
-UDD		RI1, R2		UIHB--	---	unsigned addition
+UADD		RI1, R2		UIHB--	---	unsigned addition
 ADC	0x03	RI1, R2		-IHB--	---	addition with carry
 UDC		RI1, R2		UIHB--	---	unsigned addition with carry
 SUB	0x04	RI1, R2		-IHB--	---	subtraction

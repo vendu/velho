@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <mt/mtx.h>
+#include <vnd/sys/unix.h>
 #include <vnd/mem.h>
-#include <vnd/unix.h>
 #include <vnd/bitop.h>
 
 struct tabhashtab              *g_memhashtab[TABHASH_SLOTS];
