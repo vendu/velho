@@ -1,5 +1,10 @@
 #! /bin/sh
 
+if [[ -z "$LANG" ]]; then
+    LANG="en_US.ISO8859-1"
+fi
+
+# error codes
 EOKAY=0
 EMSG=0
 EINFO=0
@@ -7,9 +12,13 @@ EDEBUG=1
 EEFAULT=2
 EABORT=3
 EERROR=4
-LANG="en_US.ISO8859-1"
+
+# configurable variables
 PROGTOOL_REPO_URIS="https://github.com/gittup/tup.git https://github.com/libusb/libusb.git"
+PROGTOOL_DEST_DIRS="bin sbin lib libexec man etc com var include share info locale man"
 PROGTOOL_BUILD_ROOT=`pwd`
+
+# runtime variables
 progtool_root_path="$PROGTOOL_BUILD_ROOT"
 progtool_repo_urls=""
 progtool_build_path=""
@@ -24,10 +33,9 @@ progtool_force_opt=0
 progtool_dry_run_opt=0
 progtool_quiet_opt=0
 progtool_help_opt=0
-progtool_info_opt=1
-progtool_info_opt=1
-
-PROGTOOL_DEST_DIRS="bin sbin lib libexec man etc com var include share info locale man"
+progtool_info_opt=0
+progtool_exec_prefix=""
+progtool_cross_build_opt=0
 
 function progtool_usage()
 {
