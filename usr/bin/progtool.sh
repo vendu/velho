@@ -502,7 +502,7 @@ progtool_main()
 {
     ret=0
     
-    progtool_get_options $@
+    progtool_get_opts $@
     progtool_create_repo_list "$PROGTOOL_REPO_URIS"
     progtool_create_repo_list "$progtool_repo_uris"
     if [[ $progtool_build_option -ne 0 ]]; then
