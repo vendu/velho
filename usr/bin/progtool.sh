@@ -1,6 +1,8 @@
 #! /bin/sh
 
+# script name
 PROG_NAME="progtool.sh"
+# set locale if not set
 if [[ -z "$LANG" ]]; then
     LANG="en_US.ISO8859-1"
 fi
@@ -27,23 +29,23 @@ progtool_build_path=""
 progtool_repo_uris="https://github.com/vendu/OS-Zero.git"
 progtool_repo_list=""
 progtool_option_flags=""
-progtool_build_opt=0
-progtool_clean_opt=0
-progtool_default_opt=0
-progtool_verbose_opt=0
-progtool_force_opt=0
-progtool_dry_run_opt=0
-progtool_quiet_opt=0
-progtool_help_opt=0
-progtool_info_opt=0
+progtool_build_option=0
+progtool_clean_option=0
+progtool_default_option=0
+progtool_verbose_option=0
+progtool_force_option=0
+progtool_dry_run_option=0
+progtool_quiet_option=0
+progtool_help_option=0
+progtool_info_option=0
 progtool_exec_prefix=""
-progtool_cross_build_opt=0
+progtool_cross_build_option=0
 
-# print help message
+# print help message, exit if -h or --help not used
 progtool_print_usage()
 {
-    if [[ $progtool_help_opt -eq 0 ]]; then
-	echo "invalid command: $@"
+    if [[ $progtool_help_option -eq 0 ]]; then
+ 	echo "invalid command: $@"
     fi
     echo ""
     echo "usage:	$PROG_NAME [options] [paths]"
@@ -67,7 +69,7 @@ progtool_print_usage()
     exit 0
 }
 
-# print debug message, execute cmd, and exit or return error code
+# print debug message, execute cmd arg, and exit or return error code
 # progtool <message> <level> <cmd>
 progtool_debug_event()
 {
@@ -128,17 +130,18 @@ progtool_debug_event()
     return $ret
 }
 
+# print [info] message
 progtool_print_msg()
 {
     ret=0
     shift
     str=$@
 
-    if [[ $progtool_dry_run_opt -ne 0 ]]; then
+    if [[ $progtool_dry_run_option -ne 0 ]]; then
 	echo "$str"
-    elif [[ $progtool_verbose_opt -ne 0 ]]; then
+    elif [[ $progtool_verbose_option -ne 0 ]]; then
 	echo "$str"
-    elif [[ $progtool_quiet_opt -ne 0 ]]; then
+    elif [[ $progtool_quiet_option -ne 0 ]]; then
 	echo "$str" >> progtool.log
     fi
     eval ret="'$?'"
@@ -146,59 +149,60 @@ progtool_print_msg()
     return $ret
 }
 
+# handle command-line options
 progtool_get_opts()
 {
     while [ $# -gt 0 ]
     do
 	case $1 in
 	    -B | --build)
-		progtool_build_opt=1
+		progtool_build_option=1
 		progtool_option_flags="'$progtool_option_flags'B"
 		shift
 		;;
 	    -C | --clean)
-		progtool_clean_opt=1
+		progtool_clean_option=1
 		progtool_option_flags="'$progtool_option_flags'C"
 		shift
 		;;
 	    -D | --default)
-		progtool_default_opt=1
+		progtool_default_option=1
 		progtool_option_flags="'$progtool_option_flags'D"
 		shift
 		;;
 	    -v | --verbose)
-		progtool_verbose_opt=1
+		progtool_verbose_option=1
 		progtool_option_flags="'$progtool_option_flags'V"
 		shift
 		;;
 	    -f | --force)
-		progtool_force_opt=1
+		progtool_force_option=1
 		progtool_option_flags="'$progtool_option_flags'f"
 		shift
 		;;
 	    -n | --dry-run)
-		progtool_dry_run_opt=1
+		progtool_dry_run_option=1
 		progtool_option_flags="'$progtool_option_flags'n"
 		shift
 		;;
 	    -q | --quiet)
-		progtool_quiet_opt=1
+		progtool_quiet_option=1
 		progtool_option_flags="'$progtool_option_flags'Q"
 		shift
 		;;
 	    -h | --help)
-		progtool_help_opt=1
+		progtool_help_option=1
 		progtool_print_usage $@
 		shift
 		;;
 	    -U | --uri | --url)
 		shift
-		progtool_uri_opts="$progtool_uri_opts $1"
+		progtool_uri_options="$progtool_uri_options $1"
 		progtool_option_flags="'$progtool_option_flags'U"
 		shift
 		;;
 	    -I | --info)
-		progtool_info_opt=1
+		progtool_info_option=1
 		progtool_option_flags="'$progtool_option_flags'I"
 		shift
 		;;
@@ -209,7 +213,7 @@ progtool_get_opts()
 		shift
 		;;
 	    -X | --cross-build)
-		progtool_cross_build_opt=1
+		progtool_cross_build_option=1
 		progtool_option_flags="'$progtool_option_flags'X"
 		shift
 		;;
@@ -221,7 +225,7 @@ progtool_get_opts()
 			progtool_option_flags="'$progtool_option_flags'r"
 		    fi
 		else
-		    progtool_uri_opts="$progtool_uri_opts $1"
+		    progtool_uri_options="$progtool_uri_options $1"
 		    progtool_option_flags="'$progtool_option_flags'wu"
 		fi
 		shift
@@ -232,22 +236,24 @@ progtool_get_opts()
     return
 }
 
+# execute command
 progtool_run_cmd()
 {
     cmd="$1"
 
-    if [[ $progtool_dry_run_opt -ne 0 ]]; then
+    if [[ $progtool_dry_run_option -ne 0 ]]; then
 	echo "$cmd"
-    elif [[ $progtool_quiet_opt -ne 0 ]]; then
+    elif [[ $progtool_quiet_option -ne 0 ]]; then
 	$cmd 2> /dev/null
     else
-	if [[ $progtool_verbose_opt -ne 0 ]]; then
+	if [[ $progtool_verbose_option -ne 0 ]]; then
 	    echo "$cmd"
 	fi
 	$cmd
     fi
 }
 
+# construct list of repositories to update/build
 progtool_create_repo_list()
 {
     root="$progtool_root_path"
@@ -269,12 +275,13 @@ progtool_create_repo_list()
     return
 }
 
+# remove directories and their files recursively
 progtool_clean_dirs()
 {
     root="$progtool_root_path"
     dirs=$@
 
-    echo "CLEAN: $dirs"
+    echo "CLEAN: $dirs" 
     cd "$root"
     if [[ -n "dirs" ]]; then
 	for dir in $dirs
@@ -287,6 +294,7 @@ progtool_clean_dirs()
     return
 }
 
+# remove empty directories
 progtool_remove_dirs()
 {
     root="$progtool_root_path"
@@ -297,7 +305,7 @@ progtool_remove_dirs()
     if [[ -n "dirs" ]]; then
 	for dir in $dirs
 	do
-	    progtool_run_cmd "rmdir $dir"
+	    progtool_run_cmd "rmdir $dir" 2> /dev/null
 	done
     fi
     cd "$root"
@@ -305,6 +313,7 @@ progtool_remove_dirs()
     return
 }
 
+# build programs in argument paths
 progtool_build_progs()
 {
     root="$progtool_root_path"
@@ -325,6 +334,7 @@ progtool_build_progs()
     return $ret
 }
 
+# update git reposity
 git_update_repo()
 {
     uri="$1"
@@ -347,6 +357,7 @@ git_update_repo()
     return $ret
 }
 
+# update mercurial repository
 hg_update_repo()
 {
     root="$progtool_root_path"
@@ -370,6 +381,7 @@ hg_update_repo()
     return $ret
 }
 
+# fetch or update argument repositories
 progtool_update_repos()
 {
     root="$progtool_root_path"
@@ -398,6 +410,7 @@ progtool_update_repos()
     return $ret;
 }
 
+# build program using gnu auto-tools
 progtool_build_auto()
 {
     root="$progtool_root_path"
@@ -413,11 +426,11 @@ progtool_build_auto()
 
 	return $ret
     fi
-    if [[ $progtool_quiet_opt -ne 0 ]]; then
-	configure_opts="-q"
+    if [[ $progtool_quiet_option -ne 0 ]]; then
+	configure_options="-q"
     fi
-    if [[ $progtool_dry_run_opt -ne 0 ]]; then
-	configure_opts="-n"
+    if [[ $progtool_dry_run_option -ne 0 ]]; then
+	configure_options="-n"
     fi
     ret=1
     if [[ -x "bootstrap.sh" ]]; then
@@ -440,7 +453,7 @@ progtool_build_auto()
     if [[ $ret -ne 0 ]]; then
 	progtool_print_msg "$prog failed"
     else
-	./configure $configure_opts --prefix="$progtool_root_path" --exec-prefix="$progtool_root_path" --program-prefix="$pkg" --includedir="$progtool_root_path/include" --oldincludedir="$progtool_root_path/usr/include" --datarootdir="$progtool_root_path/share" --datadir="$progtool_root_path/share" --infodir="$progtool_root_path/info" --localedir="$progtool_root_path/share" --mandir="$PROGTOOL_ROOT/man" --docdir="$docdir" --htmldir="$docdir" --dvidir="$docdir" --pdfdir="$docdir" --psdir="$docdir"
+	./configure $configure_options --prefix="$progtool_root_path" --exec-prefix="$progtool_root_path" --program-prefix="$pkg" --includedir="$progtool_root_path/include" --oldincludedir="$progtool_root_path/usr/include" --datarootdir="$progtool_root_path/share" --datadir="$progtool_root_path/share" --infodir="$progtool_root_path/info" --localedir="$progtool_root_path/share" --mandir="$PROGTOOL_ROOT/man" --docdir="$docdir" --htmldir="$docdir" --dvidir="$docdir" --pdfdir="$docdir" --psdir="$docdir"
 	eval ret="'$?'"
 	if [[ $ret -ne 0 ]]; then
 	    progtool_print_msg "configure failed"
@@ -463,6 +476,7 @@ progtool_build_auto()
     return $ret
 }
 
+# print configuration information
 progtool_print_info()
 {
     uris="$progtool_repo_list"
@@ -483,28 +497,29 @@ progtool_print_info()
     return
 }
 
+# main routine
 progtool_main()
 {
     ret=0
     
-    progtool_get_opts $@
+    progtool_get_options $@
     progtool_create_repo_list "$PROGTOOL_REPO_URIS"
     progtool_create_repo_list "$progtool_repo_uris"
-    if [[ $progtool_build_opt -ne 0 ]]; then
+    if [[ $progtool_build_option -ne 0 ]]; then
 	progtool_update_repos "$progtool_repo_list"
 	progtool_build_progs "$progtool_repo_dirs"
 	eval ret="'$?'"
     fi
-    if [[ $progtool_clean_opt -ne 0 ]]; then
+    if [[ $progtool_clean_option -ne 0 ]]; then
 	progtool_clean_dirs "$progtool_repo_dirs"
-	if [[ $progtool_force_opt -ne 0 ]]; then
+	if [[ $progtool_force_option -ne 0 ]]; then
 	    progtool_clean_dirs "$PROGTOOL_DEST_DIRS"
 	else
 	    progtool_remove_dirs "$PROGTOOL_DEST_DIRS"
 	fi
 	eval ret="'$?'"
     fi
-    if [[ $progtool_info_opt -ne 0 ]]; then
+    if [[ $progtool_info_option -ne 0 ]]; then
 	progtool_print_info "$progtool_repo_list"
 	progtool_print_info "$progtool_repo_dirs"
     fi
