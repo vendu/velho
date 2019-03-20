@@ -1,5 +1,6 @@
 #! /bin/sh
 
+PROG_NAME="progtool.sh"
 if [[ -z "$LANG" ]]; then
     LANG="en_US.ISO8859-1"
 fi
@@ -9,18 +10,19 @@ EOKAY=0
 EMSG=0
 EINFO=0
 EDEBUG=1
-EEFAULT=2
+EFAULT=2
 EABORT=3
 EERROR=4
 
 # configurable variables
 PROGTOOL_REPO_URIS="https://github.com/gittup/tup.git https://github.com/libusb/libusb.git"
 PROGTOOL_DEST_DIRS="bin sbin lib libexec man etc com var include share info locale man"
+
+#initialised variables
 PROGTOOL_BUILD_ROOT=`pwd`
 
 # runtime variables
 progtool_root_path="$PROGTOOL_BUILD_ROOT"
-progtool_repo_urls=""
 progtool_build_path=""
 progtool_repo_uris="https://github.com/vendu/OS-Zero.git"
 progtool_repo_list=""
@@ -37,12 +39,14 @@ progtool_info_opt=0
 progtool_exec_prefix=""
 progtool_cross_build_opt=0
 
-function progtool_usage()
+# print help message
+progtool_print_usage()
 {
-    if [[ $progtool_help_opt -ne 0 ]]; then
+    if [[ $progtool_help_opt -eq 0 ]]; then
 	echo "invalid command: $@"
     fi
-    echo "progtool	[options] [paths]"
+    echo ""
+    echo "usage:	$PROG_NAME [options] [paths]"
     echo ""
     echo "options"
     echo "-------"
@@ -54,32 +58,35 @@ function progtool_usage()
     echo "-n, --dry-run		list what would be done without executing commands"
     echo "-q, --quiet		quiet, no output messages"
     echo "-h, --help		this help screen"
-    echo "-U, --uri		repostitory to build"
+    echo "-U, --uri		repository to build"
     echo "-I, --info		build information screen"
-    echo "-E, --exec-prefix	exec prefix (e.g. with -X)"
+    echo "-E, --exec-prefix	exec prefix, e.g. for -X"
     echo "-X, --cross-build	cross-build, i.e. cross-compilation"
+    echo ""
 
     exit 0
 }
 
-function progtool_debug_event()
+# print debug message, execute cmd, and exit or return error code
+# progtool <message> <level> <cmd>
+progtool_debug_event()
 {
     msg="$1"
     lvl="$2"
-    func="$3"
+    cmd="$3"
     arg="$4"
     val=""
 
-    if [[ -n "$func" ]]; then
+    if [[ -n "$cmd" ]]; then
 	if [[ -n "$arg" ]]; then
-	    $('"$func"' $arg)
+	    "'$cmd'" $arg
 	else
-	    $('"$func"')
+	    "'$cmd'"
 	fi
 	eval val="'$?'"
     fi
-    if [ -n "$val" ]] && [[  "$val" == "$lvl" ]]; then
-	    echo "$msg"
+    if [[ -n "$val" ]] && [[ "$val" == "$lvl" ]]; then
+        echo "$msg"
     else
 	case $val in
 	    0)
@@ -116,12 +123,12 @@ function progtool_debug_event()
 		;;
 	esac
     fi
-    eval ret='"$val"'
+    eval ret="'$val'"
 
     return $ret
 }
 
-function progtool_print_msg()
+progtool_print_msg()
 {
     ret=0
     shift
@@ -139,71 +146,71 @@ function progtool_print_msg()
     return $ret
 }
 
-function progtool_get_opts()
+progtool_get_opts()
 {
     while [ $# -gt 0 ]
     do
 	case $1 in
 	    -B | --build)
 		progtool_build_opt=1
-		progtool_option_flags="$progtool_option_flags B"
+		progtool_option_flags="'$progtool_option_flags'B"
 		shift
 		;;
 	    -C | --clean)
 		progtool_clean_opt=1
-		progtool_option_flags="$progtool_option_flags C"
+		progtool_option_flags="'$progtool_option_flags'C"
 		shift
 		;;
 	    -D | --default)
 		progtool_default_opt=1
-		progtool_option_flags="$progtool_option_flags D"
+		progtool_option_flags="'$progtool_option_flags'D"
 		shift
 		;;
 	    -v | --verbose)
 		progtool_verbose_opt=1
-		progtool_option_flags="$progtool_option_flags V"
+		progtool_option_flags="'$progtool_option_flags'V"
 		shift
 		;;
 	    -f | --force)
 		progtool_force_opt=1
-		progtool_option_flags="$progtool_option_flags f"
+		progtool_option_flags="'$progtool_option_flags'f"
 		shift
 		;;
 	    -n | --dry-run)
 		progtool_dry_run_opt=1
-		progtool_option_flags="$progtool_option_flags n"
+		progtool_option_flags="'$progtool_option_flags'n"
 		shift
 		;;
 	    -q | --quiet)
 		progtool_quiet_opt=1
-		progtool_option_flags="$progtool_option_flags Q"
+		progtool_option_flags="'$progtool_option_flags'Q"
 		shift
 		;;
 	    -h | --help)
 		progtool_help_opt=1
-		progtool_usage $@
+		progtool_print_usage $@
 		shift
 		;;
 	    -U | --uri | --url)
 		shift
 		progtool_uri_opts="$progtool_uri_opts $1"
-		progtool_option_flags="$progtool_option_flags U"
+		progtool_option_flags="'$progtool_option_flags'U"
 		shift
 		;;
 	    -I | --info)
 		progtool_info_opt=1
-		progtool_option_flags="$progtool_option_flags I"
+		progtool_option_flags="'$progtool_option_flags'I"
 		shift
 		;;
 	    -E | --exec-prefix)
 		shift
 		progtool_exec_prefix="$1"
-		progtool_option_flags="$progtool_option_flags E"
+		progtool_option_flags="'$progtool_option_flags'E"
 		shift
 		;;
 	    -X | --cross-build)
 		progtool_cross_build_opt=1
-		progtool_option_flags="$progtool_option_flags X"
+		progtool_option_flags="'$progtool_option_flags'X"
 		shift
 		;;
 	    *)
@@ -211,11 +218,11 @@ function progtool_get_opts()
 		    if [[ "$progtool_root_path" == "$PROGTOOL_BUILD_ROOT" ]];
 		    then
 			progtool_root_path="$1"
-			progtool_option_flags="$progtool_option_flags r"
+			progtool_option_flags="'$progtool_option_flags'r"
 		    fi
 		else
 		    progtool_uri_opts="$progtool_uri_opts $1"
-		    progtool_option_flags="$progtool_option_flags u"
+		    progtool_option_flags="'$progtool_option_flags'wu"
 		fi
 		shift
 		;;
@@ -225,7 +232,7 @@ function progtool_get_opts()
     return
 }
 
-function progtool_run_cmd()
+progtool_run_cmd()
 {
     cmd="$1"
 
@@ -241,7 +248,7 @@ function progtool_run_cmd()
     fi
 }
 
-function progtool_create_repo_list()
+progtool_create_repo_list()
 {
     root="$progtool_root_path"
     uris=$@
@@ -262,7 +269,7 @@ function progtool_create_repo_list()
     return
 }
 
-function progtool_clean_dirs()
+progtool_clean_dirs()
 {
     root="$progtool_root_path"
     dirs=$@
@@ -280,7 +287,7 @@ function progtool_clean_dirs()
     return
 }
 
-function progtool_remove_dirs()
+progtool_remove_dirs()
 {
     root="$progtool_root_path"
     dirs=$@
@@ -298,7 +305,7 @@ function progtool_remove_dirs()
     return
 }
 
-function progtool_build_progs()
+progtool_build_progs()
 {
     root="$progtool_root_path"
     dirs=$@
@@ -318,7 +325,7 @@ function progtool_build_progs()
     return $ret
 }
 
-function git_update_repo()
+git_update_repo()
 {
     uri="$1"
     dir="$2"
@@ -340,7 +347,7 @@ function git_update_repo()
     return $ret
 }
 
-function hg_update_repo()
+hg_update_repo()
 {
     root="$progtool_root_path"
     uri="$1"
@@ -363,10 +370,10 @@ function hg_update_repo()
     return $ret
 }
 
-function progtool_update_repos()
+progtool_update_repos()
 {
     root="$progtool_root_path"
-    uris="$@"
+    uris=$@
     ret=0
 
     for uri in $uris
@@ -391,10 +398,10 @@ function progtool_update_repos()
     return $ret;
 }
 
-function progtool_build_auto()
+progtool_build_auto()
 {
     root="$progtool_root_path"
-    dirs="$@"
+    dirs=$@
     docdir="$progtool_root_path/doc/$pkg"
     ret=0
 
@@ -456,7 +463,7 @@ function progtool_build_auto()
     return $ret
 }
 
-function progtool_print_info()
+progtool_print_info()
 {
     uris="$progtool_repo_list"
     echo "package repositories"
@@ -476,7 +483,7 @@ function progtool_print_info()
     return
 }
 
-function progtool_main()
+progtool_main()
 {
     ret=0
     
@@ -497,8 +504,10 @@ function progtool_main()
 	fi
 	eval ret="'$?'"
     fi
-    progtool_print_info "$progtool_repo_list"
-    progtool_print_info "$progtool_repo_dirs"
+    if [[ $progtool_info_opt -ne 0 ]]; then
+	progtool_print_info "$progtool_repo_list"
+	progtool_print_info "$progtool_repo_dirs"
+    fi
     
     exit $ret
 }
