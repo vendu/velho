@@ -240,17 +240,20 @@ progtool_get_opts()
 progtool_run_cmd()
 {
     cmd="$1"
+    ret=0
 
     if [[ $progtool_dry_run_option -ne 0 ]]; then
-	echo "$cmd"
+	echo '$cmd'
     elif [[ $progtool_quiet_option -ne 0 ]]; then
-	$cmd 2> /dev/null
+	ret=`$cmd 2> /dev/null`
     else
 	if [[ $progtool_verbose_option -ne 0 ]]; then
 	    echo "$cmd"
 	fi
-	$cmd
+	ret=`$cmd`
     fi
+
+    return $ret
 }
 
 # construct list of repositories to update/build
@@ -305,7 +308,7 @@ progtool_remove_dirs()
     if [[ -n "dirs" ]]; then
 	for dir in $dirs
 	do
-	    progtool_run_cmd "rmdir $dir" 2> /dev/null
+	    progtool_run_cmd `eval "rmdir $dir 2> /dev/null"`
 	done
     fi
     cd "$root"
@@ -342,12 +345,12 @@ git_update_repo()
     ret=0
 
     progtool_print_msg "cloning $uri into $progtool_root_path/$dir"
-    git clone "$uri"
+    progtool_run_cmd `eval 'git clone "$uri"'`
     eval ret="'$?'"
     if [[ $ret -ne 0 ]] && [[ -d "$dir" ]]; then
 	progtool_print_msg "updating $progtool_root_path/$dir"
-	cd "$dir"
-	git pull
+	progtool_run_cmd `eval 'cd "$dir"'`
+	progtool_run_cmd "git pull"
 	eval ret="'$?'"
 	if [[ $ret -ne 0 ]]; then
 	    progtool_print_msg "failed to update $uri in $progtool_root_path/$dir"
@@ -366,12 +369,12 @@ hg_update_repo()
     ret=0
     
     progtool_print_msg "cloning $uri in $progtool_root_dir/$path"
-    hg clone "$uri"
+    progtool_run_cmd `eval hg clone "$uri"`
     eval ret=="'$?'"
     if [[ $ret -ne 0 ]] && [[ -d "$dir" ]]; then
-	cd "$dir"
+	progtool_run_cmd `eval cd "$dir"`
 	progtool_print_msg "updating $progtool_root_path/$dir"
-	hg pull
+	progtool_run_cmd "hg pull"
 	eval ret="'$?'"
 	if [[ $ret -ne 0 ]]; then
 	    progtool_print_msg "failed to update $uri in $progtool_root_path/$dir"
@@ -434,36 +437,38 @@ progtool_build_auto()
     fi
     ret=1
     if [[ -x "bootstrap.sh" ]]; then
-	prog="bootstrap.sh"
-	./bootstrap.sh
+	cmd="./bootstrap.sh"
+	progtool_run_cmd `eval "$cmd"`
 	eval ret="'$?'"
     fi
     if [[ $ret -ne 0 ]]; then
 	if [[ -x "autogen.sh" ]]; then
-	    prog="autogen.sh"
-	    ./autogen.sh
+	    cmd=",/autogen.sh"
+	    progtool_run_cmd `eval "$cmd"`
 	    eval ret="'$?'"
 	fi
     fi
     if [[ $ret -ne 0 ]]; then
-	prog="autoreconf"
-	autoreconf -i
+	cmd="autoreconf -i"
+	progtool_run_cmd `eval "$cmd"`
+	eval ret="'$?'"
     fi
-    eval ret="'$?'"
     if [[ $ret -ne 0 ]]; then
-	progtool_print_msg "$prog failed"
+	progtool_print_msg "$cmd failed"
     else
-	./configure $configure_options --prefix="$progtool_root_path" --exec-prefix="$progtool_root_path" --program-prefix="$pkg" --includedir="$progtool_root_path/include" --oldincludedir="$progtool_root_path/usr/include" --datarootdir="$progtool_root_path/share" --datadir="$progtool_root_path/share" --infodir="$progtool_root_path/info" --localedir="$progtool_root_path/share" --mandir="$PROGTOOL_ROOT/man" --docdir="$docdir" --htmldir="$docdir" --dvidir="$docdir" --pdfdir="$docdir" --psdir="$docdir"
+	progtool_run_cmd `eval ./configure $configure_options --prefix="$progtool_root_path" --exec-prefix="$progtool_root_path" --program-prefix="$pkg" --includedir="$progtool_root_path/include" --oldincludedir="$progtool_root_path/usr/include" --datarootdir="$progtool_root_path/share" --datadir="$progtool_root_path/share" --infodir="$progtool_root_path/info" --localedir="$progtool_root_path/share" --mandir="$PROGTOOL_ROOT/man" --docdir="$docdir" --htmldir="$docdir" --dvidir="$docdir" --pdfdir="$docdir" --psdir="$docdir"`
 	eval ret="'$?'"
 	if [[ $ret -ne 0 ]]; then
 	    progtool_print_msg "configure failed"
 	else
-	    make
+	    cmd="make"
+	    progtool_run_cmd `eval "$cmd"`
 	    eval ret="'$?'"
 	    if [[ $ret -ne 0 ]]; then
 		progtool_print_msg "make failed"
 	    else
-		make install
+		cmd="make install"
+		progtool_run_cmd `eval "$cmd"`
 		eval ret="'$?'"
 		if [[ $ret -ne 0 ]]; then
 		    progtool_print_msg "make install failed"
