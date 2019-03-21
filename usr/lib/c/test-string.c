@@ -4,7 +4,7 @@
 #include <c/strings.h>
 #include <zero/trix.h>
 
-#define TEST_TABSIZE 16384
+#define TEST_TABSIZE 131072
 
 static char *tab1;
 static char *tab2;
@@ -75,7 +75,7 @@ main(int argc, char *argv[])
     tab1 = calloc(TEST_TABSIZE, sizeof(char));
     tab2 = calloc(TEST_TABSIZE, sizeof(char));
     srand(0x666);
-    nloop = 1024;
+    nloop = 1048576;
     fprintf(stderr, "testing bzero()/memset()... ");
     do {
         safe_memset(tab1, 0, TEST_TABSIZE);
@@ -94,7 +94,7 @@ main(int argc, char *argv[])
         }
     } while (--nloop);
     fprintf(stderr, "PASSED\n");
-    nloop = 1024;
+    nloop = 1048576;
     fprintf(stderr, "testing memcpy()... ");
     do {
         safe_memset(tab1, 0xff, TEST_TABSIZE);
