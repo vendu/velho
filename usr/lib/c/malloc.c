@@ -56,7 +56,7 @@ void
 free(void *ptr)
 {
     if (ptr) {
-        memrel(ptr);
+        memput(ptr);
     }
 
     return;

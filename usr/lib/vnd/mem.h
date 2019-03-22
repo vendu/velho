@@ -54,7 +54,7 @@
 #define MEM_BLK_MAX_BLOCKS      max(MEM_BLK_MIN_SLAB / MEM_BLK_MIN,     \
                                     max(MEM_BLK_MID_SLAB / MEM_BLK_MID, \
                                         MEM_BLK_BIG_SLAB / MEM_BLK_BIG))
-#define MEM_RUN_BIG_SLAB        (2 * MEM_RUN_QUEUES * PAGESIZE)
+#define MEM_RUN_BIG_SLAB        (2L * MEM_RUN_QUEUES * PAGESIZE)
 #define MEM_RUN_MID_SLAB        (MEM_RUN_QUEUES * PAGESIZE)
 #define MEM_RUN_MIN_SLAB        (MEM_RUN_QUEUES * PAGESIZE >> 1)
 #define MEM_RUN_UNIT            PAGESIZE
@@ -149,7 +149,7 @@
 
 /* buf-word bits */
 #define MEM_BUF_QUEUE_BITS      8
-#define MEM_BUF_MAP_BITS        (CHAR_BIT * sizeof(uintptr_t))
+#define MEM_BUF_MAP_BITS        (1L * CHAR_BIT * sizeof(uintptr_t))
 #define membufpagenum(buf, ptr)                                         \
     (((uintptr_t)(ptr) - (uintptr_t)(buf)->adr) >> PAGESIZELOG2)
 #define membufpagebit(buf, num)                                         \
@@ -172,7 +172,7 @@ struct membuf {
 
 struct membufq {
     mtmtx               mtx;    // buffer-queue lock mutex
-    long                qid;    // queue ID
+    unsigned long       qid;    // queue ID
     long                nbuf;   // number of buffers in queue
     struct memtls      *tls;    // pointer to thread-local data
     struct membuf      *head;   // queue head
@@ -221,7 +221,6 @@ struct memconf {
 void  * memget(size_t size, size_t align);
 void    memput(void *ptr);
 void  * memresize(void *ptr, size_t size, size_t align, long flg);
-void    memput(void *ptr);
 
 /*
  * illustrative little-endian bitfield
@@ -302,7 +301,7 @@ memgetptr(void *ptr)
     struct memhash      item = tabhashfind(g_memhashtab, mempageadr(ptr));
     long                type = memhashtype(&item);
     struct membuf      *buf = memhashbuf(&item);
-    long                qid = memhashqid(&item);
+    unsigned long       qid = memhashqid(&item);
     int8_t             *adr = ptr;
     long                ofs;
     long                bits;

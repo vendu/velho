@@ -267,7 +267,7 @@ memcmp(const void *ptr1,
                 ucptr1++;
                 ucptr2++;
                 if (retval) {
-                    
+
                     return retval;
                 }
             }
@@ -392,6 +392,7 @@ memchr(const void *ptr,
     return retval;
 }
 
+PURE
 void *
 memrchr(const void *ptr,
         int ch,
@@ -487,7 +488,7 @@ strchrnul(const char *str,
 
         return cptr;
     }
-        
+
     return retval;
 }
 
@@ -696,6 +697,7 @@ memset(void *ptr, int byte, size_t len)
             case 1:
                 bptr[0] = bval;
             case 0:
+            default:
 
                 break;
         }
@@ -740,6 +742,7 @@ memset(void *ptr, int byte, size_t len)
             case 1:
                 lptr[0] = val;
             case 0:
+            default:
 
                 break;
         }

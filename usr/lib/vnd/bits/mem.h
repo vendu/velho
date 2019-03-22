@@ -6,8 +6,6 @@
 #include <vnd/hash.h>
 #include <vnd/tabhash.h>
 
-extern struct memglob   g_mem ALIGNED(PAGESIZE);
-
 static __inline__ void *
 memgethashtab(void)
 {

@@ -19,11 +19,11 @@ struct tabhashtab              *g_memhashbuf;
 static void
 meminitblktabs(struct memglob *mem)
 {
-    double      slabsz;
-    double      blksz;
-    double      nblk;
-    double      multi;
-    long        qid;
+    double              slabsz;
+    double              blksz;
+    double              nblk;
+    double              multi;
+    unsigned long       qid;
 
     for (qid = 0 ; qid < MEM_BLK_QUEUES ; qid++) {
         slabsz = memblkslabsize(qid);
@@ -46,11 +46,11 @@ meminitblktabs(struct memglob *mem)
 static void
 meminitruntabs(struct memglob *mem)
 {
-    double      slabsz;
-    double      runsz;
-    double      nrun;
-    double      multi;
-    long        qid;
+    double              slabsz;
+    double              runsz;
+    double              nrun;
+    double              multi;
+    unsigned long       qid;
 
     for (qid = 0 ; qid < MEM_RUN_QUEUES ; qid++) {
         slabsz = (double)memrunslabsize(qid);
@@ -137,6 +137,8 @@ memgetbuf(long type)
             if (head) {
                 head->prev = NULL;
             }
+        } else {
+            head = NULL;
         }
         m_atomwrite((m_atomic_t *)hdrq, (m_atomic_t *)head);
         if (!ret) {
@@ -252,7 +254,7 @@ memdequebuf(struct membufq *queue, struct membuf *buf)
 
 /* allocate new block buffer */
 static void *
-memgetblk(long qid, size_t align)
+memgetblk(unsigned long qid, size_t align)
 {
     int8_t             *ptr = NULL;
     void               *ret = NULL;
@@ -327,6 +329,7 @@ memgetblk(long qid, size_t align)
                     case 1:
                         tab[0] = (uintptr_t)ptr;
                     case 0:
+                    default:
 
                         break;
                 }
@@ -340,7 +343,7 @@ memgetblk(long qid, size_t align)
             lim = buf->max;
             ofs++;
             buf->ofs = ofs;
-            if (ofs == buf->max) {
+            if (ofs == lim) {
                 mempopbuf(&g_mem.blktab[qid], buf);
             }
             mtunlkfmtx(&g_mem.blktab[qid].mtx);
@@ -351,7 +354,7 @@ memgetblk(long qid, size_t align)
         lim = buf->max;
         ofs++;
         buf->ofs = ofs;
-        if (ofs == buf->max) {
+        if (ofs == lim) {
             mempopbuf(&t_memtls->blktab[qid], buf);
         }
     }
@@ -369,7 +372,7 @@ memgetblk(long qid, size_t align)
 }
 
 static void *
-memgetrun(long qid, size_t align)
+memgetrun(unsigned long qid, size_t align)
 {
     int8_t             *ptr = NULL;
     void               *ret;
@@ -462,7 +465,7 @@ static void
 memputblk(struct membuf *buf, void *ptr)
 {
     struct membufq     *queue = buf->queue;
-    long                qid = queue->qid;
+    unsigned long       qid = queue->qid;
     struct memtls      *tls = queue->tls;
     long                lim = (tls) ? memnblktlsbuf(qid) : memnblkbuf(qid);
     struct membufq     *glob;
@@ -511,7 +514,7 @@ static struct membuf *
 memputrun(struct membuf *buf, void *adr)
 {
     struct membufq     *queue = buf->queue;
-    long                qid = queue->qid;
+    unsigned long       qid = queue->qid;
     struct memtls      *tls = queue->tls;
     long                ndx = memrunnum(qid, buf, adr);
     uintptr_t           bits = buf->bits;
@@ -609,7 +612,7 @@ memget(size_t size, size_t align)
     uintptr_t           type = membuftype(alnsz);
     void               *ptr;
     size_t              blksz;
-    long                qid;
+    unsigned long       qid;
 
     if (!(g_mem.flg & MEM_INIT_BIT)) {
         meminit(&g_mem);
@@ -630,6 +633,7 @@ memget(size_t size, size_t align)
         case MEM_BIG:
             blksz = roundup2(alnsz, PAGESIZE);
             ptr = memmapbig(blksz, aln);
+        default:
 
             break;
     }
@@ -705,6 +709,7 @@ memput(void *ptr)
                 break;
             case MEM_BIG:
                 memfreebig(buf->adr, size);
+            default:
 
                 break;
         }

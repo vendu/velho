@@ -1,7 +1,7 @@
 #! /bin/sh
 
-echo "bulding tests"
+echo "bulding test-string"
 gcc -O -Wall -g -I.. -o test-string test-string.c string.c
-echo "executing tests"
-./test
+echo "executing test-string"
+./test-string
 

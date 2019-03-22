@@ -113,14 +113,12 @@ tabhashadd(TABHASH_TAB_T **hashtab, const uintptr_t key, const uintptr_t val)
 {
     TABHASH_TAB_T      *head;
     TABHASH_TAB_T      *tab;
-    TABHASH_TAB_T      *prev;
     long                ndx;
     long                lim;
     long                loop;
     TABHASH_ITEM_T      item = { key, val };
 
     ndx = TABHASH_HASH(key);
-    prev = NULL;
     mtlkbit((m_atomic_t *)&hashtab[ndx], MEM_LK_BIT_OFS);
     head = hashtab[ndx];
     tab = (void *)((uintptr_t)head & ~MEM_LK_BIT);
@@ -149,7 +147,6 @@ tabhashadd(TABHASH_TAB_T **hashtab, const uintptr_t key, const uintptr_t val)
             tab->ncur = ndx;
             loop = 0;
         } else {
-            prev = tab;
             tab = tab->next;
         }
     } while (loop);
