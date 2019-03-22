@@ -6,19 +6,19 @@
 #include <mt/mtx.h>
 #endif
 #include <mt/sem.h>
-//#include <mt/thr.h>
+#include <mt/thr.h>
 
 long
-semwait(mtsem *sem)
+mtwaitsem(mtsem *sem)
 {
     do {
 #if defined(PTHREAD)
         while (!pthread_mutex_trylock(&sem->lk)) {
-            thryield();
+            mtyieldthr();
         }
 #elif defined(MTFMTX)
         while (!mttryfmtx(&sem->lk)) {
-            thryield();
+            mtyieldthr();
         }
 #endif
         if (sem->val > 0) {
@@ -36,7 +36,7 @@ semwait(mtsem *sem)
 #elif defined(MTFMTX)
             mtunlkfmtx(&sem->lk);
 #endif
-            thryield();
+            mtyieldthr();
         }
     } while (1);
 
@@ -49,11 +49,11 @@ semtrywait(mtsem *sem)
     do {
 #if defined(PTHREAD)
         while (!pthread_mutex_trylock(&sem->lk)) {
-            thryield();
+            mtyieldthr();
         }
 #elif defined(MTfMTX)
         while (!mttryfmtx(&sem->lk)) {
-            thryield();
+            mtyieldthr();
         }
 #endif
         if (sem->val > 0) {
@@ -86,11 +86,11 @@ sempost(mtsem *sem)
     do {
 #if defined(PTHREAD)
         while (!pthread_mutex_trylock(&sem->lk)) {
-            thryield();
+            mtyieldthr();
         }
 #elif defined(MTFMTX)
         while (mttryfmtx(&sem->lk)) {
-            thryield();
+            mtyieldthr();
         }
 #endif
         if (!sem->val) {
@@ -99,7 +99,7 @@ sempost(mtsem *sem)
 #elif defined(MTFMTX)
             mtunlkfmtx(&sem->lk);
 #endif
-            thryield();
+            mtyieldthr();
         } else if (sem->val != MTSEM_MAXVAL) {
             sem->val++;
 #if defined(PTHREAD)

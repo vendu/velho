@@ -16,12 +16,13 @@
 
 typedef pthread_cond_t mtcond;
 
-#define condinit(cp)               pthread_cond_init(cp, NULL)
-#define condwait(cp, mp)           pthread_cond_wait(cp, mp)
-#define condwaittimed(cp, mp, tsp) pthread_cond_timedwait(cp, mp, tsp)
-#define condsigone(cp)             pthread_cond_signal(cp)
-#define condsigall(cp)             pthread_cond_broadcast(cp)
-#define condfree(cp)               pthread_cond_destroy(cp)
+#define mtinitcond(cp)                  pthread_cond_init(cp, NULL)
+#define mtwaitcond(cp, mp)              pthread_cond_wait(cp, mp)
+#define mtwaitcondtimed(cp, mp, tsp)    pthread_cond_timedwait(cp, mp, tsp)
+#define mtsigcondone(cp)                pthread_cond_signal(cp)
+#define mtsigcondmany(cp, n)            pthread_cond_broadcast(cp)
+#define mtsigcondall(cp)                pthread_cond_broadcast(cp)
+#define mtfreecond(cp)                  pthread_cond_destroy(cp)
 
 #elif defined(MTCOND)
 
@@ -32,19 +33,20 @@ typedef struct __mtcond {
 
 #endif
 
-#define condsignal(cp) condsigmany(cp, 8)
-void condinit(mtcond *cond);
-long condsigone(mtcond *cond);
-long condsigmany(mtcond *cond, long nthr);
-long condsigall(mtcond *cond);;
+#define mtsigcond(cp)   mtsigcondmany(cp, 8)
+
+void    mtinitcond(mtcond *cond);
+long    mtsigcondone(mtcond *cond);
+long    mtsigcondmany(mtcond *cond, long nthr);
+long    mtsigcondall(mtcond *cond);
 #if (MTFMTX)
-long condwait(mtcond *cond, mtfmtx *mtx);
-long condwaitabstime(mtcond *cond, mtfmtx *mtx,
-                     const struct timespec *absts);
+long    mtwaitcond(mtcond *cond, mtfmtx *mtx);
+long    mtwaitcondabstime(mtcond *cond, mtfmtx *mtx,
+                          const struct timespec *absts);
 #elif (MTMTX)
-long condwait(mtcond *cond, mtmtx *mtx);
-long condwaitabstime(mtcond *cond, mtmtx *mtx,
-                     const struct timespec *absts);
+long    mtwaitcond(mtcond *cond, mtmtx *mtx);
+long    mtwaitcondabstime(mtcond *cond, mtmtx *mtx,
+                          const struct timespec *absts);
 #endif
 
 #endif /* __MT_COND_H__ */

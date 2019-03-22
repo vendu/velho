@@ -9,20 +9,20 @@
 #include <mt/mtx.h>
 
 #if defined(PTHREAD) && !defined(__KERNEL__)
-#define thrid()         ((uintptr_t)pthread_self())
+#define mtthrself()         ((uintptr_t)pthread_self())
 #endif
 
 #if defined(VELHO)
 #include <sched.h>
-#define thryield()      sched_yield()
+#define mtyieldthr()    sched_yield()
 #elif defined(MTTHREAD) || (POSIX_THREAD)
-#define thryield()      pthread_yield()
+#define mtyieldthr()    pthread_yield()
 #elif defined(_WIN64) || defined(_WIN32)
-#define thryield()      kYieldProcessor()
+#define mtyieldthr()    kYieldProcessor()
 #elif defined(__linux__) && !defined(__KERNEL__)
-#define thryield()      sched_yield()
+#define mtyieldthr()    sched_yield()
 #elif defined(__KERNEL__)
-#define thryield()      schedyield()
+#define mtyieldthr()    schedyield()
 #endif
 
 #if defined(MTTHREAD)
@@ -75,12 +75,12 @@ typedef struct __mtthrqueue {
     mtthr      *tail;
 } mtthrqueue;
 
-extern void     thrwait1(mtthrqueue *queue);
-extern long     thrsleep2(mtthrqueue *queue, const struct timespec *absts);
-extern mtthr  * thrwake1(mtthrqueue *queue);
-extern void     thrwakeall(mtthrqueue *queue);
+extern void     mtwaitthr1(mtthrqueue *queue);
+extern long     mtsleepthr2(mtthrqueue *queue, const struct timespec *absts);
+extern mtthr  * mtwakethr1(mtthrqueue *queue);
+extern void     mtwakethrall(mtthrqueue *queue);
 
-#define         thrwait()       thrwait1(NULL)
+#define         mtwaitthr()     thrwait1(NULL)
 
 #endif /* defined(MTTHREAD) */
 

@@ -6,9 +6,7 @@
 #define POSIX_THREAD 0
 #define ZERO_THREAD  1
 #define ZERO_MUTEX   1
-#if !defined(PTHREAD)
-#define PTHREAD 0
-#endif
+/* #define PTHREAD     1 */
 
 #if (ZERO_MUTEX)
 #include <mt/mtx.h>

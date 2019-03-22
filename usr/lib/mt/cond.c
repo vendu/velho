@@ -9,7 +9,7 @@
 #include <mt/thr.h>
 
 void
-condinit(mtcond *cond)
+mtinitcond(mtcond *cond)
 {
 #if (MTFMTX)
     mtinitfmtx(&cond->queue.mtx);
@@ -21,26 +21,26 @@ condinit(mtcond *cond)
 }
 
 long
-condsigone(mtcond *cond)
+mtsigcondone(mtcond *cond)
 {
     if (!cond) {
 
         return -EINVAL;
     }
-    thrwake1(&cond->queue);
+    mtwakethr1(&cond->queue);
 
     return 0;
 }
 
 long
-condsigmany(mtcond *cond, long nthr)
+mtsigcondmany(mtcond *cond, long nthr)
 {
     if (!cond || !nthr) {
 
         return -EINVAL;
     }
     while (nthr--) {
-        if (!thrwake1(&cond->queue)) {
+        if (!mtwakethr1(&cond->queue)) {
 
             return 0;
         }
@@ -56,13 +56,13 @@ condsigall(mtcond *cond)
 
         return EINVAL;
     }
-    thrwakeall(&cond->queue);
+    mtwakethrall(&cond->queue);
 
     return 0;
 }
 
 long
-condwait(mtcond *cond, mtfmtx *fmtx)
+mtwaitcond(mtcond *cond, mtfmtx *fmtx)
 {
     if (!cond || !fmtx) {
 
@@ -71,7 +71,7 @@ condwait(mtcond *cond, mtfmtx *fmtx)
 
         return -EPERM;
     } else {
-        thrwait1(&cond->queue);
+        mtwaitthr1(&cond->queue);
     }
     mtlkfmtx(fmtx);
 
@@ -79,7 +79,7 @@ condwait(mtcond *cond, mtfmtx *fmtx)
 }
 
 long
-condwaitabstime(mtcond *cond, mtfmtx *fmtx, const struct timespec *absts)
+mtwaitcondabstime(mtcond *cond, mtfmtx *fmtx, const struct timespec *absts)
 {
     if (!cond || !fmtx || !absts || absts->tv_sec < 0
         || absts->tv_nsec < 0 || absts->tv_nsec >= 1000000000) {
@@ -88,7 +88,7 @@ condwaitabstime(mtcond *cond, mtfmtx *fmtx, const struct timespec *absts)
     } else if (!mttryfmtx(fmtx)) {
 
         return -EPERM;
-    } else if (thrsleep2(&cond->queue, absts) < 0) {
+    } else if (mtsleepthr2(&cond->queue, absts) < 0) {
 
         return -EINVAL;
     }
