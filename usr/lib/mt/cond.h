@@ -1,6 +1,8 @@
 #ifndef __MT_COND_H__
 #define __MT_COND_H__
 
+/* velho conditional variables */
+
 #if defined(PTHREAD)
 #include <stddef.h>
 #include <time.h>

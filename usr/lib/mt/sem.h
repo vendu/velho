@@ -1,6 +1,8 @@
 #ifndef __MT_SEM_H__
 #define __MT_SEM_H__
 
+/* velho semaphores */
+
 #include <limits.h>
 #include <mt/mtx.h>
 

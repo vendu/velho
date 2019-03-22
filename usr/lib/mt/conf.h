@@ -1,6 +1,8 @@
 #ifndef __MT_CONF_H_
 #define __MT_CONF_H_
 
+/* velho libmt configuration file */
+
 #define POSIX_THREAD 0
 #define ZERO_THREAD  1
 #define ZERO_MUTEX   1

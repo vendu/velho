@@ -1,6 +1,8 @@
 #ifndef __MT_SPINRW_H__
 #define __MT_SPINRW_H__
 
+/* velho read-write spinlocks */
+
 /* REFERENCE: https://jfdube.wordpress.com/2014/01/03/implementing-a-recursive-read-write-spinlock/ */
 
 /*

@@ -1,6 +1,8 @@
 #ifndef __MT_LK_H__
 #define __MT_LK_H__
 
+/* velho lock routines */
+
 #include <mach/asm.h>
 
 static INLINE long

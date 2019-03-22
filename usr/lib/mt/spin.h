@@ -1,6 +1,8 @@
 #ifndef __MT_SPIN_H__
 #define __MT_SPIN_H__
 
+/* velho spinlocks */
+
 #include <mach/asm.h>
 
 #if !defined(MTNEWSPIN)

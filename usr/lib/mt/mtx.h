@@ -1,6 +1,8 @@
 #ifndef __MT_MTX_H__
 #define __MT_MTX_H__
 
+/* velho mutex locks */
+
 #define MTPTHREAD       1
 
 #define MTMTX           1

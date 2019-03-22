@@ -6,12 +6,13 @@
 #include <zero/cdefs.h>
 #include <zero/time.h>
 #include <zero/prof.h>
-#define HTLIST_TYPE             mtthr
-#define HTLIST_QTYPE            mtthrqueue
-#define HTLIST_RM_COND(thr)     ((thr)->sleep)
-#define HTLIST_QUEUE(thr)       ((thr)->sleep = MT_THR_ASLEEP)
-#define HTLIST_DEQUEUE(thr)     ((thr)->sleep = MT_THR_AWAKE)
-#include <zero/htlist.h>
+
+#define DEQLIST_TYPE            mtthr
+#define DEQLIST_QTYPE           mtthrqueue
+#define DEQLIST_RM_COND(thr)    ((thr)->sleep)
+#define DEQLIST_QUEUE(thr)      ((thr)->sleep = MT_THR_ASLEEP)
+#define DEQLIST_DEQUEUE(thr)    ((thr)->sleep = MT_THR_AWAKE)
+#include <mt/deq.h>
 
 static mtthrqueue               thrsleepqueue;
 THREADLOCAL mtthr               thrself;
@@ -24,7 +25,7 @@ thrwait1(mtthrqueue *queue)
     if (!queue) {
         queue = &thrsleepqueue;
     }
-    htlistpush(queue, thr);
+    deqlistpush(queue, thr);
     while (m_atomread(&thr->sleep)) {
         thryield();
     }
@@ -46,7 +47,7 @@ thrsleep2(mtthrqueue *queue, const struct timespec *absts)
     if (!queue) {
         queue = &thrsleepqueue;
     }
-    htlistpush(queue, thr);
+    deqlistpush(queue, thr);
 #if defined(USECLOCKNANOSLEEP)
     while (clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, absts, &tsrem)) {
         if (errno == EINTR) {
@@ -54,14 +55,14 @@ thrsleep2(mtthrqueue *queue, const struct timespec *absts)
             continue;
         } else {
             if (m_atomread(&thr->sleep)) {
-                htlistrm(queue, thr);
+                deqlistrm(queue, thr);
             }
 
             return -1;
         }
     }
     if (m_atomread(&thr->sleep)) {
-        htlistrm(queue, thr);
+        deqlistrm(queue, thr);
     }
 #else
     gettimeofday(&tvcur, NULL);
@@ -69,7 +70,7 @@ thrsleep2(mtthrqueue *queue, const struct timespec *absts)
     do {
         if (timevalcmp(&tvout, &tvcur) > 0) {
             if (m_atomread(&thr->sleep)) {
-                htlistrm(queue, thr);
+                deqlistrm(queue, thr);
             }
 
             return 0;
@@ -90,7 +91,7 @@ thrwake1(mtthrqueue *queue)
     if (!queue) {
         queue = &thrsleepqueue;
     }
-    htlistdequeue(queue, &thr);
+    deqlistdequeue(queue, &thr);
 
     return thr;
 }
@@ -104,7 +105,7 @@ thrwakeall(mtthrqueue *queue)
         queue = &thrsleepqueue;
     }
     do {
-        htlistdequeue(queue, &thr);
+        deqlistdequeue(queue, &thr);
     } while (thr);
 
     return;

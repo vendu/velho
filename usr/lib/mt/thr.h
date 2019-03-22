@@ -1,6 +1,8 @@
 #ifndef __MT_THR_H__
 #define __MT_THR_H__
 
+/* velho thread abstraction */
+
 #include <mt/conf.h>
 #include <stddef.h>
 #include <stdint.h>

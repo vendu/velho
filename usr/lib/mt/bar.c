@@ -4,25 +4,25 @@
 #include <mt/mtx.h>
 #include <mt/cond.h>
 #include <mt/bar.h>
-#include <zero/sys.h>
+//#include <zero/sys.h>
 
 #if (MTFMTX)
 #define barinitlk(lp) (*(lp) = MTFMTXINITVAL)
-#define barlk(lp)     mtlkfmtx(lp)
-#define barunlk(lp)   mtunlkfmtx(lp)
+#define mtlkbar(lp)     mtlkfmtx(lp)
+#define mtunlkbar(lp)   mtunlkfmtx(lp)
 #else
 #define barinitlk(lp) (*(lp) = MTFMTXINITVAL)
-#define barlk(lp)     mtxlk(lp)
+#define mtlkbar(lp)     mtxlk(lp)
 #endif
 
 void
 barfree(mtbar *bar)
 {
-    barlk(&bar->lk);
+    mtlkbar(&bar->lk);
     while (bar->num > BARFLAGBIT) {
-        condwait(&bar->cond, &bar->lk);
+        mtwaitcond(&bar->cond, &bar->lk);
     }
-    barunlk(&bar->lk);
+    mtunlkbar(&bar->lk);
 //    condfree(&bar->cond);
 }
 
@@ -30,7 +30,7 @@ void
 barinit(mtbar *bar, unsigned long cnt)
 {
     barinitlk(&bar->lk);
-    condinit(&bar->cond);
+    mtinitcond(&bar->cond);
     bar->cnt = cnt;
     bar->num = BARFLAGBIT;
 }
@@ -38,9 +38,9 @@ barinit(mtbar *bar, unsigned long cnt)
 long
 barwait(mtbar *bar)
 {
-    barlk(&bar->lk);
+    mtlkbar(&bar->lk);
     while (bar->num > BARFLAGBIT) {
-        condwait(&bar->cond, &bar->lk);
+        mtwaitcond(&bar->cond, &bar->lk);
     }
     if (bar->num == BARFLAGBIT) {
         bar->num = 0;
@@ -48,19 +48,19 @@ barwait(mtbar *bar)
     bar->num++;
     if (bar->num == bar->cnt) {
         bar->num += BARFLAGBIT - 1;
-        condsigall(&bar->cond);
-        barunlk(&bar->lk);
+        mtsigcondl(&bar->cond);
+        mtunlkbar(&bar->lk);
 
         return BARSERIALTHR;
     } else {
         while (bar->num < BARFLAGBIT) {
-            condwait(&bar->cond, &bar->lk);
+            mtwaitcond(&bar->cond, &bar->lk);
         }
         bar->num--;
         if (bar->num == BARFLAGBIT) {
-            condsigall(&bar->cond);
+            mtsigcondl(&bar->cond);
         }
-        barunlk(&bar->lk);
+        mtunlkbar(&bar->lk);
 
         return 0;
     }

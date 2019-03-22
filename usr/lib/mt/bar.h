@@ -1,6 +1,8 @@
 #ifndef __MT_BAR_H__
 #define __MT_BAR_H__
 
+/* velho thread barriers */
+
 #define MTFMTX 1
 
 #include <stdint.h>

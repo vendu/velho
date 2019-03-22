@@ -1,6 +1,8 @@
 #ifndef __MT_TKTLK_H__
 #define __MT_TKTLK_H__
 
+/* velho ticket locks */
+
 /* REFERENCE: http://locklessinc.com/articles/locks/ */
 
 #include <stdint.h>

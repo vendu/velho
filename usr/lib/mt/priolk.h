@@ -1,6 +1,8 @@
 #ifndef __MT_PRIOLK_H__
 #define __MT_PRIOLK_H__
 
+/* velaho priority locks */
+
 #include <stdint.h>
 #include <mach/param.h>
 #if defined(PRIOLKUSEMMAP)

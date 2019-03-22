@@ -1,6 +1,8 @@
 #ifndef __MT_SPINWT_H__
 #define __MT_SPINWT_H__
 
+/* velho spin-wait locks */
+
 /*
  * NOTES
  * -----
