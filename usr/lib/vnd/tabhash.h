@@ -1,6 +1,15 @@
 #ifndef __VND_TABHASH_H__
 #define __VND_TABHASH_H__
 
+/*
+ * cache-friendly hash table
+ * -------------------------
+ * - instead of chaining single hash-items into linked lists, we chain tables
+ *   of a few dozen items with a few words of book-keeping information in order
+ *   to leverage massive cache-prefetching and avoid pointer-chasing/cache-
+ *   fetching on per-item basis
+ */
+
 #include <string.h>
 #include <mach/param.h>
 #include <mt/lk.h>
@@ -25,7 +34,6 @@ extern TABHASH_TAB_T   *TABHASH_BUF;
 #define TABHASH_CLEAR(ptr)      memset(ptr, 0, sizeof(TABHASH_ITEM_T))
 #endif
 
-struct tabhashtab;
 #define TABHASH_TAB_SIZE        (roundup2(sizeof(struct tabhashtab), CLSIZE))
 #define TABHASH_BUF_SIZE        (2 * PAGESIZE)
 #define TABHASH_CACHE_TABS      (TABHASH_BUF_SIZE / TABHASH_TAB_SIZE)

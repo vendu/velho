@@ -61,6 +61,7 @@
 #define MEM_RUN_MIN             MEM_RUN_UNIT
 #define MEM_RUN_MAX             (MEM_RUN_QUEUES * MEM_RUN_UNIT)
 /* fixed for run allocation bitmap of a single long */
+#define MEM_BUF_MAP_BITS        (CHAR_BIT * sizeof(uintptr_t))
 #define MEM_RUN_QUEUES          MEM_BUF_MAP_BITS
 #define MEM_RUN_MID_QUEUE_MIN   (MEM_RUN_QUEUES >> 2)
 #define MEM_RUN_BIG_QUEUE_MIN   (MEM_RUN_QUEUES >> 1)
@@ -119,26 +120,6 @@
         ? 2                                                             \
         : 1))
 
-/* page-member */
-#define MEM_HASH_NREF_BITS              (PAGESIZELOG2 - MEM_TYPE_BITS)
-#define MEM_HASH_NREF_MASK              (((uintptr_t)1 << MEM_HASH_NREF_BITS) \
-                                         - 1)
-#define MEM_HASH_TYPE_SHIFT             MEM_HASH_NREF_BITS
-#define MEM_HASH_TYPE_MASK              (MEM_TYPE_MASK << MEM_HASH_TYPE_SHIFT)
-#define MEM_HASH_TYPE_BLK               (MEM_BLK << MEM_HASH_TYPE_SHIFT)
-#define MEM_HASH_TYPE_RUN               (MEM_RUN << MEM_HASH_TYPE_SHIFT)
-#define MEM_HASH_TYPE_BIG               (MEM_BIG << MEM_HASH_TYPE_SHIFT)
-#define MEM_HASH_PAGE_MASK              (~(PAGESIZE - 1))
-/* buf-member */
-#define MEM_BUF_ADR_MASK                (~MEM_BUF_QUEUE_MASK)
-#define MEM_BUF_QUEUE_MASK              (((uintptr_t)1 << MEM_BUF_QUEUE_BITS) \
-                                         - 1)
-#define MEM_BUF_QUEUE_BITS              8
-#define MEM_BUF_TLS_SHIFT               MEM_QUEUE_BITS
-#define MEM_BUF_TLS_BIT                 ((uintptr_t)1 << MEM_BUF_TLS_SHIFT)
-
-#define MEM_CACHE_BLK_BUFS      16
-#define MEM_CACHE_BUFS          32
  /* must be power of two size/alignment at least a page */
 #define membufsize()            PAGESIZE
 #define memblkbufsize()                                                 \
@@ -147,9 +128,6 @@
 #define memrunbufsize()         (membufsize())
 #define membigbufsize()         (membufsize())
 
-/* buf-word bits */
-#define MEM_BUF_QUEUE_BITS      8
-#define MEM_BUF_MAP_BITS        (1L * CHAR_BIT * sizeof(uintptr_t))
 #define membufpagenum(buf, ptr)                                         \
     (((uintptr_t)(ptr) - (uintptr_t)(buf)->adr) >> PAGESIZELOG2)
 #define membufpagebit(buf, num)                                         \
@@ -218,21 +196,103 @@ struct memconf {
 #define MEM_ALLOC_ON_NULL       (1 << 1)
 #define MEM_ERRNO_ON_RESIZE     (1 << 2)
 
-void  * memget(size_t size, size_t align);
+void  * memget(size_t size, size_t align, size_t *retsize);
 void    memput(void *ptr);
 void  * memresize(void *ptr, size_t size, size_t align, long flg);
 
 /*
- * illustrative little-endian bitfield
- * -----------------------------------
+ * hash-item (struct memhash) contents
+ * ------------------
+ *
+ * struct memhash consists of two machine words as described below
+ *
  * struct memhash {
- *     unsigned nref    : MEM_HASH_NREF_BITS;
- *     unsigned page    : PTRBITS - MEM_HASH_NREF_BITS;
+ *     uintptr_t page;
+ *     uintptr_t val;
+ * };
+ *
+ * here we list the contents of struct memhash for different allocation classes
+ * in little-endian (least-significant byte first) bit/byte-order
+ *
+ * blk-class
+ * ---------
+ *
+ * nref - number of active allocations in page
+ * type - allocation type (MEM_TYPE_BLK)
+ * adr  - allocation page-address
+ * qid  - blk-queue ID
+ * tls  - thread-local storage flag
+ * buf  - header (struct membuf) address
+ *
+ * struct memhash {
+ *     unsigned nref    : PAGESIZELOG2 - MEM_TYPE_BITS;
+ *     unsigned type    : MEM_TYPE_BITS;
+ *     unsigned adr     : MEM_PAGE_PTR_BITS;
  *     unsigned qid     : MEM_BUF_QUEUE_BITS;
- *     unsigned buf     : PTRBITS;
+ *     unsigned tls     : 1;
+ *     unsigned buf     : MEM_PAGE_PTR_BITS;
+ * };
+ *
+ * run-class
+ * ---------
+ *
+ * res  - reserved bits
+ * type - allocation type (MEM_TYPE_RUN)
+ * adr  - allocation [page] address
+ * qid  - run-queue ID
+ * tls  - thread-local storage flag
+ * size - allocation size
+ *
+ * struct memhash {
+ *     unsigned res     : PAGESIZELOG2 - MEM_TYPE_BITS;
+ *     unsigned type    : MEM_TYPE_BITS;
+ *     unsigned adr     : MEM_PAGE_PTR_BITS;
+ *     unsigned qid     : MEM_BUF_QUEUE_BITS
+ *     unsigned tls     : 1;
+ *     unsigned buf     : MEM_PAGE_PTR_BITS
+ * };
+ *
+ * big-class
+ * ---------
+ *
+ * res  - reserved bits
+ * type - allocation type (MEM_TYPE_RUN)
+ * adr  - allocation [page] address
+ * aln  - alignment shift count
+ * tls  - thread-local storage flag
+ * size - allocation size
+ *
+ * struct memhash {
+ *     unsigned res     : PAGESIZELOG2 - MEM_TYPE_BITS;
+ *     unsigned type    : MEM_TYPE_BITS;
+ *     unsigned adr     : MEM_PAGE_PTR_BITS;
+ *     unsigned aln     : MEM_BIG_ALN_BITS;
+ *     unsigned tls     : 1;
+ *     unsigned size    : MEM_BIG_SIZE_BITS;
  * };
  */
-
+/* page-member */
+#define MEM_HASH_NREF_BITS              (PAGESIZELOG2 - MEM_TYPE_BITS)
+#define MEM_HASH_NREF_MASK              ((1U << MEM_HASH_NREF_BITS) - 1)
+#define MEM_HASH_TYPE_SHIFT             MEM_HASH_NREF_BITS
+#define MEM_HASH_TYPE_MASK              (MEM_TYPE_MASK << MEM_HASH_TYPE_SHIFT)
+#define MEM_HASH_TYPE_BLK               (MEM_BLK << MEM_HASH_TYPE_SHIFT)
+#define MEM_HASH_TYPE_RUN               (MEM_RUN << MEM_HASH_TYPE_SHIFT)
+#define MEM_HASH_TYPE_BIG               (MEM_BIG << MEM_HASH_TYPE_SHIFT)
+#define MEM_PAGE_PTR_BITS               (PTRBITS - PAGESIZELOG2)
+#define MEM_HASH_PAGE_MASK              (~(PAGESIZE - 1))
+/* val-member */
+#define MEM_BUF_ADR_MASK                (~MEM_BUF_QUEUE_MASK)
+#define MEM_BUF_ADR_BITS                (ADRBITS - MEM_BUF_QUEUE_BITS - MEM_BUF_ALN_BITS - 1)
+#define MEM_BUF_QUEUE_MASK              (((uintptr_t)1 << MEM_BUF_QUEUE_BITS) \
+                                         - 1)
+#define MEM_BUF_QUEUE_BITS              8
+#define MEM_BIG_ALN_BITS                8
+#define MEM_BUF_TLS_SHIFT               MEM_QUEUE_BITS
+#define MEM_BUF_TLS_BIT                 ((uintptr_t)1 << MEM_BUF_TLS_SHIFT)
+#define MEM_BIG_SIZE_BITS               (ADRBITS - MEM_BIG_ALN_BITS - 1)
+#define MEM_CACHE_BLK_BUFS              16
+#define MEM_CACHE_BUFS                  32
 struct memhash {
     uintptr_t   page;           // block page address + reference count
     uintptr_t   val;            // queue ID + allocation buffer address + flags
