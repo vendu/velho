@@ -22,7 +22,7 @@
 #define memsethashpage(adr, type)       ((uintptr_t)(adr)               \
                                          | ((type) << MEM_HASH_TYPE_SHIFT))
 #define memsethashbuf(buf, qid)         ((uintptr_t)(buf) | (qid))
-#define memsethashval(sz)               (sz)
+#define memsethashval(sz, cnt)          ((sz) | (cnt))
 
 #define MEM_ALIGN_MIN                   CLSIZE
 
