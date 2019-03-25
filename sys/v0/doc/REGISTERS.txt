@@ -9,25 +9,26 @@ R0	zero register - reads return zero, writes are ignored
 Caller-Save/Function Argument Registers
 ---------------------------------------
 
-R1	first function argument, function return value
-R2	second function argument, second function return value
-R3	third function argument
-R4	fourth function argument
-R5	fifth function argument
-R6	sixth function argument
-R7	seventh function argument
+R0	first function argument, function return value
+R1	second function argument, second function return value
+R2	third function argument
+R3	fourth function argument
 
 Callee-Save/Scratch Registers
 -----------------------------
 
-R8	first scratch register
-R9	second  scratch register
-R10	third scratch register
-R11	fourth scratch register
-R12	fifth scratch register
-R13	sixth scratch register
-R14	seventh scratch register
-R15	eighth scratch register
+R4	first scratch/local register
+R5	second scratch/local register
+R6	third scratch/local register
+R7	fourth  scratch/local register
+R8	fifth scratch/local register
+R9	sixth scratch/local register
+R10	seventh scratch/local register
+R11	eigth scratch/local register
+R12/FP	frame-pointer
+R12/SP	stack-pointer
+R14/LR	link-register (return address)
+R15/PC	program counter
 
 Special Registers
 -----------------
@@ -35,21 +36,19 @@ Special Registers
 ID	Description		Contents
 --	-----------		--------
 
-PC	program counter		program counter, instruction pointer
-LR	link register		return address back to caller
-FP	frame pointer		function stack-frame address
-SP	stack pointer		current stack pointer
-MSW	machine status word	processor state flags
-WC	task register		ID, status, flags
-IM	interrupt mask		1-bits for masked interrupts, 0 for enabled
-IV	interrupt vector	interrupt descriptor table address + # of items
-PD	page directory		page structure base address + limit
-TCB	thread context base	thread context table base address
-BLO	bound range low limit	array base address
-BHI	bound range high limit	base + size, 1 past last item
-TLO	timestamp counter	low 32-bit word of timestamp counter
-THI	timestamp counter	high 32-bit word of timestamp counter
-MFR	machine feature word	flags for features present
+MSW     machine status word
+TCB     thread control block base address
+TLS	thread-local storage pointer
+TWC     thread wait channel
+IM      interrupt-mask (1-bit enabled)
+IV      interrupt vector address
+PD      page directory address + flags
+IOM     I/O descriptor map base address
+BLO     bound-range low limit
+BHI     bound-range high limit (base + size)
+TLO     timestamp low 32 bits
+THI     timestamp high 32 bits
+MFR     machine feature word, read-only
 
 MSW Register Bits
 -----------------
@@ -57,13 +56,16 @@ MSW Register Bits
 ID	Description		Bits
 --	-----------		----
 
-TID	thread ID 		[0:7]
 ZF	zero/equal		8
+CF	carry/borrow		1
+OF	overflow		2
+LT	less than		3
+SF	signed			4
+IF	interrupt		5
+
 SF	signed result		9
 LT	less than		10
 GT	greater than		11
-CF	carry/borrow		12
-OF	overflow		13
 IF	interrupts enabled	14
 RF	ring-flag, 1 for system 15
 

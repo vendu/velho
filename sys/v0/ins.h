@@ -224,23 +224,21 @@ v0decadr2(struct v0 *vm, struct v0ins *ins)
 #define V0_NSF_OP     (V0_NOT_BIT | V0_SF_MASK)
 /* SUBR-unit */
 #define V0_SUBR_UNIT  0x0a
-#define V0_BEG_BIT    (1 << 0)
 #define V0_FIN_BIT    (1 << 0)
-#define V0_INTR_BIT   (1 << 0)
+#define V0_RET_BIT    (1 << 0)
 #define V0_SUBR_BIT   (1 << 1)
 #define V0_SYS_BIT    (1 << 2)
-#define V0_THR_BIT    (1 << 2)
-#define V0_RET_BIT    (1 << 3)  // return from subroutine
-#define V0_CSF_OP     0x00
-#define V0_BEG_OP     V0_BEG_BIT
+#define V0_INTR_BIT   (1 << 2)
+#define V0_THR_BIT    (1 << 3)
+#define V0_BEG_OP     0x00
+#define V0_FIN_OP     V0_FIN_BIT
 #define V0_CSR_OP     V0_SUBR_BIT
-#define V0_FIN_OP     (V0_FIN_BIT | V0_SUBR_BIT)
+#define V0_RET_OP     (V0_SUBR_BIT | V0_FIN_BIT)
 #define V0_SYS_OP     V0_SYS_BIT
-#define V0_SRT_OP     (V0_FIN_BIT | V0_SYS_BIT)
-#define V0_THR_OP     (V0_SUBR_BIT | V0_THR_BIT)
-#define V0_THX_OP     (V0_FIN_BIT | V0_SUBR_BIT | V0_THR_BIT)
-#define V0_RET_OP     V0_RET_BIT
+#define V0_SRT_OP     (V0_SYS_BIT | V0_RET_BIT)
 #define V0_IRT_OP     (V0_INTR_BIT | V0_RET_BIT)
+#define V0_THR_OP     V0_THR_BIT
+#define V0_THX_OP     (V0_THR_BIT | V0_RET_BIT)
 /* SYS-unit */
 #define V0_SYS_UNIT   0x0b
 #define V0_ON_BIT     (1 << 0)  // enable operation

@@ -147,9 +147,7 @@ SAR	0x02	RV1, R2		--HB--	---	arithmetic right shift
 USAR	0x02	RV1, R2		U-HB--	---	arithmetic right shift
 ----	0x03
 ROL	0x04	RV1, R2		------	---	rotate left
-UROL	0x04	RV1, R2		U-HB--	---	rotate left
 ROR	0x05	RV1, R2		--HB--	---	rotate right
-UROR	0x05	RV1, R2		U-HB--	---	rotate right
 ----	0x06
 ----	0x07
 
@@ -201,29 +199,21 @@ UMLH			     	UIHB--	---	unsigned high multiplication
 BIT-UNIT	0x05
 --------
 SEX	0x00	R1		-IHB--	---	sign extend
-USEX	0x00	R1		UIHB--	---	sign extend
 ZEX	0x01	R1		-IHB--	---	zero extend
-UZEX	0x01	R1		UIHB--	---	zero extend
 NEG	0x02	R1		-IHB--	---	arithmetic negation
-UNEG	0x02	R1		UIHB--	---	arithmetic negation
 SWP	0x03	R1		-IHB--	---	swap byte order
-USWP	0x03	R1		UIHB--	---	swap byte order
 
 Miscellaneous Operations	- OPTIONAL
 ------------------------
 PAR	0x04	R1, R2		-IHB--	---	compute byte-parity, 1 for odd
 UPAR	0x04	R1, R2		UIHB--	---	compute byte-parity, 1 for odd
 CLZ	0x05	R1, R2		-IHB--	---	count leading zero-bits
-UCLZ	0x05	R1, R2		UIHB--	---	count leading zero-bits
 HAM	0x06	R1, R2		-IHB--	---	count Hamming weight
-UHAM	0x06	R1, R2		UIHB--	---	count Hamming weight
 ----	0x07
 BCD	0x08	RI1, R2		-IHB--	---	encode to binary-coded decimal
 UBCD	0x08	RI1, R2		UIHB--	---	encode to binary-coded decimal
 DCD	0x09	RI1, R2		-IHB--	---	decode from binary-coded decimal
-UDCD	0x09	RI1, R2		UIHB--	---	decode from binary-coded decimal
 CRC	0x0a	RI1, R2		-IHB--	---	compute IPv4 or ECC checksum
-UCRC	0x0a	RI1, R2		UIHB--	---	compute IPv4 or ECC checksum
 ----	0x0b
 HSH	0x0c	RI1, R2		-IHB--	---	hash source operand
 HUN	0x0d	RI1, R2		-IHB--	---	unhash source operand
@@ -264,20 +254,22 @@ STN	0x0f	RI1, A2		-IHB--	---	cache-bypassing store
 Conditions for CLD and CST
 --------------------------
 
-Code	MSW-Bits
-----	--------
-EQ	ZF
-Z	ZF
-NE	!ZF
-NZ	!ZF
-LT	!ZF && LT
-LE	ZF || LT
-GT	!ZF && !LT
-GE	ZF || !LT
-CF	CF
-NC	!CF
-OF	OF
-NO	!OF
+Code	MSW-Bits	Description
+----	--------	-----------
+EQ	ZF		equal
+NE	!ZF		not equal
+LT	!ZF && LT	less than
+LO	!CF    		lower (unsigned < 0)
+LE	ZF || LT	less than or equal
+LS	!CF || ZF	lower or same (unsigned <=)
+GT	!ZF && !LT	greater than
+HI	CF && !ZF	higher (unsigned > 0)
+GE	ZF || !LT	greater than or equal
+HS	CF   		higher or same (unsigned >=)
+CF	CF		carry set
+NC	!CF		carry not set
+OF	OF		overflow set
+NO	!OF		overflow not set
 
 STACK-UNIT	0x07
 ----------
@@ -335,16 +327,16 @@ Conditions
 
 SUBR-UNIT	0x0a
 ---------
-CSF	0x00	RI1, A		-I----	---	fill registers and stack frame
-BEG	0x01	   		------	---	psh %fp; ldr %fp, %sp
+BEG	0x00	I1   		------	---	subroutine prologue
+FIN	0x01	RI1		-I----	---	subroutine epilogue; set stack
 CSR	0x02	A1		-I----	---	call subroutine
-FIN	0x03	RI1		-I----	---	subroutine epilogue; set stack
+RET	0x03	RI1		-I----	---	return from subroutine
 SYS	0x04	RI1, A		-I----	---	enter system call
 SRT	0x05	RI1		-I----	---	return from system call
-THR	0x06	RI1, A		-I----	---	launch a thread
-THX	0x07	RI1		-I----	---	terminate a thread
-RET	0x08	RI1		-I----	---	return from subroutine
-IRT	0x09	RI1		-I----	---	return from interrupt function
+IRT	0x06	RI1		-I----	---	return from interrupt function
+----    0x07
+THR	0x08	RI1, A		-I----	---	launch a thread
+THX	0x09	RI1		-I----	---	terminate a thread
 
 IO-UNIT		0x0b
 -------

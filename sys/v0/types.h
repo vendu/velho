@@ -15,38 +15,33 @@ typedef uint32_t        v0pagedesc;     // [virtual] memory page descriptor
 typedef uint32_t        v0iodesc;       // I/O-device page address + flags
 typedef uint32_t        v0ioperm;       // I/O-permission bits
 
+struct v0sysctx {
+    v0reg       msw;
+    v0reg       sp;
+};
+
 struct v0tcb {
-    v0wreg regs[V0_STD_REGS];
-    v0reg  fp0;                         // ring #0 (system mode) frame-pointer
-    v0reg  sp0;                         // ring #0 stack-pointer
+    v0wreg      regs[V0_STD_REGS];
+    v0reg       fp0;                    // ring #0 (system mode) frame-pointer
+    v0reg       sp0;                    // ring #0 stack-pointer
 };
 
 /* callee-save structure */
 struct v0calleectx {
-    v0reg fp;                   // caller frame pointer         <- FP after BEG
-    v0reg lr;                   // caller return address        <- FP after CSR
-    v0reg r8;                   // scratch registers R8..R15
-    v0reg r9;
-    v0reg r10;
-    v0reg r11;
-    v0reg r12;
-    v0reg r13;
-    v0reg r14;
-    v0reg r15;
-    v0reg args[VLA];            // stack parameters to callee   <- SP
+    /* local variables are allocated here */
+    /* stored registers r4..r11 go here */                       <- SP
+    v0reg       fp;             // caller frame pointer         <- FP after BEG
+    v0reg       lr;             // caller return address        <- FP after CSR
+    v0reg       args[VLA];      // stack parameters to callee   <- SP after CSR
 };
 
 /* caller-save structure */
 struct v0callerctx {
-    /* r0 is always zero, so not saved */
-    /* r1..r7 may be used as subroutine arguments */
-    v0reg r1;
-    v0reg r2;
-    v0reg r3;
-    v0reg r4;
-    v0reg r5;
-    v0reg r6;
-    v0reg r7;
+    /* r0..r3 may be used as subroutine arguments */
+    v0reg       r0;
+    v0reg       r1;
+    v0reg       r2;
+    v0reg       r3;
 };
 
 /*
