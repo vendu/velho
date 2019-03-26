@@ -16,6 +16,8 @@
 #define V0_LR_REG       14
 #define V0_PC_REG       15
 
+#include <sys/v0/types.h>
+
 static __inline__ void
 v0csr(v0adr adr)
 {

@@ -32,5 +32,33 @@ struct v0segdesc {
     v0pagedesc lim;             // limit (byte address or size in pages)
 };
 
+static __inline__ v0word
+v0bufload(struct vm *vm, v0word adr)
+{
+    v0word              ndx = tmhash32(adr);
+    v0word              word;
+    v0word              badr;
+    struct v0membuf    *buf;
+
+    ndx &= vm->memsize - 1;
+    buf = &vm->buf[ndx];
+    badr = buf->adr;
+    if (badr == adr) {
+        word = buf->val;
+    } else {
+        ndx = tmhash32(ndx);
+        ndx &= vm->memsize - 1;
+        buf = &vm->buf[ndx];
+        badr = buf->adr;
+        if (badr == adr) {
+            word = buf->val;
+        } else {
+            word = *(v0reg *)(&g_v0vm.mem[adr]);
+        }
+    }
+
+    return word;
+}
+
 #endif /* __V0_MEM_H__ */
 

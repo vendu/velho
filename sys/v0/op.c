@@ -9,6 +9,7 @@
  * Special Constant Registers
  * --------------------------
  */
+#define V0_CONST_ZERO     0x00000000 // constant zero
 #define V0_CONST_ONE      0x00000001 // constant one
 #define V0_CONST_HAM_33   0x33333333 // mask for ham
 #define V0_CONST_HAM_55   0x55555555 // mask for ham

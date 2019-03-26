@@ -25,24 +25,24 @@
 #define V0_TRAP_BP       0x11 // breakpoint             - code is PC
 #define V0_TRAP_NMI      0x12 // non-maskable interrupt
 #define V0_TRAP_LAST_SYS 0x1f
-#define V0_TRAP_IRQ_BIT  0x20
-#define V0_TRAP_IRQ(i)   (V0_TRAP_IRQ_BIT | (i))
-#define V0_TRAP_IRQ0     V0_TRAP_IRQ(0)	// device interrupt 0   - TMR
-#define V0_TRAP_IRQ1     V0_TRAP_IRQ(1)	// device interrupt 1   - AUD
-#define V0_TRAP_IRQ2     V0_TRAP_IRQ(2)	// device interrupt 2	- VID
-#define V0_TRAP_IRQ3     V0_TRAP_IRQ(3)	// device interrupt 3	- KBD
-#define V0_TRAP_IRQ4     V0_TRAP_IRQ(4)	// device interrupt 4	- PTR
-#define V0_TRAP_IRQ5     V0_TRAP_IRQ(5)	// device interrupt 5	- HID
-#define V0_TRAP_IRQ6     V0_TRAP_IRQ(6)	// device interrupt 6	- NET
-#define V0_TRAP_IRQ7     V0_TRAP_IRQ(7)	// device interrupt 7	- DSK
-#define V0_TRAP_IRQ8     V0_TRAP_IRQ(8)	// device interrupt 8   - OPT
-#define V0_TRAP_IRQ9     V0_TRAP_IRQ(9)	// device interrupt 9   - USB
-#define V0_TRAP_IRQ10    V0_TRAP_IRQ(a)	// device interrupt 10
-#define V0_TRAP_IRQ11    V0_TRAP_IRQ(b)	// device interrupt 11
-#define V0_TRAP_IRQ12    V0_TRAP_IRQ(c)	// device interrupt 12
-#define V0_TRAP_IRQ13    V0_TRAP_IRQ(d)	// device interrupt 13
-#define V0_TRAP_IRQ14    V0_TRAP_IRQ(e)	// device interrupt 14
-#define V0_TRAP_IRQ15    V0_TRAP_IRQ(f) // device interrupt 15
+#define V0_IRQ_TRAP_BIT  0x20
+#define V0_IRQ_TRAP(i)   (V0_IRQ_TRAP_BIT | (i))
+#define V0_IRQ_TRAP0     V0_IRQ_TRAP(0)		// device interrupt 0   - TMR
+#define V0_IRQ_TRAP1     V0_IRQ_TRAP(1)		// device interrupt 1   - AUD
+#define V0_IRQ_TRAP2     V0_IRQ_TRAP(2)		// device interrupt 2	- VID
+#define V0_IRQ_TRAP3     V0_IRQ_TRAP(3)		// device interrupt 3	- KBD
+#define V0_IRQ_TRAP4     V0_IRQ_TRAP(4)		// device interrupt 4	- PTR
+#define V0_IRQ_TRAP5     V0_IRQ_TRAP(5)		// device interrupt 5	- HID
+#define V0_IRQ_TRAP6     V0_IRQ_TRAP(6)		// device interrupt 6	- NET
+#define V0_IRQ_TRAP7     V0_IRQ_TRAP(7)		// device interrupt 7	- DSK
+#define V0_IRQ_TRAP8     V0_IRQ_TRAP(8)		// device interrupt 8   - OPT
+#define V0_IRQ_TRAP9     V0_IRQ_TRAP(9)         // device interrupt 9   - USB
+#define V0_IRQ_TRAP10    V0_IRQ_TRAP(10)	// device interrupt 10
+#define V0_IRQ_TRAP11    V0_IRQ_TRAP(11)	// device interrupt 11
+#define V0_IRQ_TRAP12    V0_IRQ_TRAP(12)	// device interrupt 12
+#define V0_IRQ_TRAP13    V0_IRQ_TRAP(13)	// device interrupt 13
+#define V0_IRQ_TRAP14    V0_IRQ_TRAP(14)	// device interrupt 14
+#define V0_IRQ_TRAP15    V0_IRQ_TRAP(15)        // device interrupt 15
 
 /* IV-register contents */
 
