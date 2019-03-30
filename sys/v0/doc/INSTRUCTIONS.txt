@@ -346,19 +346,3 @@ IWR	0x02	RI1, R2		------	---	I/O write operation
 ILD	0x03	RI1, R2		------	---	load I/O register
 IST	0x04	RI1, A		------	---	store I/O register
 
-IOC Commands
-------------
-- TODO: ASYNC, DMA
-PROBE_BUS
-INIT_BUT
-PROBE_DEV
-INIT_DEV
-READ_BYTE
-READ_HALF
-READ_WORD
-WRITE_BYTE
-WRITE_HALF
-WRITE_WORD
-READ_BLK
-WRITE_BLK
-
