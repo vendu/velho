@@ -7,44 +7,44 @@
 #include <v0/types.h>
 
 /* NOP is declared as all 0-bits in code */
-#define V0_NOP_CODE           0x0000
+#define V0_NOP_CODE             0x0000
 /* predefined coprocessor IDs in middle 8 parm-bits */
-#define V0_COPROC_FPM         (0x20 << V0_OP_BITS) // fixed-point
-#define V0_COPROC_FPU         (0x21 << V0_OP_BITS) // floating-point unit
-#define V0_COPROC_SIMD        (0x22 << V0_OP_BITS) // SIMD-unit
-#define V0_COPROC_VEC         (0x23 << V0_OP_BITS) // vector processor
-#define V0_COPROC_DSP         (0x24 << V0_OP_BITS) // digital signal processor
-#define V0_COPROC_GPU         (0x25 << V0_OP_BITS) // graphics processor unit
-#define v0mkcode(u, i, f)     (((i) << (V0_OP_BITS + V0_UNIT_BITS))
-#define v0isnop(ins)          ((ins)->code == V0_NOP_CODE)
-#define v0iscop(ins)          (((ins)->code & V0_UNIT_MASK) > 0x01f0)
-#define v0copid(ins)          (((ins)->code & V0_UNIT_MASK) >> V0_OP_BITS)
-#define v0copflg(ins)         ((ins)->parm & 0x0f00)
-#define v0copins(ins)         ((ins)->parm & 0xff)
-#define v0getflg(ins)         ((ins)->parm & V0_INS_FLG_MASK)
+#define V0_COPROC_FPM         	(0x20 << V0_OP_BITS) // fixed-point
+#define V0_COPROC_FPU         	(0x21 << V0_OP_BITS) // floating-point unit
+#define V0_COPROC_SIMD        	(0x22 << V0_OP_BITS) // SIMD-unit
+#define V0_COPROC_VEC         	(0x23 << V0_OP_BITS) // vector processor
+#define V0_COPROC_DSP         	(0x24 << V0_OP_BITS) // digital signal processor
+#define V0_COPROC_GPU         	(0x25 << V0_OP_BITS) // graphics processor unit
+#define v0mkcode(u, i, f)       (((i) << (V0_OP_BITS + V0_UNIT_BITS))
+#define v0isnop(ins)            ((ins)->code == V0_NOP_CODE)
+#define v0iscop(ins)            (((ins)->code & V0_UNIT_MASK) > 0x01f0)
+#define v0copid(ins)            (((ins)->code & V0_UNIT_MASK) >> V0_OP_BITS)
+#define v0copflg(ins)           ((ins)->parm & 0x0f00)
+#define v0copins(ins)           ((ins)->parm & 0xff)
+#define v0getflg(ins)           ((ins)->parm & V0_INS_FLG_MASK)
 #define v0getreg1(ins)                                                  \
     ((ins)->parm & V0_INS_REG_MASK)
 #define v0getreg2(ins)                                                  \
     (((ins)->parm >> V0_INS_REG_BITS) & V0_INS_REG_MASK)
-#define v0getreg(vm, reg)     (((v0reg *)(vm)->regs)[(reg)])
-#define v0getureg(vm, reg)    (((v0ureg *)(vm)->regs)[(reg)])
-#define v0setreg(vm, reg, u)  (((v0reg *)(vm)->regs)[(reg)] = (u))
-#define v0setureg(vm, reg, u) (((v0ureg *)(vm)->regs)[(reg)] = (u))
-#define v0getval(vm, ins)     \
+#define v0getreg(vm, reg)       (((v0reg *)(vm)->regs)[(reg)])
+#define v0getureg(vm, reg)      (((v0ureg *)(vm)->regs)[(reg)])
+#define v0setreg(vm, reg, u)    (((v0reg *)(vm)->regs)[(reg)] = (u))
+#define v0setureg(vm, reg, u)   (((v0ureg *)(vm)->regs)[(reg)] = (u))
+#define v0getval(vm, ins)                                               \
     (((vm)->parm & V0_SIGN_BIT)                                         \
      ? (-((vm)->parm & V0_VAL_MASK))                                    \
      : ((vm)->parm & V0_VAL_MASK))
                                                                         \
-#define v0getofs(vm, ins)     (((ins)->flg & V0_IMM_BIT)                \
-                               ? (ins)->imm[0].ofs                      \
-                               : 0)
-#define v0getimm(ins)         ((ins)->imm[0].val)
-#define v0getimmu(ins)        ((ins)->imm[0].uval)
+#define v0getofs(vm, ins)       (((ins)->flg & V0_IMM_BIT)              \
+                                 ? (ins)->imm[0].ofs                    \
+                                 : 0)
+#define v0getimm(ins)           ((ins)->imm[0].val)
+#define v0getimmu(ins)          ((ins)->imm[0].uval)
 static __inline__ v0reg
-v0decadr1(struct v0 *vm, struct v0ins *ins)
+v0getadr1(struct v0 *vm, struct v0ins *ins)
 {
-    v0reg adr = ((ins)->flg & V0_REG_ADR) ? v0getreg1(vm, ins) : 0;
-    v0reg ofs = ((ins)->flg & V0_PIC_ADR) ? v0getreg(vm, V0_PC_REG) : 0;
+    v0reg adr = ((ins)->flg & V0_REG_ADR) ? v0getureg1(vm, ins) : 0;
+    v0reg ofs = ((ins)->flg & V0_PIC_ADR) ? v0getureg(vm, V0_PC_REG) : 0;
     v0reg imm = ((ins)->flg & V0_IMM_BIT) ? v0getofs(ins) : 0;
 
     adr += ofs;
@@ -53,10 +53,10 @@ v0decadr1(struct v0 *vm, struct v0ins *ins)
     return adr;
 }
 
-v0decadr2(struct v0 *vm, struct v0ins *ins)
+v0getadr2(struct v0 *vm, struct v0ins *ins)
 {
-    v0reg adr = ((ins)->flg & V0_REG_ADR) ? v0getreg2(vm, ins) : 0;
-    v0reg ofs = ((ins)->flg & V0_PIC_ADR) ? v0getreg(vm, V0_PC_REG) : 0;
+    v0reg adr = ((ins)->flg & V0_REG_ADR) ? v0getureg2(vm, ins) : 0;
+    v0reg ofs = ((ins)->flg & V0_PIC_ADR) ? v0getureg(vm, V0_PC_REG) : 0;
     v0reg imm = ((ins)->flg & V0_IMM_BIT) ? v0getofs(ins) : 0;
 
     adr += ofs;

@@ -29,7 +29,7 @@
 #define v0bar(vm)         (v0synwr(vm), v0synrd(vm))
 
 static __inline__ void
-mem(struct v0 *vm, struct v0ins *ins)
+v0memop(struct v0 *vm, struct v0ins *ins)
 {
     v0reg reg1 = v0getreg1(ins);
     v0reg reg2 = v0getreg2(ins);

@@ -17,7 +17,8 @@
 #define V0_TEXT_ADR          V0_PAGE_SIZE       // system text segment address
 #if defined(V0_THREADS)
 #define V0_TASK_STACK_SIZE   (4 * V0_PAGE_SIZE) // per-thread stack size
-#define V0_NTHR              16
+#define V0_PROC_THREADS      16                 // max # of per-process threads
+#define V0_MAX_THREADS       256                // max # of system threads
 #endif
 
 #endif /* __V0_CONF_H__ */

@@ -30,7 +30,12 @@ struct v0systhr {
     v0sysfpuctx fctx;           // floating-point unit context
 };
 
-#define V0_SYS_THREADS  (V0_PAGE_SIZE / sizeof(struct v0systhr))
+struct v0tlbitem {
+    v0word      hash;
+    v0adr       page;
+};
+
+#define V0_SYS_THREADS   V0_MAX_THREADS
 #define V0_TLB_ENTRIES   (V0_PAGE_SIZE / sizeof(v0pagedesc))
 #define V0_IOMAP_ENTRIES (V0_PAGE_SIZE / sizeof(v0iodesc *))
 #define v0initvm(vm, ramsz, clsft, numtlb, pgsft, numio)               \
