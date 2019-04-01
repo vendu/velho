@@ -34,7 +34,6 @@
     (((vm)->parm & V0_SIGN_BIT)                                         \
      ? (-((vm)->parm & V0_VAL_MASK))                                    \
      : ((vm)->parm & V0_VAL_MASK))
-                                                                        \
 #define v0getofs(vm, ins)       (((ins)->flg & V0_IMM_BIT)              \
                                  ? (ins)->imm[0].ofs                    \
                                  : 0)
@@ -122,7 +121,7 @@ v0getadr2(struct v0 *vm, struct v0ins *ins)
 #define V0_MLH_OP     V0_MUL_BIT                // MLH, MLHU
 /* BIT-unit */
 #define V0_BIT_UNIT   0x05
-#define V0_DCD_BIT    (1 << 0)
+#define V0_BDD_BIT    (1 << 0)
 #define V0_HUN_BIT    (1 << 0)
 #define V0_ONE_BIT    (1 << 1)
 #define V0_NEG_BIT    (1 << 1)  // arithmetic negation: R2 = -R1
@@ -140,7 +139,7 @@ v0getadr2(struct v0 *vm, struct v0ins *ins)
 #define V0_CLZ_OP     (V0_UNS_BIT | V0_CNT_BIT)
 #define V0_HAM_OP     (V0_ONE_BIT | V0_CNT_BIT)
 #define V0_BCD_OP     V0_BCD_BIT
-#define V0_DCD_OP     (V0_DCD_BIT | V0_BCD_BIT)
+#define V0_BDD_OP     (V0_BDD_BIT | V0_BCD_BIT)
 #define V0_CRC_OP     V0_CRC_MASK
 #define V0_HSH_OP     V0_HASH_MASK
 #define V0_HUN_OP     (V0_HUN_BIT | V0_HASH_MASK)
@@ -150,7 +149,6 @@ v0getadr2(struct v0 *vm, struct v0ins *ins)
 #define V0_CL_BIT     (1 << 2)  // cacheline operation
 #define V0_BAR_BIT    (1 << 3)  // memory barrier
 #define V0_IPG_MASK   0x03
-#define V0_PFN_MASK   0x07
 #define V0_COND_MASK  0x0c
 #define V0_STN_MASK   0x0e
 #define V0_LEA_OP     0x00
@@ -160,15 +158,14 @@ v0getadr2(struct v0 *vm, struct v0ins *ins)
 #define V0_CLD_OP     V0_CL_BIT
 #define V0_CPF_OP     (V0_RD_BIT | V0_CL_BIT)
 #define V0_CFL_OP     (V0_WR_BIT | V0_CL_BIT)
-#define V0_PFN_OP     V0_PFN_MASK
 #define V0_BAR_OP     V0_BAR_BIT
 #define V0_BRD_OP     (V0_RD_BIT | V0_BAR_BIT)
 #define V0_BWR_OP     (V0_WR_BIT | V0_BAR_BIT)
 #define V0_CLD_OP     V0_COND_MASK
 #define V0_CST_OP     (V0_CST_BIT | V0_COND_MASK)
 #define V0_STN_OP     V0_STN_MASK
-/* STACK-unit */
-#define V0_STACK_UNIT 0x07
+/* STK-unit */
+#define V0_STK_UNIT   0x07
 #define V0_POP_BIT    (1 << 0)
 #define V0_RNG_BIT    (1 << 1)  // range operation
 #define V0_PSH_OP     0x00

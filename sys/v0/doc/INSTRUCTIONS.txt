@@ -198,10 +198,10 @@ UMLH			     	UIHB--	---	unsigned high multiplication
 
 BIT-UNIT	0x05
 --------
-SEX	0x00	R1		-IHB--	---	sign extend
-ZEX	0x01	R1		-IHB--	---	zero extend
-NEG	0x02	R1		-IHB--	---	arithmetic negation
-SWP	0x03	R1		-IHB--	---	swap byte order
+SEX	0x00	RI1, R2		-IHB--	---	sign extend
+ZEX	0x01	RI1, R2		-IHB--	---	zero extend
+NEG	0x02	RI1, R2		-IHB--	---	arithmetic negation
+SWP	0x03	RI1, R2		-IHB--	---	swap byte order
 
 Miscellaneous Operations	- OPTIONAL
 ------------------------
@@ -212,7 +212,7 @@ HAM	0x06	R1, R2		-IHB--	---	count Hamming weight
 ----	0x07
 BCD	0x08	RI1, R2		-IHB--	---	encode to binary-coded decimal
 UBCD	0x08	RI1, R2		UIHB--	---	encode to binary-coded decimal
-DCD	0x09	RI1, R2		-IHB--	---	decode from binary-coded decimal
+BDD	0x09	RI1, R2		-IHB--	---	decode from binary-coded decimal
 CRC	0x0a	RI1, R2		-IHB--	---	compute IPv4 or ECC checksum
 ----	0x0b
 HSH	0x0c	RI1, R2		-IHB--	---	hash source operand
@@ -230,7 +230,7 @@ IPG	0x03	RA1		-I----	---	invalidate page TLB-entry
 CLD	0x04	RA1		-I----	---	clear cacheline dirty-bit
 CPF	0x05	RA1		-I----	---	prefetch cacheline
 CFL	0x06	RA1		-I----	---	flush [write out] cacheline
-PFN	0x07	RA1		-I----	---	prefetch non-temporal/uncached
+----	0x07
 
 prefetch cacheline (bypass cache)
 
@@ -273,8 +273,10 @@ NO	!OF		overflow not set
 
 STACK-UNIT	0x07
 ----------
-PSH	0x00	RI1		-IHB--	---	push register
-POP	0x01	RI1		--HB--	---	pop register
+
+PSH	RI1		0x00
+PSH	0x00	RI1		-IHB--	---	push register or immediate
+POP	0x01	R1		--HB--	---	pop register
 PSM	0x02	I1, I2		------	---	push register range R1..R2
 POM	0x03	I1, I2		------	---	pop register range R1..R2
 

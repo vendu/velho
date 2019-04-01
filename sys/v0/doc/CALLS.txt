@@ -3,9 +3,9 @@ V0 Stack Frame Layout
 
 prevframe	- frameptr
 ---------
-callparm	- stack parameters to callee	CALLER
+r0..r3		- caller-save registers		CALLER
 ---------
-r0..r3		- caller-save registers
+callparm	- stack parameters to callee
 ------------------------------------------------------
 retadr		- return address into caller
 ---------
@@ -22,10 +22,10 @@ Function Call
 Caller
 ------
 
+- save %r0..%r3 (-16(%fp)..-4(%fp))
 - push arguments 4- to stack
-- save %r0..%r3
 - load first (up to) 4 parameters into %r0..%r3
-- save %lr
+- save %pc
 - call subroutine with CSR
 
 Callee

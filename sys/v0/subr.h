@@ -18,11 +18,21 @@
 
 #include <sys/v0/types.h>
 
+/*
+ * stack layout after CSR
+ *
+ * ------
+ * r0..r3
+ * ------
+ * parm         stack arguments
+ * ------
+ *
+ */
 static __inline__ void
 v0csr(v0adr adr)
 {
     v0psh(V0_PC_REG);
-    v0csr(adr);
+    v0setreg(V0_PC_REG, adr);
 }
 
 static __inline__ void

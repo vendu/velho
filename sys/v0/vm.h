@@ -15,11 +15,13 @@ typedef long v0vmopfunc_t(struct vm *vm, void *op);
 
 #define v0getop(ins)    	((ins)->code & V0_OP_MASK)
 #define v0getunit(ins)  	(((ins)->code & V0_UNIT_MASK) >> V0_UNIT_SHIFT)
-#define v0getreg1(ins)          (((ins)->parm & V0_REG2_MASK) >> V0_REG_BITS)
+#define v0getreg1(ins)          ((ins)->parm & V0_REG_MASK)
+#define v0getreg2(ins)          ((ins)->parm >> V0_REG_BITS)
 #define V0getadr(ins)           (((ins)->parm & V0_ADR_MASK) >> 2 * V0_REG_BITS)
 #define v0getval(ins)           (((ins)->parm & V0_VAL_BIT)             \
                                  ? ((ins)->parm & ~V0_VAL_BIT)          \
-                                 : 0)
+                                 : -1)
+#define v0getflg(ins)           ((ins)->code & V0_INS_FLG_MASK)
 #define v0getword(vm, adr)      (*(v0reg *)(&(vm)->mem[adr]))
 #define v0gethalf(vm, adr)      (*(int16_t *)(&(vm)->mem[adr]))
 #define v0getbyte(vm, adr)      (*(int8_t *)(&(vm)->mem[adr]))

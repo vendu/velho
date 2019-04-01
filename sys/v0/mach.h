@@ -1,12 +1,12 @@
-#ifndef __V0_SYS_H__
-#define __V0_SYS_H__
+#ifndef __V0_MACH_H__
+#define __V0_MACH_H__
 
 #include <limits.h>
 #include <v0/conf.h>
 #include <v0/fpu.h>
 #include <v0/types.h>
 
-struct v0sysatr {
+struct v0machatr {
     size_t       nbram;         // size of RAM-memory in bytes
     uint8_t     *ram;           // pointer to virtual machine "RAM"
     size_t       clshift;       // cacheline-size log2
@@ -17,17 +17,17 @@ struct v0sysatr {
     v0iodesc   **iomap;         // v0iodesc *iomap[niomap]
 };
 
-struct v0sysintctx {
-    v0wreg regs[V0_STD_REGS];
+struct v0machintctx {
+    v0wreg regs[V0_STD_REGS];   // scalar registers
 };
 
-struct v0sysfpuctx {
-    v0dbl regs[V0_FPU_REGS];
+struct v0machfpuctx {
+    v0dbl regs[V0_FPU_REGS];    // floating-point registers
 };
 
-struct v0systhr {
-    v0sysintctx ictx;           // integer-unit context
-    v0sysfpuctx fctx;           // floating-point unit context
+struct v0machthr {
+    v0machintctx        ictx;   // integer-unit context
+    v0machfpuctx        fctx;   // floating-point unit context
 };
 
 struct v0tlbitem {
@@ -35,7 +35,7 @@ struct v0tlbitem {
     v0adr       page;
 };
 
-#define V0_SYS_THREADS   V0_MAX_THREADS
+#define V0_MACH_THREADS   V0_MAX_THREADS
 #define V0_TLB_ENTRIES   (V0_PAGE_SIZE / sizeof(v0pagedesc))
 #define V0_IOMAP_ENTRIES (V0_PAGE_SIZE / sizeof(v0iodesc *))
 #define v0initvm(vm, ramsz, clsft, numtlb, pgsft, numio)               \
@@ -49,7 +49,7 @@ struct v0tlbitem {
       && ((vm)->atr.clbits = calloc((ramsz) >> (clsft + 3), sizeof(int8_t))) \
       && ((vm)->atr.iomap = calloc((numio), sizeof(v0iodesc *)))))
 struct v0 {
-    struct v0systhr  thrbuf[V0_SYS_THREADS];
+    struct v0machthr thrbuf[V0_SYS_THREADS];
     v0pagedesc       tlb[V0_TLB_ENTRIES];
     v0wreg           regs[V0_STD_REGS];
     v0flt            fpuregs[V0_FPU_REGS];
