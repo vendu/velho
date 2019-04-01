@@ -32,8 +32,31 @@
  * %fps         fixed-point status register
  * %fst         floating-point status register
  */
+
+#define V0_REG_BITS             32
 #define V0_RET_REG      	V0_R0_REG // function return value register
-#define V0_REG_ARGS             4 // R1..R4, function register arguments
+#define V0_REG_ARGS             4 // R1..R3, function register arguments
+#define V0_SAVE_REGS            10 // R4..R12/SP, FP, callee save arguments
+#define V0_R0_REG               0
+#define V0_R1_REG               1
+#define V0_R2_REG               2
+#define V0_R3_REG               3
+#define V0_R4_REG               4
+#define V0_R5_REG               5
+#define V0_R6_REG               6
+#define V0_R7_REG               7
+#define V0_R8_REG               8
+#define V0_R9_REG               9
+#define V0_R10_REG              10
+#define V0_R11_REG              11
+#define V0_R12_REG      	0x0c // frame-pointer
+#define V0_R13_REG      	0x0d // stack-pointer
+#define V0_R14_REG      	0x0e // link-register
+#define V0_R15_REG      	0x0f // program-counter
+#define V0_SP_REG               V0_R12_REG
+#define V0_FP_REG               V0_R13_REG
+#define V0_LR_REG               V0_R14_REG
+#define V0_PC_REG               V0_R15_REG
 #define V0_R0_REG       	0x00 // function return value, first function argument
 #define V0_R1_REG       	0x01 // extra return value, second function argument
 #define V0_R2_REG       	0x02 // third function argument
@@ -47,10 +70,6 @@
 #define V0_R9_REG       	0x09 // scratch register #5
 #define V0_R10_REG      	0x0a // scratch register #6
 #define V0_R11_REG      	0x0b // scratch register #7
-#define V0_R12_REG      	0x0c // frame-pointer
-#define V0_R13_REG      	0x0d // stack-pointer
-#define V0_R14_REG      	0x0e // link-register
-#define V0_R15_REG      	0x0f // program-counter
 #define V0_FP_REG       	V0_R12_REG // frame-pointer
 #define V0_SP_REG       	V0_R13_REG // stack-pointer
 #define V0_LR_REG       	V0_R14_REG // link-register (return address)
@@ -58,21 +77,21 @@
 #define V0_INT_REGS             16 // # of integer/scalar registers
 #define V0_CALLEE_REGS          12 // callee saves r4..r15
 /* SYSTEM REGISTERS */
-#define V0_MSW_REG      	0x10 // machine status word
-#define V0_TCB_REG      	0x11 // thread control block base address
-#define V0_MFR_REG      	0x12 // machine feature word, read-only
-#define V0_CR_REG               0x13 // control register
-#define V0_IM_REG       	0x14 // interrupt-mask (1-bit enabled)
-#define V0_IV_REG       	0x15 // interrupt vector address
-#define V0_PD_REG       	0x16 // page directory address + flags
-#define V0_IOM_REG              0x17 // I/O descriptor map base address
-#define V0_BLO_REG      	0x18 // bound-range low limit
-#define V0_BHI_REG      	0x19 // bound-range high limit (base + size)
-#define V0_TLO_REG      	0x1a // timestamp low 32 bits
-#define V0_THI_REG      	0x1b // timestamp high 32 bits
-#define V0_TLS_REG      	0x1c // thread-local storage base address
-#define V0_TWC_REG       	0x1d // thread wait channel
-#define V0_SP0_REG              0x1e // ring #0 (system-mode) stack-pointer
+#define V0_MSW_REG      	0x00 // machine status word
+#define V0_TCB_REG      	0x01 // thread control block base address
+#define V0_MFR_REG      	0x02 // machine feature word, read-only
+#define V0_CR_REG               0x03 // control register
+#define V0_IM_REG       	0x04 // interrupt-mask (1-bit enabled)
+#define V0_IV_REG       	0x05 // interrupt vector address
+#define V0_PD_REG       	0x06 // page directory address + flags
+#define V0_IOM_REG              0x07 // I/O descriptor map base address
+#define V0_BLO_REG      	0x08 // bound-range low limit
+#define V0_BHI_REG      	0x09 // bound-range high limit (base + size)
+#define V0_TLO_REG      	0x0a // timestamp low 32 bits
+#define V0_THI_REG      	0x0b // timestamp high 32 bits
+#define V0_TLS_REG      	0x0c // thread-local storage base address
+#define V0_TWC_REG       	0x0d // thread wait channel
+#define V0_SP0_REG              0x0e // ring #0 (system-mode) stack-pointer
 #define V0_SYS_REGS             16
 /* system register IDs */
 #define V0_STD_REGS     	(V0_INT_REGS + V0_SYS_REGS) // total # of registers

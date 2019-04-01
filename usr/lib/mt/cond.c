@@ -8,6 +8,7 @@
 #include <mt/cond.h>
 #include <mt/thr.h>
 
+/* initialise condition variable */
 void
 mtinitcond(mtcond *cond)
 {
@@ -20,6 +21,7 @@ mtinitcond(mtcond *cond)
     return;
 }
 
+/* wake one thread up */
 long
 mtsigcondone(mtcond *cond)
 {
@@ -32,6 +34,7 @@ mtsigcondone(mtcond *cond)
     return 0;
 }
 
+/* wake several threads up */
 long
 mtsigcondmany(mtcond *cond, long nthr)
 {
@@ -50,7 +53,7 @@ mtsigcondmany(mtcond *cond, long nthr)
 }
 
 long
-condsigall(mtcond *cond)
+mtsigcondall(mtcond *cond)
 {
     if (!cond) {
 

@@ -7,6 +7,8 @@
 #include <v0/types.h>
 
 struct v0machatr {
+    size_t       nbbram;        // size of BRAM-memory in bytes
+    uint8_t     *bram;          // block RAM
     size_t       nbram;         // size of RAM-memory in bytes
     uint8_t     *ram;           // pointer to virtual machine "RAM"
     size_t       clshift;       // cacheline-size log2

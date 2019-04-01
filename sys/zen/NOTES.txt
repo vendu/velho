@@ -34,9 +34,9 @@ Tao Scheduler
   - schedsleep(us)	- sleep for us microseconds or more
   - schedconf(cmd, val, *arg)	- configure thread scheduling
     - SCHED_SET_CLASS
-      - SCHED_CLASS_HID		- human-interfaces	- fastest devices
-      - SCHED_CLASS_RT		- realtime class	- interactive response
-      - SCHED_CLASS_SYSTEM	- system class		- fast throughput
+      - SCHED_CLASS_RT		- realtime class	- fast response
+      - SCHED_CLASS_FAST	- human-interfaces	- fastest devices (HIDs)
+      - SCHED_CLASS_SYS		- system class		- fast throughput
       - SCHED_CLASS_USER	- user class		- high speed execution
       - SCHED_CLASS_BATCH	- batch, i.e. lots of I/O and processing without
       				  need for fast interactive response
@@ -48,8 +48,7 @@ Tao Scheduler
       - SCHED_MEM_SMALL_BIT	- smallish memory footprint
       - SCHED_MEM_HUGE_BIT	- huge memory footprint, bigger buffers
     - SCHED_SET_IO
-      - SCHED_IO_SYN_BIT, SCHED_IO_POLL_BIT, SCHED_IO_UNBUF_BIT,
-      	SCHED_IO_RAW_BIT
+      - SCHED_IO_SYNC_BIT, SCHED_IO_POLL_BIT, SCHED_IO_BUF_BIT, SCHED_IO_RAW_BIT
 
 Processes and Threads
 ---------------------
@@ -70,8 +69,10 @@ Processes and Threads
 
 Synchronization
 ---------------
-- asm		- assembly routines, i.e. machine-specific stuff
-- syn		- machine-specific routines
+
+Synchonization is done by using libmt.
+
+- mach		- assembly routines, i.e. machine-specific stuff
 - mtx		- mutual exclusion/binary semaphore
 - sem		- semaphore
 - bar		- thread barrier

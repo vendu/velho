@@ -3,7 +3,7 @@
 
 #include <string.h>
 
-#define bzero(ptr, sz)  memset(ptr, 0, sz)
+//#define bzero(ptr, sz)  memset(ptr, 0, sz)
 /* TODO: POSIX.1-2008 removes index() and rindex() */
 #define index(s, c)     strchr(s, c)
 #define rindex(s, c)    strrchr(s, c)

@@ -26,5 +26,5 @@
 #define _LARGEFILE64_SOURCE 1
 #endif
 
-#endif __FEATURES_H__
+#endif /* __FEATURES_H__ */
 

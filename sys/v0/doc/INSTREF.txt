@@ -343,6 +343,9 @@ IRT	0x06	RI1		-I----	---	return from interrupt function
 ----    0x07
 THR	0x08	RI1, A		-I----	---	launch a thread
 THX	0x09	RI1		-I----	---	terminate a thread
+THW	0x0a	RI1		-I----	---	wait for a thread
+THY	0x0b	RI1		-I----	---	yield processor (suspend thread)
+THC	0x0c	RI1		-I----	---	configure thread
 
 IO-UNIT		0x0b
 -------

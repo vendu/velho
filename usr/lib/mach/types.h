@@ -3,12 +3,21 @@
 
 #include <stdint.h>
 #include <zero/cdefs.h>
+#include <mach/param.h>
 
 /* machine types */
-typedef int8_t     m_byte_t;
-typedef int16_t    m_dualbyte_t;
-typedef uintptr_t  m_adr_t;
-typedef void      *m_ptr_t;
+typedef int8_t     		m_byte_t;
+typedef int16_t    		m_dualbyte_t;
+typedef uintptr_t  		m_adr_t;
+typedef void      	       *m_ptr_t;
+
+#if (LONGLONGSIZE > LONGSIZE)
+typedef long long               m_word_t;
+typedef unsigned long long      m_uword_t;
+#else
+typedef long                    m_word_t;
+typedef unsigned long           m_uword_t;
+#endif
 
 #if defined(_WIN64)
 #include <zero/msc/win64.h>

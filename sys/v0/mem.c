@@ -1,72 +1,71 @@
-/*
- * MEM	0x07	0x00	LEA		A, R	load effective address
- * MEM	0x07	0x01	LDR	RD	RIA, R	load into register
- * MEM	0x07	0x02	STR	WR	RI, A	store to memory
- * MEM	0x07	0x03	IPG	  	A	invalidate TLB-entry
- * MEM	0x07	0x04	CLR	CL	A	mark cacheline clear
- * MEM	0x07	0x05	CPF	RD|CL	A	prefetch cacheline
- * MEM	0x07	0x06	CFL	WR|CL	A	flush cacheline
- * MEM	0x07	0x08	BAR	BAR		full memory barrier
- * MEM	0x07	0x09	BRD	RD|BAR		memory read barrier
- * MEM	0x07	0x0a	BWR	WR|BAR		memory write barrier
- * MEM	0x07	0x0b	RFL	RD|MSW	R	read machine status word/flags
- * MEM	0x07	0x0c	WFL	WR|MSW	RI	write machine status word/flags
- */
+#include <stddef.h>
+#include <v0/types.h>
 
-#define v0lea1(vm, ins)   (v0getadr1(vm, ins))
-#define v0lea2(vm, ins)   (v0getadr2(vm, ins))
-#define v0clid(adr)       ((adr)  & ~(CLSZ - 1))
-#define v0pgid(adr)       ((adr) & ~(PGSZ - 1))
-#define v0ldr(reg1, reg2) ((reg2) = (reg1))
-#define v0lda(adr, reg)   ((reg) = *(adr))
-#define v0str(ins, adr)   (*(adr) =  regimm(ins))
-#define v0ipg(pga)        (v0flstlb(pga))
-#define v0clr(cla)        (v0clrbit(clbits, cla))
-#define v0cpf(cla)        (ldr(cla, tmp))
-#define v0cfl(cla)        (str(cla, adr1))
-#define v0brd(vm)         (v0synrd(vm))
-#define v0bwr(vm)         (v0synwr(vm))
-#define v0bar(vm)         (v0synwr(vm), v0synrd(vm))
-
-static __inline__ void
-v0memop(struct v0 *vm, struct v0ins *ins)
+void
+v0bzerow(void *ptr, size_t nw)
 {
-    v0reg reg1 = v0getreg1(ins);
-    v0reg reg2 = v0getreg2(ins);
-    v0reg adr1 = lea1(vm, ins);
-    v0reg adr2 = lea2(vm, ins);
-    v0reg imm = v0getimm(ins);
-    v0reg cl = cla(adr1);
-    v0reg pg = pga(adr1);
+    v0word     *dest = ptr;
+    v0word      zero = 0;
+    size_t      n = (uintptr_t)ptr & (V0_CL_SIZE - 1);
 
-    switch (ins->op) {
-        case LEA:
-            v0setreg(vm, reg2, adr1);
-
-            break;
-        case LDR:
-            if (ins->flg & V0_NO_ADR) {
-                v0setreg(vm, reg2, reg1);
-            } else if (ins->flg & V0_IMM_BIT) {
-                v0setreg(vm, reg2, imm);
-            } else {
-                reg2 = v0getmem(vm, adr1, v0reg);
+    if (nw >= 2 * V0_CL_SIZE) {
+        if (n) {
+            n = V0_CLSIZE - n;
+            nw -= n;
+            while (n--) {
+                *dest++'= zero;
             }
-
-            break;
-        case STR:
-            if (ins->flg & V0_NO_ADR) {
-                v0setmem(vm, adr2, reg1, v0reg, 0xffffffff);
-            } else if (ins->flg & V0_IMM_BIT) {
-                v0setmem(vm, adr2, imm, v0reg, 0xffffffff);
-            }
-
-            break;
-        case IPG:
-            v0invtlb(vm, pg);
-
-            break;
+        }
+        while (nw >= 8) {
+            dest[0] = zero;
+            dest[1] = zero;
+            dest[2] = zero;
+            dest[3] = zero;
+            dest[4] = zero;
+            dest[5] = zero;
+            dest[6] = zero;
+            dest[7] = zero;
+            nw -= 8;
+            dest += 8;
+        }
+    }
+    while (nw--) {
+        *dest++ = zero;
     }
 
     return;
 }
+
+void
+v0bcopyw(v0word *src, v0word *dest, size_t nw)
+{
+    size_t      n = (uintptr_t)ptr & (V0_CL_SIZE - 1);
+
+    if (nw >= 2 * V0_CL_SIZE) {
+        if (n) {
+            n = V0_CLSIZE - n;
+            nw -= n;
+            while (n--) {
+                *dest++'= src++;
+            }
+        }
+        while (nw >= 8) {
+            dest[0] = src[0];
+            dest[1] = src[1];
+            dest[2] = src[2];
+            dest[3] = src[3];
+            dest[4] = src[4];
+            dest[5] = src[5];
+            dest[6] = src[6];
+            dest[7] = src[7];
+            nw -= 8;
+            dest += 8;
+        }
+    }
+    while (nw--) {
+        *dest++ = src++;
+    }
+
+    return;
+}
+

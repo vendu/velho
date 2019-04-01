@@ -2,6 +2,7 @@
 #define __V0_MEM_H__
 
 #include <stddef.h>
+#include <stdint.h>
 
 /* page-table entry flag-bits */
 #define V0_PAGE_EXEC   (1 << 0)
@@ -16,6 +17,14 @@
 #define V0_PAGE_SYS    (1 << 9)
 #define V0_PAGE_GLOBAL (1 << 10)
 #define V0_PAGE_DIRECT (1 << 11)
+#define V0_PAGE_FLAGS  V0_PAGE_SHIFT
+#define V0_PAGE_MASK   (UINT32_C(V0_PAGE_SIZE - 1))
+#define V0_PAGE_FRAME  (~UINT32_C(V0_PAGE_SIZE - 1))
+
+struct v0tlb {
+    v0uword page;
+    v0uword desc;
+};
 
 static __inline__ v0word
 v0bufload(struct vm *vm, v0adr adr)
