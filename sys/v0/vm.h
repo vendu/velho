@@ -24,8 +24,12 @@ struct vm {
     uint8_t            *mem;
     size_t              memsize;
     m_atomic_t          buflkmap;
-    struct v0membuf    *buftab;
+    v0pagedesc         *buftab;
     size_t              bufsize;
+    v0uword             ustk;
+    size_t              ustksize;
+    v0uword             sstk;
+    size_t              sstksize;
 };
 
 #endif /* #ifndef __V0_VM_H__ */

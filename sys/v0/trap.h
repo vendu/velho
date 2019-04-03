@@ -8,10 +8,11 @@
 #define V0_TRAP_DZ       0x00 // divizion by zero       - code is PC
 #define V0_TRAP_OP       0x01 // invalid opcode         - code is PC
 #define V0_TRAP_PF       0x02 // page-fault             - code is ADR + flags
-#define V0_TRAP_DF       0x03 // double-fault
-#define V0_TRAP_TF       0x04 // triple-fault
+#define V0_TRAP_DF       0x03 // double-fault           - code is ADR
+#define V0_TRAP_TF       0x04 // triple-fault           - code is ADR
 #define V0_TRAP_TS       0x05 // invalid task state     - code is ADR
-#define V0_TRAP_NP       0x06 // segment not present    - code is ID
+#define V0_TRAP_NP       0x06 // segment not present    - code is ADR
+
 #define V0_TRAP_SS       0x07 // stack-segment full     - code is SP
 #define V0_TRAP_PE       0x08 // protection error       - code is ADR
 #define V0_TRAP_FP       0x09 // floating-point error   - code is PC
@@ -43,35 +44,37 @@
 #define V0_IRQ_TRAP13    V0_IRQ_TRAP(13)	// device interrupt 13
 #define V0_IRQ_TRAP14    V0_IRQ_TRAP(14)	// device interrupt 14
 #define V0_IRQ_TRAP15    V0_IRQ_TRAP(15)        // device interrupt 15
+#define V0_TRAPS         32                     // total # of traps for system
 
 /* IV-register contents */
 
 /* v0trapdesc */
-#define V0_TRAP_SYS      (1 << 0)
-#define V0_TRAP_PHYS     (1 << 1)
-#define V0_TRAP_ADR_MASK 0xfffffffc
+#define V0_TRAP_SYS             (1 << 0)       	// system-mode trap execution
+#define V0_TRAP_STK             (1 << 1)        // traps on separate stack
+#define V0_TRAP_ADR_MASK        0xfffffffc     	// trap-handler function pointer
 
 /* PF (page-fault) trap error code bits */
-#define V0_PF_EX         (1 << 0)       // page-fault during execution
-#define V0_PF_WR         (1 << 1)       // page-fault during write
-#define V0_PF_RD         (1 << 2)       // page-fault during read
-#define V0_PF_R0         (1 << 3)       // page-fault with system page
+#define V0_PF_EX         	(1 << 0)       	// page-fault during execution
+#define V0_PF_WR         	(1 << 1)       	// page-fault during write
+#define V0_PF_RD         	(1 << 2)       	// page-fault during read
+#define V0_PF_R0         	(1 << 3)       	// page-fault with system page
+#define V0_PF_SS         	(1 << 4)       	// stack-fault
+#define V0_PF_ADR_MASK   	(~(V0_PAGE_SIZE - 1)) // page-fault address mask
 /* IO (input/output) trap error code bits */
-#define V0_IO_SP         (1 << 0)       // invalid seek position
-#define V0_IO_WR         (1 << 1)       // write error
-#define V0_IO_RD         (1 << 2)       // read error
-#define V0_IO_PF         (1 << 3)       // insufficient I/O permission
+#define V0_IO_WR         	(1 << 0)       	// write error
+#define V0_IO_RD         	(1 << 1)       	// read error
+#define V0_IO_PF         	(1 << 2)       	// insufficient I/O permission
+#define V0_IO_SP         	(1 << 3)       	// invalid seek position
+#define V0_IO_DF         	(1 << 4)        // device I/O failure
+#define V0_IO_OK         	(1 << 5)        // check if given I/O allowed
 
+/* trap stack-frame */
 struct v0trapframe {
-    void  *retadr;
-    v0reg  msw;
-    v0reg  sp;
-    v0reg  fp;
-};
-
-struct v0trapdesc {
-    long  id;
-    void *func(void *);
+    v0uword      code;                  	// error code
+    v0word      *ret;                   	// return address
+    v0uword      msw;                   	// machine status-word
+    v0uword      usp;                   	// user-mode stack-pointer
+    v0uword      ufp;                   	// user-mode frame-pointer
 };
 
 #endif /* __V0_TRAP_H__ */

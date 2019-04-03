@@ -10,6 +10,9 @@ typedef uint32_t        v0uword;        // unsigned register value
 typedef int64_t         v0wide;    	// signed wide-register value
 typedef uint64_t        v0uwide;   	// unsigned wide-register value
 
+typedef uint32_t        v0pagedesc;     // page address + flags
+typedef uint32_t        v0trapdesc;     // trap function address + flags
+
 typedef uint32_t        v0iodesc;       // I/O-device page address + flags
 typedef uint32_t        v0ioperm;       // I/O-permission bits
 
@@ -27,11 +30,6 @@ struct v0callerctx {
     v0word      r1;
     v0word      r2;
     v0word      r3;
-};
-
-struct v0membuf {
-    v0word      adr;
-    v0word      val;
 };
 
 struct v0thr {

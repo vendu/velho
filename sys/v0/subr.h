@@ -46,15 +46,15 @@ static __inline__ void
 v0beg(struct vm *vm, v0word nb)
 {
     v0wide     *regs = &t_thr->genregs;
-    v0word      sp = regs[V0_SP_REG];
-    v0word      fp = regs[V0_FP_REG];
-    v0w0rd      pc = regs[V0_PC_REG];
-    v0word     *stk;
+    v0uword     sp = regs[V0_SP_REG];
+    v0uword     fp = regs[V0_FP_REG];
+    v0uword     pc = regs[V0_PC_REG];
+    v0uword    *stk;
 
     pc += sizeof(struct v0ins);
-    (v0word *)&vm->mem[sp] = fp;
-    sp -= V0_SAVE_REGS * sizeof(v0word);
-    stk = (v0word *)&vm->mem[sp];
+    (v0uword *)&vm->mem[sp] = fp;
+    sp -= V0_SAVE_REGS * sizeof(v0uword);
+    stk = (v0uword *)&vm->mem[sp];
     regs[V0_FP_REG] = sp;
     stk[0] = regs[V0_R4_REG];
     stk[1] = regs[V0_R5_REG];
@@ -82,9 +82,9 @@ static __inline__ void
 v0fin(struct vm *vm, v0word nb)
 {
     v0wide     *regs = &t_thr->genregs;
-    v0word      fp = regs[V0_FP_REG];
-    v0word      pc = regs[V0_PC_REG];
-     v0w0rd     *stk = (v0word *)&vm->mem[fp];
+    v0uword     fp = regs[V0_FP_REG];
+    v0uword     pc = regs[V0_PC_REG];
+    v0uword    *stk = (v0uword *)&vm->mem[fp];
 
     regs[V0_R4_REG] = stk[0];
     regs[V0_R5_REG] = stk[1];
@@ -116,13 +116,13 @@ static __inline__ void
 v0csr(struct vm *vm, v0uword adr)
 {
     v0wide     *regs = &t_thr->genregs;
-    v0word      sp = regs[V0_SP_REG];
-    v0word      lr = regs[V0_LR_REG];
-    v0w0rd      pc = regs[V0_PC_REG];
+    v0uword     sp = regs[V0_SP_REG];
+    v0uword     lr = regs[V0_LR_REG];
+    v0uword     pc = regs[V0_PC_REG];
 
-    sp -= sizeof(v0word);
+    sp -= sizeof(v0uword);
     pc += sizeof(struct v0ins);
-    *(v0word *)&g_vm.mem[sp] = lr;
+    *(v0uword *)&g_vm.mem[sp] = lr;
     regs[V0_SP_REG] = sp;
     regs[V0_LR_REG] = pc;
     regs[V0_PC_REG] = adr;
@@ -147,14 +147,14 @@ static __inline__ void
 v0ret(struct vm *vm)
 {
     v0wide     *regs = &t_thr->genregs;
-    v0word      fp = regs[V0_FP_REG];
-    v0word     *stk = (v0reg *)&g_vm.mem[fp];
-    v0word      pc;
-    v0w0rd      lr;
-    v0word      sp;
+    v0uword     fp = regs[V0_FP_REG];
+    v0uword    *stk = (v0reg *)&g_vm.mem[fp];
+    v0uword     pc;
+    v0uword     lr;
+    v0uword     sp;
 
     pc = *stk;
-    fp += sizeof(v0word);
+    fp += sizeof(v0uword);
     sp = stk[-1];
     regs[V0_SP_REG] = fp;
     regs[V0_LR_REG] = lr;
@@ -165,10 +165,10 @@ v0ret(struct vm *vm)
 
 /*
  * struct v0sysctx {
- *     v0word      msw;
- *     v0word      fp1;
- *     v0word      sp1;
- *     v0word      lr;
+ *     v0uword  msw;
+ *     v0uword  ufp;
+ *     v0uword  usp;
+ *     v0uword  lr;
  * };
  *
  * system call arguments are in r0..r3
@@ -178,9 +178,9 @@ v0ret(struct vm *vm)
  * ------
  * pc           user-mode return address
  * ------
- * sp1          user-mode frame-pointer
+ * usp          user-mode frame-pointer
  * ------
- * fp1          user-mode stack-pointer
+ * ufp          user-mode stack-pointer
  * ------
  * msw          machine status word     <- FP
  * ------
@@ -189,20 +189,20 @@ static __inline__ void
 v0sys(struct vm *vm, v0uword adr)
 {
     v0wide     *regs = &t_thr->genregs;
-    v0word      sp = t_thr->sysregs[V0_SP0_REG];
-    v0word      pc = regs[V0_PC_REG];
-    v0word      sp1 = regs[V0_SP_REG];
-    v0word      fp1 = regs[V0_FP_REG];
-    v0word      msw = t_thr->sysregs[V0_MSW_REG];
-    v0word     *stk;
+    v0uword     sp = t_thr->sysregs[V0_SP0_REG];
+    v0uword     pc = regs[V0_PC_REG];
+    v0uword     usp = regs[V0_SP_REG];
+    v0uword     ufp = regs[V0_FP_REG];
+    v0uword     msw = t_thr->sysregs[V0_MSW_REG];
+    v0uword    *stk;
 
     sp--;
     pc += sizeof(struct v0ins);
-    stk = (v0word *)&g_vm.mem[sp];
-    sp -= 3 * sizeof(v0word);
+    stk = (v0uword *)&g_vm.mem[sp];
+    sp -= 3 * sizeof(v0uword);
     *stk = pc;
-    stk[-1] = sp1;
-    stk[-2] = fp1;
+    stk[-1] = usp;
+    stk[-2] = ufp;
     stk[-3] = msw;
     t_thr->sysregs[V0_SP0_REG] = sp;
     t_thr->genregs[V0_SP_REG] = sp;
@@ -216,17 +216,17 @@ static __inline__ void
 v0srt(struct vm *vm)
 {
     v0wide     *regs = &t_thr->genregs;
-    v0word      sp = regs[V0_FP_REG];
-    v0word     *stk = (v0word *)&vm->mem[sp];
-    v0word      msw = *stk;
-    v0word      fp1 = stk[1];
-    v0word      sp1 = stk[2];
-    v0word      pc = stk[3];
+    v0uword     sp = regs[V0_FP_REG];
+    v0uword    *stk = (v0uword *)&vm->mem[sp];
+    v0uword     msw = *stk;
+    v0uword     ufp = stk[1];
+    v0uword     usp = stk[2];
+    v0uword     pc = stk[3];
 
-    sp += 4 * sizeof(v0word);
+    sp += 4 * sizeof(v0uword);
     t_thr->sysregs[V0_MSW_REG] = msw;
-    regs[V0_SP_REG] = sp1;
-    regs[V0_FP_REG] = fp1;
+    regs[V0_SP_REG] = usp;
+    regs[V0_FP_REG] = ufp;
     t_thr->sysregs[V0_SP0_REG] = sp;
     regs[V0_PC_REG] = pc;
 }
@@ -237,9 +237,9 @@ v0srt(struct vm *vm)
  * ------
  * lr
  * ------
- * sp1
+ * usp
  * ------
- * fp1
+ * ufp
  * ------
  * msw                                  <- FP
  * ------
@@ -254,18 +254,18 @@ static __inline__ void
 v0irt(struct vm *vm)
 {
     v0wide     *regs = &t_thr->genregs;
-    v0word      fp = regs[V0_FP_REG];
-    v0word     *stk = (v0word *)&g_vm.mem[fp];
-    v0wide     *ctx = (v0wide *)stk - V0_STD_REGS;
-    v0word      msw = *stk;
-    v0word      fp1 = stk[1];
-    v0word      sp1 = stk[2];
-    v0word      pc = stk[3];
-    v0word      sp = fp + 4 * sizeof(v0word);
+    v0uword     fp = regs[V0_FP_REG];
+    v0uword    *stk = (v0uword *)&g_vm.mem[fp];
+    v0wide     *ctx = (v0wide *)stk - V0_INT_REGS;
+    v0uword     msw = *stk;
+    v0uword     ufp = stk[1];
+    v0uword     usp = stk[2];
+    v0uword     pc = stk[3];
+    v0uword     sp = fp + 4 * sizeof(v0uword);
 
     v0bcopyw(ctx, regs, V0_INT_REGS * sizeof(v0wide));
-    regs[V0_SP_REG] = sp1;
-    regs[V0_FP_REG] = fp1;
+    regs[V0_SP_REG] = usp;
+    regs[V0_FP_REG] = ufp;
     v0->sysregs[V0_SP0_REG] = sp;
     regs[V0_PC_REG] = pc;
 

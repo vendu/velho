@@ -1,20 +1,24 @@
 #include <stddef.h>
 #include <v0/types.h>
+#include <v0/mem.h>
+
+static v0pagedesc *g_v0pagedir[V0_PAGE_DIR_ITEMS];
+static v0pagedesc  g_v0tlb[V0_PAGE_TLB_ITEMS];
 
 void
 v0bzerow(void *ptr, size_t nw)
 {
     v0word     *dest = ptr;
     v0word      zero = 0;
-    size_t      n = (uintptr_t)ptr & (V0_CL_SIZE - 1);
+    size_t      val = (uintptr_t)ptr & (V0_CL_SIZE - 1);
 
     if (nw >= 2 * V0_CL_SIZE) {
-        if (n) {
-            n = V0_CLSIZE - n;
-            nw -= n;
-            while (n--) {
+        if (val) {
+            val = V0_CLSIZE - val;
+            nw -= val;
+            while (val--) {
                 *dest++'= zero;
-            }
+}
         }
         while (nw >= 8) {
             dest[0] = zero;
@@ -27,6 +31,7 @@ v0bzerow(void *ptr, size_t nw)
             dest[7] = zero;
             nw -= 8;
             dest += 8;
+            src += 8;
         }
     }
     while (nw--) {
@@ -39,13 +44,13 @@ v0bzerow(void *ptr, size_t nw)
 void
 v0bcopyw(v0word *src, v0word *dest, size_t nw)
 {
-    size_t      n = (uintptr_t)ptr & (V0_CL_SIZE - 1);
+    size_t      val = (uintptr_t)ptr & (V0_CL_SIZE - 1);
 
     if (nw >= 2 * V0_CL_SIZE) {
-        if (n) {
-            n = V0_CLSIZE - n;
-            nw -= n;
-            while (n--) {
+        if (val) {
+            val = V0_CLSIZE - val;
+            nw -= val;
+            while (val--) {
                 *dest++'= src++;
             }
         }
@@ -60,6 +65,7 @@ v0bcopyw(v0word *src, v0word *dest, size_t nw)
             dest[7] = src[7];
             nw -= 8;
             dest += 8;
+            src += 8;
         }
     }
     while (nw--) {

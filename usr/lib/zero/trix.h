@@ -183,11 +183,11 @@ long long llabs(long long x);
         unsigned long __tmp1;                                           \
         unsigned long __tmp2;                                           \
                                                                         \
-        __tmp1 = __tmp2 = (b);                                          \
+        __tmp1 = (b);                                                   \
+        __tmp2 = (b);                                                   \
         __tmp2 >>= 4;                                                   \
         __tmp1 ^= __tmp2;                                               \
-        __tmp2 = 0x6996;                                                \
-        (r) = (__tmp2 >> (__tmp1 & 0x0f)) & 0x01;                       \
+        (r) = (0x6996 >> (__tmp1 & 0x0f)) & 0x01;                       \
     } while (0)
 #define bytepar3(b) ((0x6996 >> (((b) ^ ((b) >> 4)) & 0x0f)) & 0x01)
 
