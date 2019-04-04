@@ -97,13 +97,19 @@
 #define V0_STD_REGS     	(V0_INT_REGS + V0_SYS_REGS) // total # of registers
 /* values for MSW */
 #define V0_MSW_DEF_BITS 	(V0_IF_BIT)
-#define V0_MSW_ZF_BIT   	(1 << 0) // zero
-#define V0_MSW_CF_BIT   	(1 << 1) // carry, return bit for BTR, BTS, BTC
-#define V0_MSW_OF_BIT   	(1 << 2) // overflow
-#define V0_MSW_LT_BIT   	(1 << 3) // less than
-#define V0_MSW_SF_BIT   	(1 << 4) // signed result
-#define V0_MSW_ST_BIT           (1 << 5) // saturation
-#define V0_MSW_IF_BIT   	(1 << 5) // interrupts pending
+#define V0_MSW_THR_MASK         ((1 << V0_THR_ID_BITS) - 1)
+#define V0_MSW_FLAG_SHIFT       V0_THR_ID_BITS
+#define V0_MSW_ZF_BIT   	(1 << (V0_MSW_FLAG_SHIFT + 0)) // zero
+#define V0_MSW_CF_BIT   	(1 << (V0_MSW_FLAG_SHIFT + 1)) // carry, return bit for BTR, BTS, BTC
+#define V0_MSW_OF_BIT   	(1 << (V0_MSW_FLAG_SHIFT + 2)) // overflow
+#define V0_MSW_LT_BIT   	(1 << (V0_MSW_FLAG_SHIFT + 3)) // less than
+#define V0_MSW_SF_BIT   	(1 << (V0_MSW_FLAG_SHIFT + 4)) // signed result
+#define V0_MSW_ST_BIT           (1 << (V0_MSW_FLAG_SHIFT + 5)) // saturation
+#define V0_MSW_IF_BIT           (1 << 28)
+#define V0_MSW_RF_BIT           (1 << 29)
+#define V0_MSW_MP_BIT           (1 << 30)
+#define V0_MSW_FP_BIT           (1 << 31)
+
 /* values for MFW- and CR-registers */
 #define V0_SYS_MP_BIT   	(1 << 31) // multiprocessor support
 #define V0_SYS_PG_BIT   	(1 << 30) // paging/virtual memory enabled

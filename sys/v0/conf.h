@@ -20,6 +20,7 @@
 #define V0_TASK_STACK_SIZE   (4 * V0_PAGE_SIZE) // per-thread stack size
 #define V0_PROC_THREADS      16                 // max # of per-process threads
 #define V0_MAX_THREADS       256                // max # of system threads
+#define V0_THR_ID_BITS       8                  // # of bits in thread-IDs
 #endif
 
 /* optional features */
