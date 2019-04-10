@@ -5,6 +5,9 @@
 #if !defined(_ISOC9X_SOURCE)
 #define _ISOC9X_SOURCE      1
 #endif
+#if !defined(_ISOC11_SOURCE)
+#define _ISOC11_SOURCE      1
+#endif
 
 #if !defined(_POSIX_SOURCE)
 #define _POSIX_SOURCE       1
