@@ -7,8 +7,9 @@
 #define ZEN_IP4_NET             1
 
 #if defined(__v0__)
+#define ZEN_PROC_MAX            ZEN_TASK_MAX
+#define ZEN_PROC_TASKS          8
 #define ZEN_TASK_MAX            64
-#define ZEN_THR_MAX             64
 #endif
 
 /* system parameters */

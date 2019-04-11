@@ -30,13 +30,17 @@ typedef uint32_t                m_page_t;       // page-structure descriptor
 #define ZEN_MEM_WRITE           (1 << 8)        // write permission bit
 #define ZEN_MEM_READ            (1 << 9)        // read permission bit
 #define ZEN_MEM_NONTEMP   	(1 << 10)       // non-temporal (uncached) hint
+#define ZEN_MEM_FLAG            (1 << 11)       // for system use
 
 /* memory layout */
 
 #define ZEN_SYS_STACK_SIZE      ZEN_PAGE_SIZE
+#define ZEN_USR_STACK_SIZE      (4 * ZEN_PAGE_SIZE)
 #define ZEN_TRAP_VECTOR         0x00000000
 #define ZEN_TEXT_MEM            ZEN_PAGE_SIZE
+#define ZEN_USR_STACK_LIM       (ZEN_USR_STACK - ZEN_USR_STACK_SIZE)
 #define ZEN_USR_STACK           (ZEN_SYS_STACK - ZEN_SYS_STACK_SIZE)
+#define ZEN_SYS_STACK_LIM       (ZEN_SYS_STACK - ZEN_SYS_STACK_SIZE)
 #define ZEN_SYS_STACK           ZEN_RAM_SIZE
 
 union m_task {

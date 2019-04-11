@@ -41,6 +41,33 @@ struct zenperm {
     m_uword_t           flags;
 };
 
+#define MEM_NULL_FLAGS          0
+#define MEM_CODE_FLAGS          (ZEN_MEM_EXEC | ZEN_MEM_READ)
+#define MEM_RODATA_FLAGS        ZEN_MEM_READ
+#define MEM_DATA_FLAGS          (ZEN_MEM_WRITE | ZEN_MEM_READ | ZEN_MEM_ZERO)
+#define MEM_HEAP_FLAGS          (ZEN_MEM_WRITE | ZEN_MEM_READ | ZEN_MEM_DYNAMIC)
+#define MEM_USRSTK_FLAGS        (ZEN_MEM_WRITE | ZEN_MEM_READ           \
+                                 | ZEN_MEM_GROW_DOWN)
+#define MEM_SYS_FLAGS           (ZEN_MEM_EXEC | ZEN_MEM_READ | ZEN_MEM_SYS)
+#define MEM_SYSSTK_FLAGS        (ZEN_MEM_WRITE | ZEN_MEM_READ           \
+                                 | ZEN_MEM_GROW_DOWN | ZEN_MEM_SYS)
+#define ZEN_NULL_SEG            0
+#define ZEN_CODE_SEG            1
+#define ZEN_RODATA_SEG          2
+#define ZEN_DATA_SEG            3
+#define ZEN_HEAP_SEG            4
+#define ZEN_USRSTK_SEG          5
+#define ZEN_SYS_SEG             6
+#define ZEN_SYSSTK_SEG          7
+#define ZEN_MEM_DYNAMIC         ZEN_MEM_FLAG
+#define ZEN_MEM_ZERO            (ZEN_MEM_FLAG << 1)
+struct zenseg {
+    m_adr_t             base;
+    m_adr_t             lim;
+    m_uword_t           size;
+    m_uword_t           flags;
+};
+
 struct zenmap {
     m_adr_t             adr;
     m_uword_t           size;
@@ -57,6 +84,11 @@ struct zenpage {
     m_uword_t           qid;    // lruq, sizeof(m_word_t) * CHAR_BIT - clz(nflt)
     struct zenpage     *prev;   // previous in queue
     struct zenpage     *next;   // next in queue
+};
+
+struct zenvm {
+    struct zentask     *tasktab[V0_PROC_TASKS];
+    struct m_page_t    *pagedir[V0_PAGE_DIR_ITEMS];
 };
 
 #endif /* __ZEN_TYPES_H__ */
