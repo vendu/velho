@@ -58,9 +58,9 @@
 #define V0_REV_OP               V0_EVENT_OP     // VAL-bit + counter ID in code
 #define V0_LDX_OP               V0_XREG_OP      // FLAG1-bit set
 #define V0_STX_OP               V0_XREG_OP      // FLAG2-bit set
-#define V0_IPG_OP       	V0_PAGE_OP      // FLAG1-bit clear
-#define V0_PFC_OP       	V0_CACHE_OP     // FLAG1-bit clear
-#define V0_FLC_OP       	V0_CACHE_OP     // FLAG1-bit set
+#define V0_IPG_OP               V0_PAGE_OP      // FLAG1-bit clear
+#define V0_PFC_OP               V0_CACHE_OP     // FLAG1-bit clear
+#define V0_FLC_OP               V0_CACHE_OP     // FLAG1-bit set
 #define V0_BLK_OP               V0_MEM_OP       // no flag-bits
 #define V0_BRD_OP               V0_MEM_OP       // FLAG1-bit set
 #define V0_BWR_OP               V0_MEM_OP       // FLAG2-bit set
