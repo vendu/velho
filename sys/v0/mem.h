@@ -13,23 +13,6 @@
 
 #define V0_PAGE_TLB_ITEMS       (V0_PAGE_SIZE / sizeof(v0pagedesc))
 
-/* page-table entry flag-bits */
-/* STM: !CORE && WIRE */
-#define V0_MEM_LOCK_BIT         (1 << 0)
-#define V0_MEM_CORE_BIT         (1 << 1)
-#define V0_MEM_WIRE_BIT         (1 << 2)
-#define V0_MEM_DIRTY_BIT        (1 << 3)
-#define V0_MEM_SYS_BIT          (1 << 4)
-#define V0_MEM_GLOBAL_BIT       (1 << 5)
-#define V0_MEM_EXEC_BIT         (1 << 6)
-#define V0_MEM_WRITE_BIT        (1 << 7)
-#define V0_MEM_READ_BIT         (1 << 8)
-#define V0_MEM_GROW_DOWN_BIT    (1 << 9)
-#define V0_MEM_FLAG1_BIT        (1 << 10)
-#define V0_MEM_FLAG2_BIT        (1 << 11)
-#define V0_PAGE_BITS   		(UINT32_C(V0_PAGE_SIZE - 1))
-#define V0_PAGE_FRAME  		(~UINT32_C(V0_PAGE_SIZE - 1))
-
 static __inline__ v0word
 v0bufload(struct vm *vm, v0adr adr)
 {

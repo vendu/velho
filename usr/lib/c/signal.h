@@ -14,6 +14,9 @@ typedef uint32_t                pid_t;
 #define __pid_t_defined         1
 #endif
 #include <bits/signal.h>
+#if defined(__ZEN__)
+#include <zen/signal.h>
+#endif
 #if (_POSIX_SOURCE) && (USEPOSIX199309)
 struct timespec;
 #include <time.h>
@@ -46,8 +49,6 @@ typedef int64_t         sigset_t;
 #define SIG_BLOCK       0
 #define SIG_UNBLOCK     1
 #define SIG_SETMASK     2
-
-#if !defined(__KERNEL__)
 
 /* set handler for signal sig; returns old handler */
 extern void           (*signal(int sig, void (*func)(int)))(int);
@@ -117,10 +118,6 @@ extern int              sigsetmask(int mask);
 /* return current signal mask */
 extern int              siggetmask(void);
 
-#endif /* !defined(__KERNEL__) */
-
-#if !defined(__KERNEL__)
-
 #if (USEBSD) && (!USEPOSIX)
 int                     sigvec(int sig, const struct sigvec *vec,
                                struct sigvec *oldvec);
@@ -128,11 +125,7 @@ int                     sigvec(int sig, const struct sigvec *vec,
 
 // extern int sigreturn(struct sigcontext *scp);
 
-#endif /* !defined(__KERNEL__) */
-
 #endif /* _BSD_SOURCE */
-
-#if !defined(__KERNEL__)
 
 #if (USEPOSIX)
 
@@ -164,10 +157,6 @@ extern const char *const        _sys_siglist[_NSIG];
 extern const char *const        sys_siglist[_NSIG];
 #endif
 
-#endif /* !defined(__KERNEL__) */
-
-#if !defined(__KERNEL__)
-
 /*
  * if intr is nonzero, make signal sig interrupt system calls (causing them
  * to fail with EINTR); if intr is zero, make system calls be restarted
@@ -194,8 +183,6 @@ extern int              sigrelse(int sig);
 extern int              sigignore(int sig);
 extern __sighandler_t   sigset(int sig, __sighandler_t func);
 #endif /* USEXOPENEXT */
-
-#endif /* !defined(__KERNEL__) */
 
 #endif /* __SIGNAL_H__ */
 

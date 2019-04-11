@@ -54,18 +54,18 @@
 #define V0_TRAP_ADR_MASK        0xfffffffc     	// trap-handler function pointer
 
 /* PF (page-fault) trap error code bits */
-#define V0_PF_EX         	(1 << 0)       	// page-fault during execution
-#define V0_PF_WR         	(1 << 1)       	// page-fault during write
-#define V0_PF_RD         	(1 << 2)       	// page-fault during read
-#define V0_PF_R0         	(1 << 3)       	// page-fault with system page
-#define V0_PF_SS         	(1 << 4)       	// stack-fault
+#define V0_PF_EXEC         	(1 << 0)       	// page-fault during execution
+#define V0_PF_WRITE         	(1 << 1)       	// page-fault during write
+#define V0_PF_READ         	(1 << 2)       	// page-fault during read
+#define V0_PF_RING0         	(1 << 3)       	// page-fault with system page
+#define V0_PF_STACK         	(1 << 4)       	// stack-fault
 #define V0_PF_ADR_MASK   	(~(V0_PAGE_SIZE - 1)) // page-fault address mask
 /* IO (input/output) trap error code bits */
-#define V0_IO_WR         	(1 << 0)       	// write error
-#define V0_IO_RD         	(1 << 1)       	// read error
-#define V0_IO_PF         	(1 << 2)       	// insufficient I/O permission
-#define V0_IO_SP         	(1 << 3)       	// invalid seek position
-#define V0_IO_DF         	(1 << 4)        // device I/O failure
+#define V0_IO_WRITE         	(1 << 0)       	// write error
+#define V0_IO_READ         	(1 << 1)       	// read error
+#define V0_IO_PERM         	(1 << 2)       	// insufficient I/O permission
+#define V0_IO_SEEK         	(1 << 3)       	// invalid seek position
+#define V0_IO_DEV_FAILURE      	(1 << 4)        // device I/O failure
 #define V0_IO_OK         	(1 << 5)        // check if given I/O allowed
 
 /* trap stack-frame */

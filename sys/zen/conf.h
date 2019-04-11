@@ -1,6 +1,8 @@
 #ifndef __ZEN_CONF_H__
 #define __ZEN_CONF_H__
 
+#define ZEN_IP4_NET             1
+
 #if defined(__v0__)
 #define ZEN_TASK_MAX            64
 #define ZEN_THR_MAX             64
