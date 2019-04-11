@@ -48,5 +48,16 @@ struct zenmap {
     struct zencred     *cred;
 };
 
+struct zenpage {
+    m_uword_t           blk;    // page-device block ID
+    zendev_t            dev;    // page-device
+    void               *pte;    // pointer to page-table entry
+    m_uword_t           flags;  // page-flags
+    m_uword_t           nflt;   // # of page-faults
+    m_uword_t           qid;    // lruq, sizeof(m_word_t) * CHAR_BIT - clz(nflt)
+    struct zenpage     *prev;   // previous in queue
+    struct zenpage     *next;   // next in queue
+};
+
 #endif /* __ZEN_TYPES_H__ */
 
