@@ -48,13 +48,13 @@
 #define V0_PAGE_OP              0x04
 #define V0_CACHE_OP             0x05
 #define V0_MEM_OP               0x06
-#define V0_HLT_OP       	V0_STOP_OP      // FLAG1-bit clear
-#define V0_RST_OP       	V0_STOP_OP      // FLAG1-bit set
+#define V0_HLT_OP               V0_STOP_OP      // FLAG1-bit clear
+#define V0_RST_OP               V0_STOP_OP      // FLAG1-bit set
 #define V0_INT_OP               V0_INTR_OP      // VAL-bit + 8-bit interrupt ID
-#define V0_STI_OP       	V0_INTR_OP      // FLAG1-bit set
-#define V0_CLI_OP       	V0_INTR_OP      // FLAG2-bit set
-#define V0_WFE_OP       	V0_EVENT_OP     // FLAG1-bit set
-#define V0_SEV_OP       	V0_EVENT_OP     // FLAG2-bit set
+#define V0_STI_OP               V0_INTR_OP      // FLAG1-bit set
+#define V0_CLI_OP               V0_INTR_OP      // FLAG2-bit set
+#define V0_WFE_OP               V0_EVENT_OP     // FLAG1-bit set
+#define V0_SEV_OP               V0_EVENT_OP     // FLAG2-bit set
 #define V0_REV_OP               V0_EVENT_OP     // VAL-bit + counter ID in code
 #define V0_LDX_OP               V0_XREG_OP      // FLAG1-bit set
 #define V0_STX_OP               V0_XREG_OP      // FLAG2-bit set
@@ -124,14 +124,14 @@
 #define V0_MULADD_OP            0x02
 #define V0_MULSH_OP             0x03
 #define V0_RECIP_OP             0x04
-#define V0_MUL_OP       	V0_MULTI_OP
+#define V0_MUL_OP               V0_MULTI_OP
 #define V0_MLH_OP               V0_MULTI_OP     // FLAG1-bit set
-#define V0_DIV_OP       	V0_DIVIDE_OP    // no flag-bits
-#define V0_REM_OP       	V0_DIVIDE_OP    // FLAG1-bit set
+#define V0_DIV_OP               V0_DIVIDE_OP    // no flag-bits
+#define V0_REM_OP               V0_DIVIDE_OP    // FLAG1-bit set
 #define V0_MAD_OP               V0_MULADD_OP    // no flag-bits
 #define V0_MSL_OP               V0_MULSH_OP     // FLAG1-bit clear
 #define V0_MSR_OP               V0_MULSH_OP     // FLAG1-bit set
-#define V0_IRP_OP       	V0_RECIP_OP     // FLAG1-bit clear
+#define V0_IRP_OP               V0_RECIP_OP     // FLAG1-bit clear
 
 /* SHIFT-unit */
 /*
@@ -150,15 +150,15 @@
 #define V0_SHIFT_OP             0x00
 #define V0_SHADD_OP             0x01
 #define V0_SHMASK_OP            0x02
-#define V0_SHL_OP       	V0_SHIFT_OP
-#define V0_SHR_OP       	V0_SHIFT_OP     // FLAG1-bit set
-#define V0_SAR_OP       	V0_SHIFT_OP     // FLAG1- and FLAG2-bits set
-#define V0_ROL_OP       	V0_SHIFT_OP     // VAL-bit set
-#define V0_ROR_OP       	V0_SHIFT_OP     // VAL- and FLAG1-bits set
+#define V0_SHL_OP               V0_SHIFT_OP
+#define V0_SHR_OP               V0_SHIFT_OP     // FLAG1-bit set
+#define V0_SAR_OP               V0_SHIFT_OP     // FLAG1- and FLAG2-bits set
+#define V0_ROL_OP               V0_SHIFT_OP     // VAL-bit set
+#define V0_ROR_OP               V0_SHIFT_OP     // VAL- and FLAG1-bits set
 #define V0_SLA_OP               V0_SHADD_OP     // FLAG1-bit clear
 #define V0_SRA_OP               V0_SHADD_OP     // FLAG1-bit set
-#define V0_SLM_OP       	V0_SHMASK_OP    // FLAG1-bit clear
-#define V0_SRM_OP       	V0_SHMASK_OP    // FLAG1-bit set
+#define V0_SLM_OP               V0_SHMASK_OP    // FLAG1-bit clear
+#define V0_SRM_OP               V0_SHMASK_OP    // FLAG1-bit set
 
 /* BIT-unit */
 /*
@@ -180,16 +180,16 @@
 #define V0_BCD_OP               0x02
 #define V0_CHK_OP               0x03
 #define V0_HASH_OP              0x04
-#define V0_CLZ_OP       	V0_BITCNT_OP    // FLAG1-bit clear
-#define V0_HAM_OP       	V0_BITCNT_OP    // FLAG1-bit set
-#define V0_PAR_OP       	V0_BITCNT_OP    // FLAG2-bit set
-#define V0_SWP_OP       	V0_BSWAP_OP
-#define V0_EBD_OP       	V0_BCD_OP       // FLAG1-bit clear
-#define V0_DBD_OP       	V0_BCD_OP       // FLAG1-bit set
-#define V0_CRC_OP       	V0_CHK_OP       // compute 16-bit IPv4 checksum
+#define V0_CLZ_OP               V0_BITCNT_OP    // FLAG1-bit clear
+#define V0_HAM_OP               V0_BITCNT_OP    // FLAG1-bit set
+#define V0_PAR_OP               V0_BITCNT_OP    // FLAG2-bit set
+#define V0_SWP_OP               V0_BSWAP_OP
+#define V0_EBD_OP               V0_BCD_OP       // FLAG1-bit clear
+#define V0_DBD_OP               V0_BCD_OP       // FLAG1-bit set
+#define V0_CRC_OP               V0_CHK_OP       // compute 16-bit IPv4 checksum
 #define V0_ECC_OP               V0_CHK_OP       // FLAG1-bit set
-#define V0_HSH_OP       	V0_HASH_OP      // hash using tmhash32()
-#define V0_HUN_OP       	V0_HASH_OP      // FLAG1-bit set, unhash
+#define V0_HSH_OP               V0_HASH_OP      // hash using tmhash32()
+#define V0_HUN_OP               V0_HASH_OP      // FLAG1-bit set, unhash
 
 /* ATOM-unit */
 /*
@@ -208,16 +208,16 @@
 #define V0_BITXCHG_OP           0x01
 #define V0_FETCHADD_OP          0x02
 #define V0_CAS_OP               0x03
-#define V0_LDL_OP       	V0_LLSC_OP      // FLAG1-bit clear
-#define V0_STL_OP       	V0_LLSC_OP      // FLAG2-bit set
-#define V0_BTC_OP       	V0_BITXCHG_OP   // FLAG1-bit clear
+#define V0_LDL_OP               V0_LLSC_OP      // FLAG1-bit clear
+#define V0_STL_OP               V0_LLSC_OP      // FLAG2-bit set
+#define V0_BTC_OP               V0_BITXCHG_OP   // FLAG1-bit clear
 #define V0_BTS_OP               V0_BITXCHG_OP   // set if clear, old in CF
-#define V0_XADD_OP      	V0_FETCHADD_OP  // no flag-bits
+#define V0_XADD_OP              V0_FETCHADD_OP  // no flag-bits
 #define V0_XINC_OP              V0_FETCHADD_OP  // FLAG1-bit set
-#define V0_XDEC_OP      	V0_FETCHADD_OP  // FLAG2-bit set
+#define V0_XDEC_OP              V0_FETCHADD_OP  // FLAG2-bit set
 
 /*
- * Code	MSW-Bits	Description
+ * Code    MSW-Bits    Description
  * ----	--------	-----------
  * EQ	ZF		equal
  * NE	!ZF		not equal
@@ -336,9 +336,9 @@
 #define V0_STN_OP               V0_STORE_OP     // FLAG1-bit set
 #define V0_STC_OP               V0_STORE_OP     // VAL-bit + condition bits
 #define V0_PSH_OP               V0_STACK_OP     // FLAG1-bit clear
-#define V0_PSM_OP       	V0_STACK_OP     // FLAG1-bit set
-#define V0_POP_OP       	V0_STACK_OP     // FLAG2-bit set
-#define V0_POM_OP       	V0_STACK_OP     // FLAG1- and FLAG2-bits set
+#define V0_PSM_OP               V0_STACK_OP     // FLAG1-bit set
+#define V0_POP_OP               V0_STACK_OP     // FLAG2-bit set
+#define V0_POM_OP               V0_STACK_OP     // FLAG1- and FLAG2-bits set
 #define V0_IOC_OP               V0_IO_OP        // VAL-bit + command in val
 #define V0_IOP_OP               V0_IO_OP        // no flag-bits
 #define V0_IOR_OP               V0_IO_OP        // FLAG1-bit set
