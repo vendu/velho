@@ -1,5 +1,5 @@
-#ifndef __ZERO_RANDKLC_H__
-#define __ZERO_RANDKLC_H__
+#ifndef __PRNG_RANDKLC_H__
+#define __PRNG_RANDKLC_H__
 
 #include <mach/param.h>
 
@@ -18,5 +18,5 @@
      (val) += 1442695040888963407, g_seed64 = (val))
 #endif
 
-#endif /* __ZERO_RANDKLC_H__ */
+#endif /* __PRNG_RANDKLC_H__ */
 
