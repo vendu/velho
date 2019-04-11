@@ -82,14 +82,8 @@ struct v0callerctx {
 struct v0tcb {
     v0word      msw0;                   // ring #0 machine status word
     v0word      sp0;                    // ring #0 stack-pointer
-    v0intreg    genregs[V0_GEN_REGS];   // wide registers
+    v0wide      genregs[V0_GEN_REGS];   // wide registers
     v0word      sysregs[V0_SYS_REGS];   // system registers
-};
-
-struct v0thr {
-    v0wide      genregs[V0_GEN_REGS];
-    v0word      sysregs[V0_SYS_REGS];
-    m_atomic_t  mtx;
 };
 
 /* flg-member bits */

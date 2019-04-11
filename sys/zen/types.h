@@ -16,6 +16,12 @@ typedef int64_t         zenoff_t;       // file-system offset
 typedef int32_t         zenuid_t;       // user ID
 typedef int32_t         zengid_t;       // group ID
 
+union m_task {
+#if defined(__v0__)
+    struct v0tcb        v0;
+#endif
+};
+
 #define ZEN_ROOT_UID    INT32_C(0)
 #define ZEN_ROOT_GID    INT32_C(0)
 #define ZEN_NO_GID      (~INT32_C(0))
