@@ -1,10 +1,14 @@
 #ifndef __ZEN_ASM_V0_H__
 #define __ZEN_ASM_V0_H__
 
-#define V0_PAGE_SIZE    4096
+#define V0_PAGE_SIZE            4096
+#define V0_PROBE_FB             0
+#define V0_LIST_FB_MODES        1
+#define V0_GET_FB_MODE          2
+#define V0_SET_FB_MODE          3
 
-#define BOOT_MEM_BIT    (1 << 0)
-#define BOOT_FB_BIT     (1 << 1)
+#define BOOT_MEM_BIT            (1 << 0)
+#define BOOT_FB_BIT             (1 << 1)
 
 #if !defined(__ASSEMBLER__)
 

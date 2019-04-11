@@ -32,6 +32,7 @@
 #define SIGSYS          31
 #define SIGUNUSED       31
 #define SIGRTMIN        32
+#define SIGRT(sig)      (SIGRTMIN | (sig))
 #define SIGRTMAX        63
 #define RTSIGMAX        32
 

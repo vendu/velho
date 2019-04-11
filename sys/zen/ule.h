@@ -1,79 +1,44 @@
 #Ifndef __ZEN_ULE_H__
 #define __ZEN_ULE_H__
 
+#include <zen/conf.h>
+
+#if defined(ZEN_ULE_THR_SCHED)
+
+#include <zen/task.h>
 #include <mach/param.h>
 #include <mt/mtx.h>
 
 /* thread priority parameters */
 #define TAO_SCHED_PRIO_MAX      128
 #define TAO_SCHED_PRIOS         32
-#define TAO_SCHED_FAST          0
-#define TAO_SCHED_SYS           1
+#define TAO_SCHED_PRIO_SHIFT    2
+#define TAO_SCHED_QUICK         0
+#define TAO_SCHED_FAST          1
 #define TAO_SCHED_USER          2
 #define TAO_SCHED_BATCH         3
 #define TAO_SCHED_CLASSES       4
 
-/* thread priority parameters */
-#define TAO_SCHED_PRIO_MAX      128
-#define TAO_SCHED_PRIOS         32
-#define TAO_SCHED_FAST          0
-#define TAO_SCHED_SYS           1
-#define TAO_SCHED_USER          2
-#define TAO_SCHED_BATCH         3
-#define TAO_SCHED_CLASSES       4
-
-/* thread states */
-#define TAO_THR_NEW             0
-#define TAO_THR_RUN             1
-#define TAO_THR_SLEEP           2
-#define TAO_THR_STOP            3
-#define TAO_THR_ZOMBIE          4
-
-#define taoprioqid(prio)        ((prio) >> 2)
+#define taoprioqid(prio)        ((prio) >> TAO_SCHED_PRIO_SHIFT)
 struct taouleparm {
-    uintptr_t   wtchan;
-    m_word_t    type;
-    m_word_t    prio;
-    m_word_t    slice;
-    m_word_t    ticks;
-};
-
-struct taoproc {
-    struct taouleparm   sched;
-};
-
-struct taothr {
-    void               *tcb;
-    struct taoparm      sched;
+    m_adr_t             wtchan;
+    m_word_t            type;
+    m_word_t            prio;
+    m_word_t            slice;
+    m_word_t            ticks;
 };
 
 struct taoqueue {
     mtmtx               mtx;
-    struct taothr      *head;
-    struct taothr      *tail;
+    struct zentask     *head;
+    struct zentask     *tail;
     uint8_t            _pad[CLSIZE - sizeof(mtmtx) - 2 * sizeof(void *)];
 };
 
-struct taouleparm {
-    m_word_t    type;
-    m_word_t    prio;
-    m_word_t    slice;
-    m_word_t    ticks;
-};
-
-struct taoproc {
-    struct taoparm      sched;
-};
-
-struct taothr {
-    void               *tcb;
-    struct taoparm      sched;
-};
-
 struct taoqueue {
     mtmtx               mtx;
-    struct taothr      *head;
-    struct taothr      *tail;
+    struct zentask     *head;
+    struct zentask     *tail;
     uint8_t            _pad[CLSIZE - sizeof(mtmtx) - 2 * sizeof(void *)];
 };
 
@@ -88,28 +53,28 @@ taoinitqueue(struct taoqueue *queue)
 }
 #endif
 
-static __inline__ struct taothr *
-taopickthr(m_word_t type)
+static __inline__ struct zentask *
+taopicktask(m_word_t type)
 {
     struct taoqueue    *queue = &taoprioq[type][0];
     m_word_t            prio = 0;
     m_word_t            one;
-    struct taothr      *thr;
-    struct taothr      *head;
+    struct zentask     *task;
+    struct zentask     *head;
     uintptr_t           hptr;
     uintptr_t           tptr;
 
     while (prio < TAO_SCHED_PRIOS) {
         mtlkbit(&queue->head);
         hptr = queue->head;
-        thr = (void *)(hptr & ~TAO_QUEUE_LK_BIT);
+        task = (void *)(hptr & ~TAO_QUEUE_LK_BIT);
         one = 0;
         tptr = queue->tail;
-        if ((thr) && hptr == tptr) {
+        if ((task) && hptr == tptr) {
             /* single-item queue, lock tail */
             mtlkbit(&queue->tail);
             tptr = queue->tail;
-            head = thr->next;
+            head = task->next;
             if (tptr == hptr) {
                 /* still single-item queue */
                 one = 1;
@@ -117,8 +82,8 @@ taopickthr(m_word_t type)
                 /* queue changed, head != tail */
                 mtunlkbit(&queue->tail);
             }
-        } else if (thr) {
-            head = thr->next;
+        } else if (task) {
+            head = task->next;
         } else {
             /* empty queue */
             mtunlkbit(&queue->head);
@@ -133,27 +98,27 @@ taopickthr(m_word_t type)
             m_atomwrite(&queue->tail, NULL);
         }
 
-        return thr;
+        return task;
     }
 
     return NULL;
 }
 
 static __inline__ void
-taopushthr(struct taothr *thr, m_word_t type, m_word_t prio)
+taopushtask(struct zentask *task, m_word_t type, m_word_t prio)
 {
     struct taoqueue    *queue = &taoprioq[type][0];
     m_word_t            one;
-    struct taothr      *thr;
-    struct taothr      *head;
+    struct zentask     *task;
+    struct zentask     *head;
     uintptr_t           hptr;
     uintptr_t           tptr;
 
-    thr->prev = NULL;
+    task->prev = NULL;
     mtlkbit(&queue->head);
     hptr = queue->head;
     head = (void *)(hptr & ~TAO_QUEUE_LK_BIT);
-    thr->next = head;
+    task->next = head;
     one = 0;
     if (head) {
         /* single-item queue, lock tail */
@@ -175,15 +140,15 @@ taopushthr(struct taothr *thr, m_word_t type, m_word_t prio)
     }
     if (one) {
             /* removing only item from queue */
-        m_atomwrite(&queue->tail, thr);
+        m_atomwrite(&queue->tail, task);
     }
-    m_atomwrite(&queue->head, thr);
+    m_atomwrite(&queue->head, task);
 
     return;
 }
 
 static __inline__ void
-taoqueuethr(struct taothr *thr, m_word_t type, m_word_t prio)
+taoqueuetask(struct zentask *task, m_word_t type, m_word_t prio)
 {
     struct taoqueue    *queue = &taoprioq[type][prio];
     m_word_t            one;
@@ -192,12 +157,12 @@ taoqueuethr(struct taothr *thr, m_word_t type, m_word_t prio)
     uintptr_t           hptr;
     uintptr_t           tptr;
 
-    thr->next = NULL;
+    task->next = NULL;
     mtlkbit(&queue->tail);
     tptr = (uintptr_t)queue->tail;
     one = 0;
     tail = (void *)(tptr & ~TAO_QUEUE_LK_BIT);
-    thr->prev = tail;
+    task->prev = tail;
     if (tail) {
         tail->next = tail;
     }
@@ -213,12 +178,12 @@ taoqueuethr(struct taothr *thr, m_word_t type, m_word_t prio)
             mtunlkbit(&queue->head);
         }
     }
-    thr->prev = tail;
-    thr->next = NULL;
+    task->prev = tail;
+    task->next = NULL;
     if (one) {
-        m_atomwrite(&queue->head, thr);
+        m_atomwrite(&queue->head, task);
     }
-    m_atomwrite(&queue->tail, thr);
+    m_atomwrite(&queue->tail, task);
 
     return;
 }

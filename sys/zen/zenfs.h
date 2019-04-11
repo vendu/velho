@@ -7,6 +7,7 @@
 #include <zero/cdefs.h>
 
 #define ZEN_FS                  1
+#define ZENFS_NAME              "zenfs"
 
 typedef uint32_t zenfsword_t;
 typedef uint16_t zenfshalf_t;

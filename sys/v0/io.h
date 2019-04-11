@@ -8,15 +8,19 @@
 /* I/O permission-bits */
 #define V0_IO_RAW               (1 << 31)       // raw/character-based I/O
 #define V0_IO_BUF               (1 << 30)       // buffered block-based I/O
-#define V0_IO_DIRECT            (1 << 29)       // direct memory access
-#define V0_IO_SYNC              (1 << 28)       // synchronous I/O
-#define V0_IO_DISCARD           (1 << 27)       // do not cache blocks
-#define V0_IO_UR_PERM   	(1 << 8)        // user read
+#define V0_IO_UNBUF             (1 << 29)       // do not cache blocks
+#define V0_IO_DIRECT            (1 << 28)       // direct memory access
+#define V0_IO_SYNC              (1 << 27)       // synchronous I/O
+#define V0_IO_POLL              (1 << 26)       // pollable object
+#define V0_IO_BUSY              (1 << 25)       // I/O in progress
+#define V0_IO_SIGIO             (1 << 24)       // send SIGIO on objects ready
+#define V0_IO_SIGURG            (1 << 23)       // send SIGURG for ZEN_IO_SYNC
+#define V0_IO_UR_PERM   	(1 << 8)        // user read permission bit
 #define V0_IO_UW_PERM   	(1 << 7)        // user write
-#define V0_IO_UX_PERM           (1 << 6)        // user execute permission bit
-#define V0_IO_GR_PERM   	(1 << 5)        // superuser read
-#define V0_IO_GW_PERM   	(1 << 4)        // superuser write
-#define V0_IO_GX_PERM   	(1 << 3)        // superuser execute
+#define V0_IO_UX_PERM           (1 << 6)        // user execute
+#define V0_IO_GR_PERM   	(1 << 5)        // group read
+#define V0_IO_GW_PERM   	(1 << 4)        // group write
+#define V0_IO_GX_PERM   	(1 << 3)        // group execute
 #define V0_IO_AR_PERM   	(1 << 2)        // world read
 #define V0_IO_AW_PERM   	(1 << 1)        // world write
 #define V0_IO_AX_PERM   	(1 << 0)        // world execute

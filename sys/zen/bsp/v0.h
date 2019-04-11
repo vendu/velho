@@ -4,8 +4,6 @@
 #include <stdint.h>
 #include <v0/trap.h>
 
-typedef intmax_t                zenlong;        // system maximum
-typedef uintmax_t               zenulong;       // unsigned system maximum
 typedef int32_t         	m_word_t;       // machine register
 typedef uint32_t        	m_uword_t;      // unsigned register/word
 typedef uint32_t        	m_adr_t;        // memory address
@@ -40,6 +38,12 @@ typedef uint32_t                m_page_t;       // page-structure descriptor
 #define ZEN_TEXT_MEM            ZEN_PAGE_SIZE
 #define ZEN_USR_STACK           (ZEN_SYS_STACK - ZEN_SYS_STACK_SIZE)
 #define ZEN_SYS_STACK           ZEN_RAM_SIZE
+
+union m_task {
+#if defined(__v0__)
+    struct v0tcb        v0;
+#endif
+};
 
 #endif /* __ZEN_BSP_ZEN_H__ */
 

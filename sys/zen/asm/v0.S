@@ -22,7 +22,7 @@ _bootfbmode:	.word	0x00000000
 .align	4
 
 bootstrap:
-	ldr			$V0_PROBE_FB_MODE
+	ldr			$V0_PROBE_FB
 	ldr			$_bootfbhdr, %r1
 	v0probefb
 	ldr			$_boothdr, %r0

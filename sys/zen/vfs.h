@@ -32,8 +32,10 @@ typedef uintptr_t       vfsuid_t;
 typedef uintptr_t       vfsgid_t;
 
 struct zenvfsnode {
+    vfsuword_t                  desc;
     vfsuword_t                  type;
     vfsuword_t                  flags;
+    void                       *funcs;
     union {
 #if defined(ZEN_FS)
         struct zenfscommon      zenfs;
