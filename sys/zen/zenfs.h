@@ -47,7 +47,7 @@ union zenfslink {
     struct zenfsblktabs blktabs;                // fs block book-keeping
     uint8_t             name[ZEN_FS_LINK_SIZE]; // CHR, BLK, FIFO, SOCK, LNK
 };
-/* struct zenfscommon is exactly 128 bytes */
+/* struct zenfscommon is exactly 128 bytes and on-disk verbatim */
 struct zenfscommon {
     zenfssize_t         size;   // file size in bytes                   0
     zenfssize_t         nblk;   // # of 1K blocks used                  8
@@ -65,25 +65,12 @@ struct zenfscommon {
     union zenfslink     link;   // block book-keeping or object name    64
 };
 
-/* on-disk data structure */
-struct zenfsdnode {
-    struct zenfscommon inode;
-};
-
-/* in-memory data structure */
-struct zenfsmnode {
-    struct zenfscommon  inode;
-    uint8_t            *buf;
-    size_t              bufsize;
-    uintptr_t           vfsflags;
-};
-
 struct zenfsdirent {
     zenfssize_t         ofs;            // 64-bit offset
     zenfsino_t          ino;            // 32-bit inode number
     zenfshalf_t         namelen;        // 16-bit length of name
     zenfsbyte_t         type;           // ZEN_FS_*_NODE
-    zenfsbyte_t         _pad;           // padding/reserved
+    zenfsbyte_t         ver;            // filesystem version
     zenfsbyte_t         name[VLA];      // padded to 64-bit boundary
 };
 

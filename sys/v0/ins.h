@@ -91,20 +91,20 @@
 #define V0_UNADD_OP             0x03
 #define V0_ADDER_OP             0x04
 #define V0_EXT_OP               0x05
-#define V0_NOT_OP       	V0_INV_OP       // FLAG1-bit clear
-#define V0_NEG_OP       	V0_INV_OP       // FLAG1-bit set
-#define V0_IOR_OP       	V0_OR_OP        // FLAG1-bit clear
+#define V0_NOT_OP               V0_INV_OP       // FLAG1-bit clear
+#define V0_NEG_OP               V0_INV_OP       // FLAG1-bit set
+#define V0_IOR_OP               V0_OR_OP        // FLAG1-bit clear
 #define V0_XOR_OP               V0_OR_OP        // FLAG1-bit set
-#define V0_AND_OP       	V0_AND_OP       // FLAG1-bit set
-#define V0_INC_OP       	V0_UNADD_OP     // FLAG1-bit clear
+#define V0_AND_OP               V0_AND_OP       // FLAG1-bit set
+#define V0_INC_OP               V0_UNADD_OP     // FLAG1-bit clear
 #define V0_DEC_OP               V0_UNADD_OP     // FLAG1-bit set
-#define V0_ADD_OP       	V0_ADDER_OP     // no flag bits
-#define V0_ADC_OP       	V0_ADDER_OP     // FLAG1-bit set
-#define V0_SUB_OP       	V0_ADDER_OP     // FLAG2-bit set
-#define V0_SBB_OP       	V0_ADDER_OP     // FLAG1- and FLAG2-bits set
-#define V0_CMP_OP       	V0_ADDER_OP     // VAL-bit set
-#define V0_ZEX_OP       	V0_EXT_OP       // FLAG1-bit clear
-#define V0_SEX_OP       	V0_EXT_OP       // FLAG1-bit set
+#define V0_ADD_OP               V0_ADDER_OP     // no flag bits
+#define V0_ADC_OP               V0_ADDER_OP     // FLAG1-bit set
+#define V0_SUB_OP               V0_ADDER_OP     // FLAG2-bit set
+#define V0_SBB_OP               V0_ADDER_OP     // FLAG1- and FLAG2-bits set
+#define V0_CMP_OP               V0_ADDER_OP     // VAL-bit set
+#define V0_ZEX_OP               V0_EXT_OP       // FLAG1-bit clear
+#define V0_SEX_OP               V0_EXT_OP       // FLAG1-bit set
 
 /* MULTI-unit */
 /*
