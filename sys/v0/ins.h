@@ -241,35 +241,35 @@
 /*
  * Instruction  Arguments       Brief
  * -----------  ---------       -----
- * JMP                          jump absolute
- * JMR                          jump relative
- * BEQ                          branch if equal
- * BZF                          branch if zero
- * BNE                          branch if not equal
- * BNZ                          branch if not zero
- * BLT
- * BLE
- * BGT
- * BGE
- * BCF
- * BNC
- * BOF
- * BNO
- * BSF
- * BNS
- * BEG                          subroutine prologue
- * FIN                          subroutine epilogue
- * MKF                          construct call stack-frame
- * CSR                          call subroutine
- * SYS                          call system routine
- * THR                          start thread
- * THC                          thread command/control operation
- * THW                          thread wait
+ * JMP          adr             jump absolute
+ * JMR          r1, adr         jump relative
+ * BEQ          adr             branch if equal
+ * BZF          adr             branch if zero
+ * BNE          adr             branch if not equal
+ * BNZ          adr             branch if not zero
+ * BLT          adr             branch if less than
+ * BLE          adr             branch if less or equal
+ * BGT          adr             branch if greater than
+ * BGE          adr             branch if greater or equal
+ * BCF          adr             branch if CF-bit set in MSW
+ * BNC          adr             branch if CF-bit clear in MSW
+ * BOF          adr             branch if OF-bit set in MSW
+ * BNO          adr             branch if OF-bit clear in MSW
+ * BSF          adr             branch if SF-bit set in MSW
+ * BNS          adr             branch if SF-bit clear in MSW
+ * BEG          adr             subroutine prologue
+ * FIN          adr             subroutine epilogue
+ * MKF          r1, adr         construct call stack-frame
+ * CSR          adr             call subroutine
+ * SYS          adr             call system routine
+ * THR          adr, r1         start thread
+ * THC          val, r1         thread command/control operation
+ * THW          val, r1         thread wait
  * THY                          thread yield
- * RET                          return from subroutine
- * SRT                          return from system routine
- * THX                          exit thread
- * IRT                          return from interrupt routine
+ * RET          ri1             return from subroutine
+ * SRT          ri1             return from system routine
+ * THX          ri1             exit thread
+ * IRT          ri1             return from interrupt routine
  */
 #define V0_JUMP_OP              0x00
 #define V0_BRANCH_OP            0x01
@@ -310,20 +310,20 @@
 /*
  * Instruction  Arguments       Brief
  * -----------  ---------       -----
- * LDR                          load register
- * LDN                          load non-temporal
- * LDC                          load conditional
- * STR                          store register
- * STN                          store non-temporal
- * STC                          store conditional
- * PSH                          push register
- * PSM                          push register-range
- * POP                          pop register
- * POM                          pop register-range
- * IOC                          I/O command
- * IOP                          I/O permission
- * IOR                          read I/O port
- * IOW                          write I/O port
+ * LDR          ria1, r2        load register
+ * LDN          ria1, r2        load non-temporal
+ * LDC          val, ria1, r2   load conditional
+ * STR          r1, adr         store register
+ * STN          r1, adr         store non-temporal
+ * STC          val, r1, r2     store conditional
+ * PSH          r1              push register
+ * PSM          val             push register-range
+ * POP          r1              pop register
+ * POM          val             pop register-range
+ * IOC          val, ri1, r2    I/O command
+ * IOP          val, ri1, r2    I/O permission
+ * IOR          val, ri1, r2    read I/O port
+ * IOW          val, ri1, r2    write I/O port
  */
 #define V0_LOAD_OP              0x00
 #define V0_STORE_OP             0x01
