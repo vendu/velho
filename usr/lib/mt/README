@@ -1,9 +1,5 @@
-Welcome to libmt.
-
-libmt is an in-progress multithreading library.
-
-modules
--------
+libmt notes
+-----------
 
 build.sh	build script
 bar		thread barriers
