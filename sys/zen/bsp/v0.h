@@ -9,6 +9,7 @@ typedef uint32_t        	m_uword_t;      // unsigned register/word
 typedef uint32_t        	m_adr_t;        // memory address
 typedef uint32_t                m_trap_t;       // interrupt descriptor
 typedef uint32_t                m_page_t;       // page-structure descriptor
+typedef uint32_t                m_desc_t;       // vfs object descriptor
 
 /* memory parameters */
 #define ZEN_CL_SIZE             32              // memory cacheline size

@@ -1,5 +1,5 @@
-#ifndef __VND_PROF_H__
-#define __VND_PROF_H__
+#ifndef __ZEN_PROF_H__
+#define __ZEN_PROF_H__
 
 #if defined(__cplusplus)
 extern "C" {
@@ -97,5 +97,5 @@ extern "C" {
 }
 #endif
 
-#endif /* __VND_PROF_H__ */
+#endif /* __ZEN_PROF_H__ */
 

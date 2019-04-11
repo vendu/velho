@@ -1,3 +1,6 @@
+#ifndef __ZEN_KERN_H__
+#define __ZEN_KERN_H__
+
 /*
  * - 8 machine words in size
  */
@@ -11,4 +14,6 @@ struct memmap {
     long        perm;           // permission bits
     void       *acl;            // access control list
 };
+
+#endif /* __ZEN_KERN_H__ */
 

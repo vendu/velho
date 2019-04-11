@@ -1,5 +1,5 @@
-#ifndef __VND_TABHASH_H__
-#define __VND_TABHASH_H__
+#ifndef __ZEN_TABHASH_H__
+#define __ZEN_TABHASH_H__
 
 /*
  * cache-friendly hash table
@@ -14,8 +14,8 @@
 #include <mach/param.h>
 #include <mt/lk.h>
 #include <zero/trix.h>
-#include <vnd/sys/unix.h>
-#include <vnd/hash.h>
+#include <zen/sys/unix.h>
+#include <zen/hash.h>
 
 extern TABHASH_TAB_T   *TABHASH_BUF;
 
@@ -265,5 +265,5 @@ tabhashaddref(TABHASH_TAB_T **hashtab, const uintptr_t key, const uintptr_t val)
     return retval;
 }
 
-#endif /* __VND_TABHASH_H__ */
+#endif /* __ZEN_TABHASH_H__ */
 

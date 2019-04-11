@@ -1,5 +1,5 @@
-#ifndef __VND_MEM_H__
-#define __VND_MEM_H__
+#ifndef __ZEN_MEM_H__
+#define __ZEN_MEM_H__
 
 #include <limits.h>
 #include <stdint.h>
@@ -320,7 +320,7 @@ struct memhash {
 #define TABHASH_PUT_NREF(item, n)                                       \
     ((item)->page |= (n))
 #define TABHASH_CHK(item)       ((item)->page && (item)->val)
-#include <vnd/tabhash.h>
+#include <zen/tabhash.h>
 
 extern struct tabhashtab        *g_memhashtab[TABHASH_SLOTS];
 extern struct memglob            g_mem ALIGNED(PAGESIZE);
@@ -400,7 +400,7 @@ memgetptr(void *ptr)
     return adr;
 }
 
-#include <vnd/bits/mem.h>
+#include <zen/bits/mem.h>
 
-#endif /* __VND_MEM_H__ */
+#endif /* __ZEN_MEM_H__ */
 

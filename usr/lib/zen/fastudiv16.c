@@ -28,7 +28,7 @@
 #include <mach/param.h>
 #include <zero/cdefs.h>
 #include <zero/trix.h>
-#include <vnd/bitop.h>
+#include <zen/bitop.h>
 
 #define FASTUDIVSHIFTMASK 0x1f
 #define FASTUDIVADDBIT    0x20

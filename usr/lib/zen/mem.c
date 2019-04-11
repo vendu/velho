@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <mt/mtx.h>
-#include <vnd/sys/unix.h>
-#include <vnd/mem.h>
-#include <vnd/bitop.h>
+#include <zen/sys/unix.h>
+#include <zen/mem.h>
+#include <zen/bitop.h>
 
 struct tabhashtab              *g_memhashtab[TABHASH_SLOTS];
 struct memglob                  g_mem ALIGNED(PAGESIZE);

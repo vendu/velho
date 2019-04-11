@@ -1,5 +1,5 @@
-#ifndef __VND_BITOP_H__
-#define __VND_BITOP_H__
+#ifndef __ZEN_BITOP_H__
+#define __ZEN_BITOP_H__
 
 #include <stdint.h>
 #include <mach/param.h>
@@ -192,5 +192,5 @@ ham64nomul(uint64_t a)
 #define m_ham ham32
 #endif
 
-#endif /* __VND_BITOP_H__ */
+#endif /* __ZEN_BITOP_H__ */
 
