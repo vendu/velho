@@ -9,12 +9,12 @@
 /* NOP is declared as all 1-bits in code */
 #define V0_NOP_CODE             0xffff
 
-#define V0_SYS_UNIT     	0x00
-#define V0_ALU_UNIT     	0x01
-#define V0_MULTI_UNIT     	0x02
-#define V0_SHIFT_UNIT   	0x03
-#define V0_BIT_UNIT     	0x04
-#define V0_ATOM_UNIT    	0x05
+#define V0_SYS_UNIT             0x00
+#define V0_ALU_UNIT             0x01
+#define V0_MULTI_UNIT           0x02
+#define V0_SHIFT_UNIT           0x03
+#define V0_BIT_UNIT             0x04
+#define V0_ATOM_UNIT            0x05
 #define V0_FLOW_UNIT            0x06
 #define V0_XFER_UNIT            0x07
 
