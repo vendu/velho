@@ -1,0 +1,10 @@
+velho user libraries
+--------------------
+
+c	- a version of c language standard library
+mach	- machine-dependent routines and data structures
+mt	- multithread features such as synchronization primitives
+prng	- pseudo-random number generators
+vnd	- miscellaneous tools
+zero	- more miscellaneous tools
+
