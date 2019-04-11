@@ -1,0 +1,50 @@
+Mjolnir Non-Player Characters
+-----------------------------
+
+Non-Character Objects
+---------------------
+
+Object		| Display	| Description
+---------------------------------------------
+floor		| .		| floor/ground
+corridor	| #		| corridor
+wall		| -		| horizontal wall
+wall		| |		| vertical wall
+door		| +		| door
+ration		| %		| food ration
+water		| ~		| water
+fountain	| {		| fountain
+gold		| $		| use to get merchandise
+silver bullet	| S		| use for demons
+potion		| !		| potion
+plant		| *		| plant
+punchcard	| "		| to be used on in-dungeon mainframes :)
+tape		| 8		| for in-dungeon mainframes
+stairway down	| >		| go down one level
+stairway up	| <		| go up one level
+statue	 	| &		| e.g. Buddha
+trap		| ^		| trap
+wand		| \		| magic wand
+scroll		| ?		| spell or other scroll
+ring		| =		| ring
+whip		| /		| whip
+armor		| ]		| suit or armor
+mirror		| [		| mirror on a wall
+chain		| c		| chain
+chest		| C		| chest; may find treasury in them
+sub-machine gun | g		| close-range combat
+honey		| h		| from beehives after killing the queen
+knife		| k		| knife, dagger, gurkha, ...
+kaleidoscope	| K		| kaleidoscope
+lockpick	| l		| thieves are naturally best at using these
+laser		| L		| laser gun
+mace		| m		| may be Mjolnir
+mainframe	| M		| computer systems for running punchcards
+pipe		| p		| pipe
+pistol		| P		| pistol
+sword		| s		| sword
+terminal	| t		| terminal connected to mainframe
+well		| w		| well (water, may be cursed/poisonous)
+cross		| x		| cross; may be Holy Cross
+altar		| X		| altar; sacrifice dead creatures on it
+

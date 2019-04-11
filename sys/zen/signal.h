@@ -33,6 +33,22 @@
 #define SIGUNUSED       31
 #define SIGRTMIN        32
 #define SIGRT(sig)      (SIGRTMIN | (sig))
+#define SIGRT0          SIGRT(0)
+#define SIGRT1          SIGRT(1)
+#define SIGRT2          SIGRT(2)
+#define SIGRT3          SIGRT(3)
+#define SIGRT4          SIGRT(4)
+#define SIGRT5          SIGRT(5)
+#define SIGRT6          SIGRT(6)
+#define SIGRT7          SIGRT(7)
+#define SIGRT8          SIGRT(8)
+#define SIGRT9          SIGRT(9)
+#define SIGRT10         SIGRT(10)
+#define SIGRT11         SIGRT(11)
+#define SIGRT12         SIGRT(12)
+#define SIGRT13         SIGRT(13)
+#define SIGRT14         SIGRT(14)
+#define SIGRT15         SIGRT(15)
 #define SIGRTMAX        63
 #define RTSIGMAX        32
 

@@ -1,5 +1,5 @@
-#ifndef __V0_INS2_H__
-#define __V0_INS2_H__
+#Ifndef __V0_INS_H__
+#define __V0_INS_H__
 
 #include <stdint.h>
 #include <valhalla/cdefs.h>
@@ -215,7 +215,6 @@
 #define V0_XADD_OP      	V0_FETCHADD_OP  // no flag-bits
 #define V0_XINC_OP              V0_FETCHADD_OP  // FLAG1-bit set
 #define V0_XDEC_OP      	V0_FETCHADD_OP  // FLAG2-bit set
-#define V0_CAS_OP       	V0_CAS_OP       // FLAG1-bit clear
 
 /*
  * Code	MSW-Bits	Description
@@ -345,5 +344,5 @@
 #define V0_IOR_OP               V0_IO_OP        // FLAG1-bit set
 #define V0_IOW_OP               V0_IO_OP        // FLAG2-bit set
 
-#endif /* __V0_INS2_H__ */
+#endif /* __V0_INS_H__ */
 
