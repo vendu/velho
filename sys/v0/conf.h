@@ -1,8 +1,31 @@
 #ifndef __V0_CONF_H__
 #define __V0_CONF_H__
 
-#include <v0/hw/papilio.h>
+#define V0_MACHINE_TYPE      V0_PAPILIO_PRO
+#define V0_PAPILIO_PRO       0
 
+#if (V0_MACHINE_TYPE == V0_PAPILI0_PRO)
+#include <v0/hw/papilio.h>
+#else
+#errof machine-type not specified in <v0/conf.h>
+#endif
+
+#define V0_SERVER_CONF       0
+#define V0_DESKTOP_CONF      0
+#define V0_LOW_LATENCY_CONF  1
+
+#if (V0_LOW_LATENCY_DESKTOP)
+#define V0_TMR_HZ            512
+#define V0_TMR_SLICE_MS      2
+#elif (V0_DESKTOP_CONF)
+#define V0_TMR_HZ            128
+#define V0_TMR_SLICE_MS      8
+#elif (V0_SERVER_CONF
+#define V0_TMR_HZ            32
+#define V0_TMR_SLICE         32
+#else
+#errof hots-type not specified in <v0/conf.h>
+#endif
 #define V0_PAGE_SIZE         4096               // system page size
 #define V0_HUGE_PAGE_SIZE    131072             // system huge-page size
 #define V0_FB_ADR            0xe0000000         // 3.5 gigabytes
