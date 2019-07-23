@@ -1,7 +1,6 @@
 #ifndef __V0_VM_H__
 #define __V0_VM_H__
 
-#include <v0/types.h>
 #include <stdint.h>
 #include <v0/types.h>
 

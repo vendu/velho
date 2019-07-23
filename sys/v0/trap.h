@@ -61,20 +61,30 @@
 #define V0_PF_STACK         	(1 << 4)       	// stack-fault
 #define V0_PF_ADR_MASK   	(~(V0_PAGE_SIZE - 1)) // page-fault address mask
 /* IO (input/output) trap error code bits */
-#define V0_IO_WRITE         	(1 << 0)       	// write error
-#define V0_IO_READ         	(1 << 1)       	// read error
-#define V0_IO_PERM         	(1 << 2)       	// insufficient I/O permission
-#define V0_IO_SEEK         	(1 << 3)       	// invalid seek position
-#define V0_IO_DEV_FAILURE      	(1 << 4)        // device I/O failure
-#define V0_IO_OK         	(1 << 5)        // check if given I/O allowed
+#define V0_IO_EXEC         	(1 << 0)       	// execute error
+#define V0_IO_WRITE         	(1 << 1)       	// write error
+#define V0_IO_READ              (1 << 2)        // read error
+#define V0_IO_PERM         	(1 << 3)       	// no I/O permission
+#define V0_IO_SEEK         	(1 << 4)       	// invalid seek position
+#define V0_IO_DEV_ERROR      	(1 << 5)        // device I/O error
+#define V0_IO_CHK         	(1 << 6)        // check if given I/O allowed
 
 /* trap stack-frame */
+/*
+ * top-to-bottom
+ * -------------
+ * - ret
+ * - ufp
+ * - usp
+ * - msw
+ * - code
+ */
 struct v0trapframe {
-    v0uword      code;                  	// error code
-    v0word      *ret;                   	// return address
+    struct v0arg code;                          // error code
     v0uword      msw;                   	// machine status-word
     v0uword      usp;                   	// user-mode stack-pointer
     v0uword      ufp;                   	// user-mode frame-pointer
+    v0uword      retp;                          // return address
 };
 
 #endif /* __V0_TRAP_H__ */

@@ -11,17 +11,17 @@
 #endif
 
 #define V0_SERVER_CONF       0
-#define V0_DESKTOP_CONF      0
-#define V0_LOW_LATENCY_CONF  1
+#define V0_DESKTOP_CONF      1
+#define V0_LOW_LATENCY_CONF  2
 
 #if (V0_LOW_LATENCY_DESKTOP)
-#define V0_TMR_HZ            512
-#define V0_TMR_SLICE_MS      2
-#elif (V0_DESKTOP_CONF)
 #define V0_TMR_HZ            128
-#define V0_TMR_SLICE_MS      8
+#define V0_TMR_SLICE_MS      4
+#elif (V0_DESKTOP_CONF)
+#define V0_TMR_HZ            64
+#define V0_TMR_SLICE_MS      64
 #elif (V0_SERVER_CONF
-#define V0_TMR_HZ            32
+#define V0_TMR_HZ            16
 #define V0_TMR_SLICE         32
 #else
 #errof hots-type not specified in <v0/conf.h>
@@ -34,13 +34,16 @@
 #define V0_CACHE_LINE_SHIFT  5                  // log2(V0_CACHE_LINE_SIZE)
 #define V0_CACHE_STRIDE_SIZE 128                // cache fetch size
 #define V0_WORD_SIZE         4                  // native user register size
-#define V0_MAX_INSTS         256                // max # of instruction IDs
+#define V0_MAX_UNITS         16                 // max # of unit IDs
+#define V0_MAX_INSTS         64                 // max # of unit instruction IDs
 #define _MEGABYTE            (1024U * 1024U)
 #define V0_INTR_VECTOR       0x00000000         // system interrupt vector
-#define V0_TEXT_ADR          V0_PAGE_SIZE       // system text segment address
+#define V0_CODE_ADR          V0_PAGE_SIZE       // system text segment address
+#define V0_CODE_PROT_SIZE    (3 * V0_PAGE_SIZE) // code-protector maximum size
 #define V0_SYS_STACK         0x00000000         // system stack top
+#define V0_STACK_SIZE        (3 * V0_PAGE_SIZE) // per-thread stack size
+#define V0_STACK_PROT_SIZE   V0_PAGE_SIZE       // stack-protector maximum size
 #if defined(V0_THREADS)
-#define V0_TASK_STACK_SIZE   (4 * V0_PAGE_SIZE) // per-thread stack size
 #define V0_PROC_THREADS      16                 // max # of per-process threads
 #define V0_MAX_THREADS       256                // max # of system threads
 #define V0_THR_ID_BITS       8                  // # of bits in thread-IDs

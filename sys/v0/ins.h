@@ -175,19 +175,19 @@
  * HSH          ri1, r2         hash value
  * UNH          ri1, r2         unhash value
  */
-#define V0_BITCNT_OP            0x00
-#define V0_BSWAP_OP             0x01
-#define V0_BCD_OP               0x02
-#define V0_CHK_OP               0x03
-#define V0_HASH_OP              0x04
-#define V0_CLZ_OP               V0_BITCNT_OP    // FLAG1-bit clear
-#define V0_HAM_OP               V0_BITCNT_OP    // FLAG1-bit set
-#define V0_PAR_OP               V0_BITCNT_OP    // FLAG2-bit set
-#define V0_SWP_OP               V0_BSWAP_OP
-#define V0_EBD_OP               V0_BCD_OP       // FLAG1-bit clear
-#define V0_DBD_OP               V0_BCD_OP       // FLAG1-bit set
-#define V0_CRC_OP               V0_CHK_OP       // compute 16-bit IPv4 checksum
-#define V0_ECC_OP               V0_CHK_OP       // FLAG1-bit set
+#define V0_BCNT_OP              0x00            // bit-count
+#define V0_BSWAP_OP             0x01            // byte-swap
+#define V0_BCD_OP               0x02            // binary coded decimal
+#define V0_CRC_OP               0x04            // cyclic-redundancy check
+#define V0_HASH_OP              0x05            // hash routines
+#define V0_CLZ_OP               V0_BCNT_OP      // FLAG1-bit clear
+#define V0_HAM_OP               V0_BCNT_OP      // FLAG1-bit set
+#define V0_PAR_OP               V0_BCNT_OP      // FLAG2-bit set
+#define V0_SWP_OP               V0_BSWAP_OP     // 8/16-bit byteswap (FLAG1 0/1)
+#define V0_BEC_OP               V0_BCD_OP       // BCD encode (FLAG1-bit 0)
+#define V0_BDC_OP               V0_BCD_OP       // BCD decode (FLAG1-bit 1)
+#define V0_CRC_OP               V0_CRC_OP       // 16/32-bit CRC (FLAG1-bit 0/1)
+#define V0_ECC_OP               V0_CRC_OP       // FLAG1-bit set
 #define V0_HSH_OP               V0_HASH_OP      // hash using tmhash32()
 #define V0_HUN_OP               V0_HASH_OP      // FLAG1-bit set, unhash
 
@@ -263,9 +263,11 @@
  * CSR          adr             call subroutine
  * SYS          adr             call system routine
  * THR          adr, r1         start thread
+ * TDT          r1              detach thread
+ * TAT          r1              attach to thread ('join')
  * THC          val, r1         thread command/control operation
  * THW          val, r1         thread wait
- * THY                          thread yield
+ * THY          (r1)            thread yield
  * RET          ri1             return from subroutine
  * SRT          ri1             return from system routine
  * THX          ri1             exit thread

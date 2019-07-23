@@ -37,35 +37,100 @@ union v0arg {
     uint8_t     u8;     // 8-bit unsigned integer
 };
 
-/* code-member bits */
-#define V0_VAL_BIT              (1 << 15)
-#define V0_IMM_BIT              (1 << 14)
-#define V0_FLAG1_BIT     	(1 << 13)
-#define V0_FLAG2_BIT            (1 << 12)
-#define V0_CODE_FLAG_BITS       6
-#define V0_CODE_UNIT_BITS       6
-#define V0_CODE_OP_BITS         4
-#define V0_CODE_FLAG_MASK       0xfc00
-#define V0_CODE_UNIT_MASK       0x03f0
-#define V0_CODE_OP_MASK         0x000f
+/* unit-member */
+#define V0_OP_UNIT_MASK         0x000f
+#define V0_OP_OP_MASK           0x00f0
+#define V0_OP_FLAG_MASK         0xff00
+/* flag-member bits */
+#define V0_FLAG1_BIT     	(1 << 0)
+#define V0_FLAG2_BIT            (1 << 1)
+#define V0_FLAG_BITS            2
+/* bits-member bits */
+#define V0_VAL_BIT              (1 << 5)        // 5-bit value present
+#define V0_SIGN_BIT             (1 << 4)        // value sign-bit
+#define V0_INTR_BIT             (1 << 3)        // interrupts pending
+#define V0_HIGHER_BIT           (1 << 2)        // higher-than result
+#define V0_LOWER_BIT            (1 << 1)        // less-than result
+#define V0_ZERO_BIT             (1 << 0)        // zero/equal result
+#define V0_BITS_CNT             6               // # of members in bits-field
+#define V0_UNIT_BITS            4
+#define V0_OP_BITS              4
 /* parm-member values */
-#define V0_HALF_BIT             (1 << 15)       // halfword (16-bit) operation
-#define V0_BYTE_BIT             (1 << 14)       // byte (8-bit) operation
-#define V0_REG_MASK             ((1 << V0_REG_BIT) - 1)
-#define V0_PARM_FLAG_MASK       0xc000
+#define V0_IMM_BIT              (1 << 15)       // 15-bit value present
+#define V0_HALF_BIT             (1 << 14)       // halfword (16-bit) operation
+#define V0_BYTE_BIT             (1 << 13)       // byte (8-bit) operation
+#define V0_ARG_BIT_MASK         0xc000
+#define V0_REG_MASK             0xe000
 #define V0_NO_ADR       	0x0000  // register-only operands
-#define V0_NDX_ADR      	0x2000  // indexed, e.g. $4(%sp) or $128(%pc) or direct
-#define V0_REG_ADR      	0x1000  // base register, e.g. *%r1 or *%pc
+#define V0_NDX_ADR      	0x4000  // indexed, e.g. $4(%sp) or direct
+#define V0_REG_ADR      	0x2000  // base register, e.g. *%r1 or *%pc
+#define V0_STD_REG              0x0000  // standard unit register
+#define V0_CTL_REG              0x1000  // control register
 #define V0_ADR_MASK     	0x3000  // addressing-mode mask
-#define V0_REG2_MASK    	0x0fc0  // register operand #2 ID
-#define V0_REG1_MASK    	0x003f  // register operand #1 ID
-#define V0_PARM_FLAG_BITS       2
-#define V0_PARM_ADR_BITS        2       // address-mode for load-store
-#define V0_REG_BITS             6       // bits per register ID
+#define V0_REG2_MASK    	0x1f00  // register operand #2 ID
+#define V0_REG1_MASK    	0x00f8  // register operand #1 ID
+#define V0_ADR_MODE_BITS        2       // address-mode for load-store
+#define V0_REG_BITS             5       // bits per register ID
+#define V0_OP_FLAG_BITS         3
+#define V0_OP_OFS_BITS          3
+#define V0_STK_FLAG_BITS        3       // stack operation flags
+#define V0_STK_PROT_BIT         0x0001  // stack protector
+#define V0_STK_RED_BIT          0x0002  // stack protector red-zone
+#define V0_STK_CTL_BIT          0x0003  // control register range
+#define V0_IO_MAP_MASK          0x7fff
+#define V0_IO_FLAG_MASK         0x6000
+#define V0_IO_FLAG_BIT          0x8000
+#define V0_IO_MAP_BITS          15
+#define V0_IO_FLAG_BITS         2
+#define
+
+struct v0arg {
+    int32_t     i32;
+    uint32_t    u32;
+    int16_t     i16;
+    uint16_t    u16;
+    int8_t      i8;
+    uint8_t     u8;
+        union {
+            unsigned int ra1  : V0_REG_BITS;
+            unsigned int ra2  : V0_REG_BITS;
+            unsigned int rt   : 1;
+            unsigned int adr  : V0_OP_ADR_BITS;
+            unsigned int flg  : V0_OP_FLAG_BITS;
+        } adr;
+        union {
+            unsigned int r1   : V0_REG_BITS;    // first register ID
+            unsigned int r2   : V0_REG_BITS;    // last register
+            unsigned int ofs  : V0_REG_BITS;    //
+        } stk;
+        union {
+            int16_t      map  : V0_IO_MAP_BITS; // port-I/O bitmap
+            unsigned int flg  : V0_IO_FLAG_BITS; // port-IO operation flag
+            unsigned int bit  : 1;              // port-I/O bit value
+        } iop;
+        union {
+            unsigned int ins  : 2;
+            unsigned int ofs  : 12;     // 1-megabyte aligned address or port
+            unsigned int flg  : 2;      // COW, DMA
+        } ioc;
+};
+
 struct v0ins {
-    uint16_t            code;         // flag-bits, unit, instruction
-    uint16_t            parm;         // flag-bits, address-mode, 2 register IDs
-    union v0arg         arg[VLA];     // immediate if (ins->parm & V0_IMM_BIT)
+    unsigned int unit : 4;
+    unsigned int op   : 4;
+    unsigned int flg  : 2;
+    unsigned int bits : 6;
+};
+
+struct v0arg {
+    union {
+        int8_t   i8;
+        uint8_t  u8;
+        int16_t  i16;
+        uint16_t u16;
+        int32_t  i32;
+        uint32_t u32;
+    } data;
 };
 
 /* caller-save structure */
@@ -113,13 +178,13 @@ struct v0iocred {
 #define V0_MACH_THREADS   V0_MAX_THREADS
 #define V0_TLB_ENTRIES   (V0_PAGE_SIZE / sizeof(v0pagedesc))
 #define V0_IOMAP_ENTRIES (V0_PAGE_SIZE / sizeof(v0iodesc *))
-#define v0initvm(vm, ramsz, clsft, numtlb, pgsft, numio)               \
-    ((vm)->atr.nbram = (ramsz),                                        \
-     (vm)->atr.clshift = (clsft),                                      \
-     (vm)->atr.ntlb = (numtlb),                                        \
-     (vm)->atr.pgshift = (pgsft),                                      \
-     (vm)->atr.niomap = (numio),                                       \
-     (((vm)->atr.ram = calloc((nbram), sizeof(int8_t)))                \
+#define v0initvm(vm, ramsz, clsft, numtlb, pgsft, numio)                \
+    ((vm)->atr.nbram = (ramsz),                                         \
+     (vm)->atr.clshift = (clsft),                                       \
+     (vm)->atr.ntlb = (numtlb),                                         \
+     (vm)->atr.pgshift = (pgsft),                                       \
+     (vm)->atr.niomap = (numio),                                        \
+     (((vm)->atr.ram = calloc((nbram), sizeof(int8_t)))                 \
       && ((vm)->atr.pagetab = calloc((ramsz) >> (pgsft), sizeof(v0pagedesc))) \
       && ((vm)->atr.clbits = calloc((ramsz) >> (clsft + 3), sizeof(int8_t))) \
       && ((vm)->atr.iomap = calloc((numio), sizeof(v0iodesc *)))))
