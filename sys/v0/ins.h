@@ -27,7 +27,9 @@
  * INT          ri1             raise interrupt, ri1 is number
  * STI          N/A             enable interrupts
  * CLI          N/A             disable interrupts
+ * STE          ri1             reserve cacheline
  * WFE          ri1             wait for event on cacheline
+ * STB          ri1, adr        set [memory] access bounds
  * SEV          ri1             signal event on cacheline
  * RPC          ri1, r2         read performance counter
  * LDX          ria1, r2        load system register
@@ -53,8 +55,10 @@
 #define V0_INT_OP               V0_INTR_OP      // VAL-bit + 8-bit interrupt ID
 #define V0_STI_OP               V0_INTR_OP      // FLAG1-bit set
 #define V0_CLI_OP               V0_INTR_OP      // FLAG2-bit set
+#define V0_STE_OP               V0_EVENT_OP     // no flag-bits
 #define V0_WFE_OP               V0_EVENT_OP     // FLAG1-bit set
 #define V0_SEV_OP               V0_EVENT_OP     // FLAG2-bit set
+#define V0_STB_OP               V0_EVENT_OP     // FLAG1-bit and FLAG2-bit set
 #define V0_REV_OP               V0_EVENT_OP     // VAL-bit + counter ID in code
 #define V0_LDX_OP               V0_XREG_OP      // FLAG1-bit set
 #define V0_STX_OP               V0_XREG_OP      // FLAG2-bit set
@@ -327,10 +331,14 @@
  * IOR          val, ri1, r2    read I/O port
  * IOW          val, ri1, r2    write I/O port
  */
-#define V0_LOAD_OP              0x00
-#define V0_STORE_OP             0x01
-#define V0_STACK_OP             0x02
-#define V0_IO_OP                0x03
+#define V0_CHK_OP               0x00
+#define V0_LOAD_OP              0x01
+#define V0_STORE_OP             0x02
+#define V0_STACK_OP             0x03
+#define V0_IO_OP                0x04
+#define V0_CKR_OP               V0_CHK_OP       // no flag-bits
+#define V0_CKW_OP               V0_CHK_OP       // FLAG1-bit set
+#define V0_CKX_OP               V0_CHK_OP       // FLAG2-bit set
 #define V0_LDR_OP               V0_LOAD_OP      // no flag-bits
 #define V0_LDN_OP               V0_LOAD_OP      // FLAG1-bit set
 #define V0_LDC_OP               V0_LOAD_OP      // VAL-bit + condition bits
