@@ -32,7 +32,6 @@ typedef int64_t zenfs0time_t;
 #define ZEN_FS0_DIRECT_BLOCKS   12              // # of direct blocks/inode
 #define ZEN_FS0_INDIRECT_BLOCKS 4               // # of direct block IDs/inode
 #define ZEN_FS0_NAME_LEN        255             // filename w/o terminating '\0'
-#define ZEN_FS0_LINK_SIZE       64              // filename in on-disk inode
 #define ZEN_FS0_UNKNOWN_NODE    ZEN_VFS_UNKNOWN_NODE    // uninitialised type
 #define ZEN_FS0_CHR_NODE        ZEN_VFS_CHR_NODE        // character device
 #define ZEN_FS0_BLK_NODE        ZEN_VFS_BLK_NODE        // block device
@@ -42,16 +41,21 @@ typedef int64_t zenfs0time_t;
 #define ZEN_FS0_SOCK_NODE       ZEN_VFS_SOCK_NODE       // socket object
 #define ZEN_FS0_SYMLiNK_NODE    ZEN_VFS_SYMLINK_NODE    // symbolic link
 /* exactly 64 bytes */
-struct zenfs0blktabs {
+#define ZEN_FS0_BLK_TAB_SIZE    64
+struct zenfs0blktab {
     zenfs0ino_t         dir[ZEN_FS0_DIRECT_BLOCKS];      // direct blocks
     zenfs0ino_t         indir[ZEN_FS0_INDIRECT_BLOCKS];  // indirect blocks
 };
+
 /* exactly 64 bytes */
+#define ZEN_FS0_LINK_SIZE       64
 union zenfs0link {
-    struct zenfs0blktabs blktabs;                 // fs block book-keeping
+    struct zenfs0blktab blktab;                  // fs block book-keeping
     uint8_t             name[ZEN_FS0_LINK_SIZE]; // CHR, BLK, FIFO, SOCK, LNK
 };
+
 /* struct zenfs0common is exactly 128 bytes and on-disk verbatim */
+#define ZEN_FS0_COMMON_SIZE     128
 struct zenfs0common {
     zenfs0size_t        size;   // file size in bytes                   0
     zenfs0size_t        nblk;   // # of 1K blocks used                  8
