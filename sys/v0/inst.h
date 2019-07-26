@@ -1,10 +1,11 @@
-#Ifndef __V0_INST_H__
+#ifndef __V0_INST_H__
 #define __V0_INST_H__
 
 #include <stdint.h>
-#include <valhalla/cdefs.h>
-#include <valhalla/param.h>
+#include <zero/cdefs.h>
+#include <mach/param.h>
 #include <v0/types.h>
+#if defined(V0_LITERAL_DOCS)
 #include <v0/doc/sys.txt>
 #include <v0/doc/alu.txt>
 #include <v0/doc/multi.txt>
@@ -13,6 +14,7 @@
 #include <v0/doc/atom.txt>
 #include <v0/doc/flow.txt>
 #include <v0/doc/xfer.txt>
+#endif
 
 /* NOP is declared as all 1-bits in code */
 #define V0_NOP_CODE             0xffff
@@ -64,15 +66,14 @@
 /* ALU-unit */
 #define V0_INV_OP               0x00
 #define V0_OR_OP                0x01
-#define V0_AND_OP               0x02
 #define V0_UNADD_OP             0x03
 #define V0_ADDER_OP             0x04
 #define V0_EXT_OP               0x05
 #define V0_NOT_OP               V0_INV_OP       // FLAG1-bit clear
 #define V0_NEG_OP               V0_INV_OP       // FLAG1-bit set
+#define V0_AND_OP               0x02            // no flag-bits
 #define V0_IOR_OP               V0_OR_OP        // FLAG1-bit clear
 #define V0_XOR_OP               V0_OR_OP        // FLAG1-bit set
-#define V0_AND_OP               V0_AND_OP       // FLAG1-bit set
 #define V0_INC_OP               V0_UNADD_OP     // FLAG1-bit clear
 #define V0_DEC_OP               V0_UNADD_OP     // FLAG1-bit set
 #define V0_ADD_OP               V0_ADDER_OP     // no flag bits
@@ -116,7 +117,7 @@
 #define V0_BCNT_OP              0x00            // bit-count
 #define V0_BSWAP_OP             0x01            // byte-swap
 #define V0_BCD_OP               0x02            // binary coded decimal
-#define V0_CRC_OP               0x04            // cyclic-redundancy check
+#define V0_CHK_OP               0x04            // cyclic-redundancy check
 #define V0_HASH_OP              0x05            // hash routines
 #define V0_CLZ_OP               V0_BCNT_OP      // FLAG1-bit clear
 #define V0_HAM_OP               V0_BCNT_OP      // FLAG1-bit set
@@ -124,8 +125,8 @@
 #define V0_SWP_OP               V0_BSWAP_OP     // 8/16-bit byteswap (FLAG1 0/1)
 #define V0_BEC_OP               V0_BCD_OP       // BCD encode (FLAG1-bit 0)
 #define V0_BDC_OP               V0_BCD_OP       // BCD decode (FLAG1-bit 1)
-#define V0_CRC_OP               V0_CRC_OP       // 16/32-bit CRC (FLAG1-bit 0/1)
-#define V0_ECC_OP               V0_CRC_OP       // FLAG1-bit set
+#define V0_CRC_OP               V0_CHK_OP       // 16/32-bit CRC (FLAG1-bit 0/1)
+#define V0_ECC_OP               V0_CHK_OP       // FLAG1-bit set
 #define V0_HSH_OP               V0_HASH_OP      // hash using tmhash32()
 #define V0_HUN_OP               V0_HASH_OP      // FLAG1-bit set, unhash
 
@@ -179,14 +180,14 @@
 #define V0_IRT_OP               V0_RETURN_OP    // FLAG1- and FLAG2-bits set
 
 /* XFER-unit */
-#define V0_CHK_OP               0x00
+#define V0_AXS_OP               0x00
 #define V0_LOAD_OP              0x01
 #define V0_STORE_OP             0x02
 #define V0_STACK_OP             0x03
 #define V0_IO_OP                0x04
-#define V0_CKR_OP               V0_CHK_OP       // no flag-bits
-#define V0_CKW_OP               V0_CHK_OP       // FLAG1-bit set
-#define V0_CKX_OP               V0_CHK_OP       // FLAG2-bit set
+#define V0_CKR_OP               V0_AXS_OP       // no flag-bits
+#define V0_CKW_OP               V0_AXS_OP       // FLAG1-bit set
+#define V0_CKX_OP               V0_AXS_OP       // FLAG2-bit set
 #define V0_LDR_OP               V0_LOAD_OP      // no flag-bits
 #define V0_LDN_OP               V0_LOAD_OP      // FLAG1-bit set
 #define V0_LDC_OP               V0_LOAD_OP      // VAL-bit + condition bits
@@ -199,8 +200,8 @@
 #define V0_POM_OP               V0_STACK_OP     // FLAG1- and FLAG2-bits set
 #define V0_IOC_OP               V0_IO_OP        // VAL-bit + command in val
 #define V0_IOP_OP               V0_IO_OP        // no flag-bits
-#define V0_IOR_OP               V0_IO_OP        // FLAG1-bit set
-#define V0_IOW_OP               V0_IO_OP        // FLAG2-bit set
+#define V0_IRD_OP               V0_IO_OP        // FLAG1-bit set
+#define V0_IWR_OP               V0_IO_OP        // FLAG2-bit set
 
 #endif /* __V0_INST_H__ */
 

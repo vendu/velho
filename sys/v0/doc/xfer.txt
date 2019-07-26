@@ -15,7 +15,7 @@
  * POM          val             pop register-range
  * IOC          val, ri1, r2    I/O command
  * IOP          val, ri1, r2    I/O permission
- * IOR          val, ri1, r2    read I/O port
- * IOW          val, ri1, r2    write I/O port
+ * IRD          val, ri1, r2    read I/O port
+ * IWR          val, ri1, r2    write I/O port
  */
 

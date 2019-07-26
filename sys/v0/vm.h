@@ -1,7 +1,9 @@
 #ifndef __V0_VM_H__
 #define __V0_VM_H__
 
+#include <stddef.h>
 #include <stdint.h>
+#include <mach/atomic.h>
 #include <v0/types.h>
 
 typedef char           *v0byteptr;      // 8-bit pointer

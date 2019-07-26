@@ -4,8 +4,11 @@
 #define V0_MACHINE_TYPE      V0_PAPILIO_PRO
 #define V0_PAPILIO_PRO       0
 
+/* enable printing with documentation included */
+// #define V0_LITERAL_DOCUMENTATION        1
+
 #if (V0_MACHINE_TYPE == V0_PAPILI0_PRO)
-#include <v0/hw/papilio.h>
+#include <v0/bsp/papilio-pro.h>
 #else
 #errof machine-type not specified in <v0/conf.h>
 #endif

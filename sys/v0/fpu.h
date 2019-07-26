@@ -1,8 +1,10 @@
 #ifndef __V0_FPU_H__
 #define __V0_FPU_H__
 
-typedef float  v0flt;           // IEE754 32-bit single-precision value
-typedef double v0dbl;           // IEE754 64-bit double-precision value
+#define V0_FPU_REGS     16
+
+typedef float  v0flt;   // IEE754 32-bit single-precision value
+typedef double v0dbl;   // IEE754 64-bit double-precision value
 
 /* F and L suffixes for float and long double (as opposed to double) operands */
 /* FADD, FSUB, FMUL, FDIV, FREM, FIRP, FTOI, FINT

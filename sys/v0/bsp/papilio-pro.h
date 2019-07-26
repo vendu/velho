@@ -1,9 +1,9 @@
-#ifndef __ZEN_BSP_PAPILIO_PRO_H__
-#define __ZEN_BSP_PAPILIO_PRO_H__
+#ifndef __V0_BSP_PAPILIO_PRO_H__
+#define __V0_BSP_PAPILIO_PRO_H__
 
 #include <zen/conf.h>
 
-#if defined(ZEN_PAPILIO_PRO)
+#if defined(V0_PAPILIO_PRO)
 
 #include <stdint.h>
 
@@ -144,7 +144,7 @@ typedef v0pix12                         v0pixel;
 
 #define PAPILIO_PRO_RESET_PIN           85
 
-#endif /* ZEN_PAPILIO_PRO */
+#endif /* V0_PAPILIO_PRO */
 
-#endif __ZEN_BSP_PAPILIO_PRO_H__
+#endif /* __V0_BSP_PAPILIO_PRO_H__ */
 

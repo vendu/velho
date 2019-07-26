@@ -3,7 +3,10 @@
 
 #include <stdint.h>
 #include <v0/conf.h>
+#include <v0/regs.h>
+#include <v0/fpu.h>
 #include <v0/gpu.h>
+#include <v0/dsp.h>
 
 /* basic types */
 
@@ -19,23 +22,6 @@ typedef uint32_t        v0iodesc;       // I/O-device page address + flags
 typedef uint32_t        v0ioperm;       // I/O-permission bits
 
 /* instruction format */
-
-/*
- * 32-bit little-endian argument parcel
- * - declared as union, 32-bit aligned
- */
-union v0arg {
-    v0uword     adr;    // memory address
-    v0uword     uval;   // unsigned register value
-    v0word      val;    // signed register value
-    v0word      ofs;    // signed offset
-    int32_t     i32;    // 32-bit signed integer
-    uint32_t    u32;    // 32-bit unsigned integer
-    int16_t     i16;    // 16-bit signed integer
-    uint16_t    u16;    // 16-bit unsigned integer
-    int8_t      i8;     // 8-bit signed integer
-    uint8_t     u8;     // 8-bit unsigned integer
-};
 
 /* unit-member */
 #define V0_OP_UNIT_MASK         0x000f
@@ -70,7 +56,7 @@ union v0arg {
 #define V0_REG2_MASK    	0x1f00  // register operand #2 ID
 #define V0_REG1_MASK    	0x00f8  // register operand #1 ID
 #define V0_ADR_MODE_BITS        2       // address-mode for load-store
-#define V0_REG_BITS             5       // bits per register ID
+#define V0_REG_ID_BITS          5       // bits per register ID
 #define V0_OP_FLAG_BITS         3
 #define V0_OP_OFS_BITS          3
 #define V0_STK_FLAG_BITS        3       // stack operation flags
@@ -84,6 +70,10 @@ union v0arg {
 #define V0_IO_FLAG_BITS         2
 #define
 
+/*
+ * 32-bit little-endian argument parcel
+ * - declared as union, 32-bit aligned
+ */
 struct v0arg {
     int32_t     i32;
     uint32_t    u32;
@@ -92,21 +82,21 @@ struct v0arg {
     int8_t      i8;
     uint8_t     u8;
         union {
-            unsigned int ra1  : V0_REG_BITS;
-            unsigned int ra2  : V0_REG_BITS;
+            unsigned int ra1  : V0_REG_ID_BITS;
+            unsigned int ra2  : V0_REG_ID_BITS;
             unsigned int rt   : 1;
-            unsigned int adr  : V0_OP_ADR_BITS;
+            unsigned int adr  : V0_ADR_MODE_BITS;
             unsigned int flg  : V0_OP_FLAG_BITS;
         } adr;
         union {
-            unsigned int r1   : V0_REG_BITS;    // first register ID
-            unsigned int r2   : V0_REG_BITS;    // last register
-            unsigned int ofs  : V0_REG_BITS;    //
+            unsigned int r1   : V0_REG_ID_BITS; // first register ID
+            unsigned int r2   : V0_REG_ID_BITS; // last register
+            unsigned int ofs  : V0_OP_OFS_BITS;
         } stk;
         union {
-            int16_t      map  : V0_IO_MAP_BITS; // port-I/O bitmap
-            unsigned int flg  : V0_IO_FLAG_BITS; // port-IO operation flag
-            unsigned int bit  : 1;              // port-I/O bit value
+            int16_t      map  : V0_IO_MAP_BITS;         // I/O-bitmap
+            unsigned int flg  : V0_IO_FLAG_BITS;        // I/O-operation flag
+            unsigned int bit  : 1;                      // I/O bit-value
         } iop;
         union {
             unsigned int inst : 2;
@@ -117,20 +107,9 @@ struct v0arg {
 
 struct v0inst {
     unsigned int unit : 4;
-    unsigned int op:  : 4;
+    unsigned int op   : 4;
     unsigned int flg  : 2;
     unsigned int bits : 6;
-};
-
-struct v0arg {
-    union {
-        int8_t   i8;
-        uint8_t  u8;
-        int16_t  i16;
-        uint16_t u16;
-        int32_t  i32;
-        uint32_t u32;
-    } data;
 };
 
 /* caller-save structure */
@@ -147,7 +126,7 @@ struct v0callerctx {
 struct v0tcb {
     v0word      msw0;                   // ring #0 machine status word
     v0word      sp0;                    // ring #0 stack-pointer
-    v0wide      genregs[V0_GEN_REGS];   // wide registers
+    v0wide      genregs[V0_STD_REGS];   // wide registers
     v0word      sysregs[V0_SYS_REGS];   // system registers
 };
 
@@ -188,11 +167,13 @@ struct v0iocred {
       && ((vm)->atr.pagetab = calloc((ramsz) >> (pgsft), sizeof(v0pagedesc))) \
       && ((vm)->atr.clbits = calloc((ramsz) >> (clsft + 3), sizeof(int8_t))) \
       && ((vm)->atr.iomap = calloc((numio), sizeof(v0iodesc *)))))
-struct v0 {
-    struct v0machthr thrbuf[V0_SYS_THREADS];
+struct v0vm {
+    struct v0machthr thrbuf[V0_MAX_THREADS];
     v0pagedesc       tlb[V0_TLB_ENTRIES];
-    v0wreg           regs[V0_STD_REGS];
+    v0wide           regs[V0_STD_REGS];
     v0flt            fpuregs[V0_FPU_REGS];
+    v0wide           gpuregs[V0_GPU_REGS];
+    v0flt            dspregs[V0_DSP_REGS];
     struct v0sysatr  atr;
 };
 

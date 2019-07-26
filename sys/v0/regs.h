@@ -1,7 +1,9 @@
 #ifndef __V0_REGS_H__
 #define __V0_REGS_H__
 
+#if defined (V0_LITERAL_DOCS)
 #include <v0/docs/regs.txt>
+#endif
 
 #define V0_REG_BITS             32
 #define V0_RET_REG      	V0_R0_REG // function return value register
@@ -27,7 +29,7 @@
 #define V0_FP_REG               V0_R13_REG
 #define V0_LR_REG               V0_R14_REG
 #define V0_PC_REG               V0_R15_REG
-#define V0_INT_REGS             16 // # of integer/scalar registers
+#define V0_STD_REGS             16 // # of integer/scalar registers
 #define V0_CALLEE_REGS          12 // callee saves r4..r15
 
 /* SYSTEM REGISTERS */

@@ -1,7 +1,17 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <v0/ins.h>
+#include <zero/cdefs.h>
+#include <v0/conf.h>
+#include <v0/inst.h>
 
-static void * g_v0unittab[V0_UNITS];
-static void * g_v0insttab[V0_UNITS][V0_INSTS]
+/* internal type-definitions */
+typedef void            * (*v0instfunc(struct v0inst *inst));
+
+/* thread-local data */
+THREADLOCAL struct v0thr * t_thrctx;
+
+/* global data */
+static v0instfunc       * g_v0unittab[V0_MAX_UNITS];
+static v0instfunc       * g_v0insttab[V0_MAX_UNITS][V0_MAX_INSTS];
+

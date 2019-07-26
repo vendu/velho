@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <v0/types.h>
+
 struct v0sys *
 v0confsys(struct v0sys *sys, struct v0sysconf *conf)
 {
