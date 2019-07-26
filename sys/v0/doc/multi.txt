@@ -1,0 +1,15 @@
+/* MULTI-unit */
+
+/*
+ * Instruction  Arguments       Brief
+ * -----------  ---------       -----
+ * MUL          ri1, r2         multiplication
+ * MLH          ri1, r2         multiplication, return high result word
+ * DIV          ri1, r2         division
+ * REM          ri1, r2         remainder
+ * MAD          ri1, r2         multiply and add
+ * MSL          ri1, r2         multiply and shift left
+ * MSR          ri1, r2         multiply and shift right
+ * IRP          ri1, r2         calculate inverse reciprocal 1/D
+ */
+

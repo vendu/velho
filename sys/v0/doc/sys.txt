@@ -1,0 +1,26 @@
+/* SYS-unit */
+
+/*
+ * Instruction  Arguments       Brief
+ * -----------  ---------       -----
+ * NOP          N/A             no operation (alignment of memory etc.)
+ * HLT          ri1             halt until interrupt, ri1 is interrupt mask
+ * RST          N/A             reset system
+ * INT          ri1             raise interrupt, ri1 is number
+ * STI          N/A             enable interrupts
+ * CLI          N/A             disable interrupts
+ * STE          ri1             reserve cacheline
+ * WFE          ri1             wait for event on cacheline
+ * SEV          ri1             signal event on cacheline
+ * RPC          ri1, r2         read performance counter
+ * LDX          ria1, r2        load system register
+ * STX          r1, adr         store system register
+ * IPG          ri1             invalidate TLB page entry
+ * PFC          ri1             prefetch cacheline
+ * FLC          ri1             flush/invalidate caches
+ * BLK          ri1             lock page (V0_MEM_LOCK_BIT in page-entry)
+ * BRD          N/A             memory read barrier
+ * BWR          N/A             memory write barrier
+ * BAR          N/A             full memory barrier
+ */
+

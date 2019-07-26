@@ -24,7 +24,7 @@ typedef int64_t zenfs0time_t;
 #define ZEN_FS0_MECH_BIT        (1 << 0)        // mechanical (seeking) device
 #define ZEN_FS0_SOFTUP_BIT      (1 << 1)        // soft-updates
 #define ZEN_FS0_JOURNAL_BIT     (1 << 2)        // filesystem journaling
-#define ZEN_FS0_BUSY_BIT        ZEN_VFS_BUSY
+#define ZEN_FS0_BUSY_BIT        ZEN_VFS_BUSY    // filesystem being checked
 #define ZEN_FS0_DIRTY_BIT       ZEN_VFS_DIRTY   // filesystem dirty
 #define ZEN_FS0_MOUNT_BIT       ZEN_VFS_MOUNTED // filesystem mounted
 #define ZEN_FS0_MAGIC           0x13620348

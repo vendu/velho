@@ -1,0 +1,105 @@
+Preface
+-------
+
+In Loving Memory of my late father Heikki Venäläinen, my mother Saima
+Venäläinen, my family and friends who are numerous and know but especially miss
+The One who got me back in spirit after an unlikely incident of a successful
+heart surgery around the New Year of 2017/2018, as well as for her Spirit and
+dedication of bringing me back to life (better than ever, I have to say).
+
+Other people worth mentioning are Carsten "Rasterman" Haitzler for his ongoing
+support and interest in my projects (although man you're too busy with your
+work, we only have a few finishing touches left for world domination), Lauri
+Kortevaara from childhood for his endless enthusiasm, Niko Mykkänen and his
+family for their support, anyone and everyone who's helped me and stood my side
+(there's _way_ too many) of you to mention but the next time we meet let's have
+a mean party, OKAY?) :P
+
+I hereby extend my respect, best wishes, and support for the lively hacker
+community surrounding the free and open software movement. Richard M. Stallman,
+William Jolitz, the lively BSD camp, Linus Torvalds and the rest for Linux,
+Michael Abrash, Sir Donald Knuth, old school Unix hackers such as Hannu
+Aronsson from Helsinki University of Technology, Jari Taskinen, Jyri Sarha,
+Mika Pekonen, PhD Lasse Huovinen, PhD Tommi Junttila, people such as Petri
+Halttunen, Matti Änkö, Tomi Engdahl, Timo Larmela, Juha Parviainen, the
+Korvenkylä Bunch (remember the endless days of playing games on our C64? :)),
+anyone and everyone from Juankoski, especially people such as Tero Kettunen,
+Timo & Pentti Heikkinen, Janne Anttonen, Matti Vento, Jani Pirinen, Pasi
+Savolainen, Tuomo Holopainen, Juho Tenhunen, Pekka Tuppurainen, Jani Remes, The
+Pitkänen brothers Timo & Esa, and of course all of the lovely ladies behind us.
+
+I want to thank Ismo Peltola, Lauri Loven, Antti Karanta, Jyrki Anttonen, Tero
+Hurskainen, Markus Äijänen, Vesa Veijonen, Jukka Siltanen, Pekka Hartikainen,
+Ismo FIXME, Nina Pöyhönen, Pasi Seppälä, and the rest of the Espoo and Helsinki
+people whom I've had the pleasure of having good times during the "student" days
+(yeah right, I'm not the one to sit at lectures, as you guys know I was always
+way too busy with my own projects to pay much attention).
+
+I deliberately chose to not charge for the book so I won't need to bother with
+bureaucracy too much but will instead keep giving back to the community of all
+of us doing our work for the Love for the Arts!
+
+I hereby encourage our juniors and future generations to keep exploring,
+breaking, fixing, and hacking (note that I did not say cracking) the Universe
+and everything within and beyond.
+
+Peace & Love Forever,
+
+Tuomo Petteri Venäläinen /* vendu@oszero.org */
+
+REUNION
+-------
+
+OUR PLANET'S IN DANGER,
+MANKIND AT WAR.
+LET'S DO SOMETHING ABOUT IT,
+AND LET'S START NOW.
+
+LEADERS OF THE WORLD,
+GATHER TOGETHER.
+KICK BACK AND RELAX,
+HAVE A GOOD TIME.
+
+TALK TO EACH OTHER,
+LOOK FOR SOLUTIONS.
+KEEP IT SIMPLE,
+DON'T COMPLICATE THINGS.
+
+WE ARE ALL ONE TRIBE,
+ONE FAMILY, ONE LOVE!
+LET'S END VIOLENCE,
+LET'S LIVE IN PEACE!
+
+BE GOOD TO MOTHER EARTH,
+AND SHE WILL DELIVER.
+SAVE RAINFORESTS
+OR REPLACE THEM WITH HEMP!
+
+LISTEN TO ME PEOPLE,
+MY MESSAGE TO THE WORLD,
+IS PEACE & LOVE,
+ONCE AND FOR ALL!
+
+Special Thanks to the Whole Kotirinne Team
+and Especially to The One True Love of My Life ;)
+...
+
+Velho Microprocessor Introduction
+---------------------------------
+
+Velho Microprocessor #0, from now on V0 for short, is my humble attempt to
+redesign a modern, RISC-style load-store architecture for multiprocessor and
+multicore systems running heavily multithreaded/parallelized applications.
+
+Another new thing I plan on bringing up is a new operating system kernel I
+decided to n ame Zen. After 20+ years of mostly Unix-like operating systems and
+trying to redesign them I thought I might as well go for something novel and
+in order to advance the purposes of education, self-learning, and science;
+first and foremost, computer engineering. :)
+
+In addition to a typical instruction set suitable for compiling and running
+highly efficient code written in languages such as C, I plan on including
+certain features such as fused operations for typical scenarios of code
+optimization. I plan on auto-coloring of cache slots for incoming data and
+code to increase the distribution of read data more evenly between cache slots.
+

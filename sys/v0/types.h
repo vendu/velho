@@ -109,15 +109,15 @@ struct v0arg {
             unsigned int bit  : 1;              // port-I/O bit value
         } iop;
         union {
-            unsigned int ins  : 2;
+            unsigned int inst : 2;
             unsigned int ofs  : 12;     // 1-megabyte aligned address or port
             unsigned int flg  : 2;      // COW, DMA
         } ioc;
 };
 
-struct v0ins {
+struct v0inst {
     unsigned int unit : 4;
-    unsigned int op   : 4;
+    unsigned int op:  : 4;
     unsigned int flg  : 2;
     unsigned int bits : 6;
 };

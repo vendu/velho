@@ -1,0 +1,31 @@
+/* V0 REGISTER FILE */
+
+/*
+ * General-Purpose Registers
+ * -------------------------
+ * %r0          zero register; reads always return zero, writes are NOPs
+ * %zr          synonymous with %r0
+ * %r1          function return value, first caller save register
+ * %r2..%r7     function argument registers (the rest on stack)
+ * %r7..%r15    scratch registers; callee-save
+ *
+ * System Registers
+ * ----------------
+ * %pc          program counter i.e. instruction pointer
+ * %fp          frame pointer
+ * %sp          stack pointer
+ * %msw         machine status word (carry, overflow, interrupts, etc.)
+ * %ln          function return address back to caller
+ * %tr          thread-local storage segment info
+ * %iv          interrupt vector [handler table] base address
+ * %im          interrupt mask register; 1-bit denote enabled interrupts
+ * %pd          page-directory base address for virtual memory
+ * %io          I/O-map descriptor with parameters
+ * %fp0         system-mode execution stack frame-pointer
+ * %sp0         system-mode stack pointer
+ * %cr          system control-register
+ * %mfr         machine feature-word, e.g. indication of optional hardware
+ * %fps         fixed-point status register
+ * %fst         floating-point status register
+ */
+

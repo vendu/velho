@@ -1,0 +1,15 @@
+/* ATOM-unit */
+
+/*
+ * Instruction  Arguments       Brief
+ * -----------  ---------       -----
+ * LDL          adr, r2         load linked
+ * STL          r1, adr         store linked/conditional
+ * BTC          rv1, adr        bit test and clear
+ * BTS          rv1, adr        bit test and set
+ * XADD         i, adr, r2      fetch and add
+ * XINC         adr, r2         fetch and increment
+ * XDEC         adr, r2         fetch and decrement
+ * CAS          i, r1, adr      compare and swap
+ */
+

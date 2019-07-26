@@ -1,5 +1,5 @@
-Valhalla Processor 0; V0
-------------------------
+# Valhalla Processor 0; V0
+  ------------------------
 
 This directory contains an on-going design of the first version of my
 new Valhalla Processor Architecture.
@@ -11,7 +11,8 @@ V0 is designed to be friendly to the programmers and compiler implementors. The
 instruction set is relatively RISC-like with a few additions here and there.
 
 Here's some software I plan to do for the virtual machine (hopefully later to
-be implemented in hardware using FPGA-kits)
+be implemented in hardware using FPGA-kits).
+
 - an AT&T syntax assembler
   - this is quite far already, based on work I did for some earlier virtual
     architectures; the assembler needs some things added as well as more

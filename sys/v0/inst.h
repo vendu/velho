@@ -1,14 +1,24 @@
-#Ifndef __V0_INS_H__
-#define __V0_INS_H__
+#Ifndef __V0_INST_H__
+#define __V0_INST_H__
 
 #include <stdint.h>
 #include <valhalla/cdefs.h>
 #include <valhalla/param.h>
 #include <v0/types.h>
+#include <v0/doc/sys.txt>
+#include <v0/doc/alu.txt>
+#include <v0/doc/multi.txt>
+#include <v0/doc/shift.txt>
+#include <v0/doc/bit.txt>
+#include <v0/doc/atom.txt>
+#include <v0/doc/flow.txt>
+#include <v0/doc/xfer.txt>
 
 /* NOP is declared as all 1-bits in code */
 #define V0_NOP_CODE             0xffff
+#define v0isnop(op)             (!!(op)->code)
 
+/* unit-names */
 #define V0_SYS_UNIT             0x00
 #define V0_ALU_UNIT             0x01
 #define V0_MULTI_UNIT           0x02
@@ -17,32 +27,14 @@
 #define V0_ATOM_UNIT            0x05
 #define V0_FLOW_UNIT            0x06
 #define V0_XFER_UNIT            0x07
+#define V0_STD_UNITS            8
+#define V0_FPU_UNIT             0x08
+#define V0_GPU_UNIT             0x09
+#define V0_DSP_UNIT             0x0a
+#define V0_EXTRA_UNITS          8
+#define V0_UNITS                16
 
 /* SYS-unit */
-/*
- * Instruction  Arguments       Brief
- * -----------  ---------       -----
- * HLT          ri1             halt until interrupt, ri1 is interrupt mask
- * RST          N/A             reset system
- * INT          ri1             raise interrupt, ri1 is number
- * STI          N/A             enable interrupts
- * CLI          N/A             disable interrupts
- * STE          ri1             reserve cacheline
- * WFE          ri1             wait for event on cacheline
- * STB          ri1, adr        set [memory] access bounds
- * SEV          ri1             signal event on cacheline
- * RPC          ri1, r2         read performance counter
- * LDX          ria1, r2        load system register
- * STX          r1, adr         store system register
- * IPG          ri1             invalidate TLB page entry
- * PFC          ri1             prefetch cacheline
- * FLC          ri1             flush/invalidate caches
- * BLK          ri1             lock page (V0_MEM_LOCK_BIT in page-entry)
- * BRD          N/A             memory read barrier
- * BWR          N/A             memory write barrier
- * BAR          N/A             full memory barrier
- */
-
 #define V0_STOP_OP              0x00
 #define V0_INTR_OP              0x01
 #define V0_EVENT_OP             0x02
@@ -58,7 +50,6 @@
 #define V0_STE_OP               V0_EVENT_OP     // no flag-bits
 #define V0_WFE_OP               V0_EVENT_OP     // FLAG1-bit set
 #define V0_SEV_OP               V0_EVENT_OP     // FLAG2-bit set
-#define V0_STB_OP               V0_EVENT_OP     // FLAG1-bit and FLAG2-bit set
 #define V0_REV_OP               V0_EVENT_OP     // VAL-bit + counter ID in code
 #define V0_LDX_OP               V0_XREG_OP      // FLAG1-bit set
 #define V0_STX_OP               V0_XREG_OP      // FLAG2-bit set
@@ -71,24 +62,6 @@
 #define V0_BAR_OP               V0_MEM_OP       // FLAG1-bit and FLAG2-bit set
 
 /* ALU-unit */
-/*
- * Instruction  Arguments       Brief
- * -----------  ---------       -----
- * NOT          ri1, r2         reverse all bits
- * NEG          ri1, r2         arithmetic negation
- * IOR          ri1, r2         logical [inclusive] OR
- * XOR          ri1, r2         logical exclusive OR
- * AND          ri1, r2         logical AND
- * INC          r1              increment by one
- * DEC          r1              decrement by one
- * ADD          ri1, r2         addition
- * ADC          ri1, r2         addition with carry
- * SUB          ri1, r2         subtraction
- * SBB          ri1, r2         subtraction with borrow
- * CMP          ri1, r2         comparison, set flags
- * ZEX          ri1, r2         zero-extend
- * SEX          ri1, r2         sign-extend
- */
 #define V0_INV_OP               0x00
 #define V0_OR_OP                0x01
 #define V0_AND_OP               0x02
@@ -111,18 +84,6 @@
 #define V0_SEX_OP               V0_EXT_OP       // FLAG1-bit set
 
 /* MULTI-unit */
-/*
- * Instruction  Arguments       Brief
- * -----------  ---------       -----
- * MUL          ri1, r2         multiplication
- * MLH          ri1, r2         multiplication, return high result word
- * DIV          ri1, r2         division
- * REM          ri1, r2         remainder
- * MAD          ri1, r2         multiply and add
- * MSL          ri1, r2         multiply and shift left
- * MSR          ri1, r2         multiply and shift right
- * IRP          ri1, r2         calculate inverse reciprocal 1/D
- */
 #define V0_MULTI_OP             0x00
 #define V0_DIVIDE_OP            0x01
 #define V0_MULADD_OP            0x02
@@ -138,19 +99,6 @@
 #define V0_IRP_OP               V0_RECIP_OP     // FLAG1-bit clear
 
 /* SHIFT-unit */
-/*
- * Instruction  Arguments       Brief
- * -----------  ---------       -----
- * SHL          rv1, r2         shift left
- * SHR          rv1, r2         shift right
- * SAR          rv1, r2         shift right, arithmetic (fill with sign)
- * ROL          rv1, r2         rotate left
- * ROR          rv1, r2         rotate right
- * SLA          rv1, r2         shift left and add
- * SRA          rv1, r2         shift right and add
- * SLM          v, r1, r2       shift left and mask
- * SRM          v, r1, r2       shift right and mask
- */
 #define V0_SHIFT_OP             0x00
 #define V0_SHADD_OP             0x01
 #define V0_SHMASK_OP            0x02
@@ -165,20 +113,6 @@
 #define V0_SRM_OP               V0_SHMASK_OP    // FLAG1-bit set
 
 /* BIT-unit */
-/*
- * Instruction  Arguments       Brief
- * -----------  ---------       -----
- * CLZ          ri1, r2         count leading zero-bits
- * HAM          ri1, r2         Hamming weight, count one-bits
- * PAR          ri1, r2         calculate parity
- * SWP          ri1, r2         swap byte-order
- * EBD          ri1, r2         encode binary-coded decimal
- * DBD          ri1, r2         decode binary-coded decimal
- * CRC          ri1, r2         compute 16-bit IPv4 checksum
- * ECC          ri1, r2         compute 32-bit ECC checksum
- * HSH          ri1, r2         hash value
- * UNH          ri1, r2         unhash value
- */
 #define V0_BCNT_OP              0x00            // bit-count
 #define V0_BSWAP_OP             0x01            // byte-swap
 #define V0_BCD_OP               0x02            // binary coded decimal
@@ -196,18 +130,6 @@
 #define V0_HUN_OP               V0_HASH_OP      // FLAG1-bit set, unhash
 
 /* ATOM-unit */
-/*
- * Instruction  Arguments       Brief
- * -----------  ---------       -----
- * LDL          adr, r2         load linked
- * STL          r1, adr         store linked/conditional
- * BTC          rv1, adr        bit test and clear
- * BTS          rv1, adr        bit test and set
- * XADD         i, adr, r2      fetch and add
- * XINC         adr, r2         fetch and increment
- * XDEC         adr, r2         fetch and decrement
- * CAS          i, r1, adr      compare and swap
- */
 #define V0_LLSC_OP              0x00
 #define V0_BITXCHG_OP           0x01
 #define V0_FETCHADD_OP          0x02
@@ -220,63 +142,7 @@
 #define V0_XINC_OP              V0_FETCHADD_OP  // FLAG1-bit set
 #define V0_XDEC_OP              V0_FETCHADD_OP  // FLAG2-bit set
 
-/*
- * Code    MSW-Bits    Description
- * ----	--------	-----------
- * EQ	ZF		equal
- * NE	!ZF		not equal
- * LT	!ZF && LT	less than
- * LO	!CF    		lower (unsigned < 0)
- * LE	ZF || LT	less than or equal
- * LS	!CF || ZF	lower or same (unsigned <=)
- * GT	!ZF && !LT	greater than
- * HI	CF && !ZF	higher (unsigned > 0)
- * GE	ZF || !LT	greater than or equal
- * HS	CF   		higher or same (unsigned >=)
- * CF	CF		carry set
- * NC	!CF		carry not set
- * OF	OF		overflow set
- * NO	!OF		overflow not set
- * SF   SF              sign-flag set
- * NS   !SF             sign-flag not set
- */
-
 /* FLOW-unit */
-/*
- * Instruction  Arguments       Brief
- * -----------  ---------       -----
- * JMP          adr             jump absolute
- * JMR          r1, adr         jump relative
- * BEQ          adr             branch if equal
- * BZF          adr             branch if zero
- * BNE          adr             branch if not equal
- * BNZ          adr             branch if not zero
- * BLT          adr             branch if less than
- * BLE          adr             branch if less or equal
- * BGT          adr             branch if greater than
- * BGE          adr             branch if greater or equal
- * BCF          adr             branch if CF-bit set in MSW
- * BNC          adr             branch if CF-bit clear in MSW
- * BOF          adr             branch if OF-bit set in MSW
- * BNO          adr             branch if OF-bit clear in MSW
- * BSF          adr             branch if SF-bit set in MSW
- * BNS          adr             branch if SF-bit clear in MSW
- * BEG          adr             subroutine prologue
- * FIN          adr             subroutine epilogue
- * MKF          r1, adr         construct call stack-frame
- * CSR          adr             call subroutine
- * SYS          adr             call system routine
- * THR          adr, r1         start thread
- * TDT          r1              detach thread
- * TAT          r1              attach to thread ('join')
- * THC          val, r1         thread command/control operation
- * THW          val, r1         thread wait
- * THY          (r1)            thread yield
- * RET          ri1             return from subroutine
- * SRT          ri1             return from system routine
- * THX          ri1             exit thread
- * IRT          ri1             return from interrupt routine
- */
 #define V0_JUMP_OP              0x00
 #define V0_BRANCH_OP            0x01
 #define V0_FRAME_OP             0x02
@@ -313,24 +179,6 @@
 #define V0_IRT_OP               V0_RETURN_OP    // FLAG1- and FLAG2-bits set
 
 /* XFER-unit */
-/*
- * Instruction  Arguments       Brief
- * -----------  ---------       -----
- * LDR          ria1, r2        load register
- * LDN          ria1, r2        load non-temporal
- * LDC          val, ria1, r2   load conditional
- * STR          r1, adr         store register
- * STN          r1, adr         store non-temporal
- * STC          val, r1, r2     store conditional
- * PSH          r1              push register
- * PSM          val             push register-range
- * POP          r1              pop register
- * POM          val             pop register-range
- * IOC          val, ri1, r2    I/O command
- * IOP          val, ri1, r2    I/O permission
- * IOR          val, ri1, r2    read I/O port
- * IOW          val, ri1, r2    write I/O port
- */
 #define V0_CHK_OP               0x00
 #define V0_LOAD_OP              0x01
 #define V0_STORE_OP             0x02
@@ -354,5 +202,5 @@
 #define V0_IOR_OP               V0_IO_OP        // FLAG1-bit set
 #define V0_IOW_OP               V0_IO_OP        // FLAG2-bit set
 
-#endif /* __V0_INS_H__ */
+#endif /* __V0_INST_H__ */
 

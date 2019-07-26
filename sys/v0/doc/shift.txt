@@ -1,0 +1,16 @@
+/* SHIFT-unit */
+
+/*
+ * Instruction  Arguments       Brief
+ * -----------  ---------       -----
+ * SHL          rv1, r2         shift left
+ * SHR          rv1, r2         shift right
+ * SAR          rv1, r2         shift right, arithmetic (fill with sign)
+ * ROL          rv1, r2         rotate left
+ * ROR          rv1, r2         rotate right
+ * SLA          rv1, r2         shift left and add
+ * SRA          rv1, r2         shift right and add
+ * SLM          v, r1, r2       shift left and mask
+ * SRM          v, r1, r2       shift right and mask
+ */
+

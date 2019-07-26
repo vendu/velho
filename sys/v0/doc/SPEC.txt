@@ -1,0 +1,7 @@
+V0 Processor Specification
+--------------------------
+
+- 32-bit RISC-like microprocessor inspired by Cray-1 and RISC-V
+- support for atomic memory transactions
+- virtual memory in the form of hardware paging
+

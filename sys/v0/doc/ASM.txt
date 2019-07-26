@@ -1,0 +1,7 @@
+Register Names
+--------------
+
+r0..r15		full 32-bit registers
+w0..w15		32-bit registers
+h0..h15		16-bit half-word registers, i.e. low halves of r0..r15
+b0..b15		8-bit byte register, i.e. low bytes of r0..r15

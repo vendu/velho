@@ -1,0 +1,59 @@
+/* FLOW-unit */
+
+/*
+ * Instruction  Arguments       Brief
+ * -----------  ---------       -----
+ * JMP          adr             jump absolute
+ * JMR          r1, adr         jump relative
+ * BEQ          adr             branch if equal
+ * BZF          adr             branch if zero
+ * BNE          adr             branch if not equal
+ * BNZ          adr             branch if not zero
+ * BLT          adr             branch if less than
+ * BLE          adr             branch if less or equal
+ * BGT          adr             branch if greater than
+ * BGE          adr             branch if greater or equal
+ * BCF          adr             branch if CF-bit set in MSW
+ * BNC          adr             branch if CF-bit clear in MSW
+ * BOF          adr             branch if OF-bit set in MSW
+ * BNO          adr             branch if OF-bit clear in MSW
+ * BSF          adr             branch if SF-bit set in MSW
+ * BNS          adr             branch if SF-bit clear in MSW
+ * BEG          adr             subroutine prologue
+ * FIN          adr             subroutine epilogue
+ * MKF          r1, adr         construct call stack-frame
+ * CSR          adr             call subroutine
+ * SYS          adr             call system routine
+ * THR          adr, r1         start thread
+ * TDT          r1              detach thread
+ * TAT          r1              attach to thread ('join')
+ * THC          val, r1         thread command/control operation
+ * THW          val, r1         thread wait
+ * THY          (r1)            thread yield
+ * RET          ri1             return from subroutine
+ * SRT          ri1             return from system routine
+ * THX          ri1             exit thread
+ * IRT          ri1             return from interrupt routine
+ */
+
+/*
+ * Code    MSW-Bits    Description
+ * ----	--------	-----------
+ * EQ	ZF		equal
+ * NE	!ZF		not equal
+ * LT	!ZF && LT	less than
+ * LO	!CF    		lower (unsigned < 0)
+ * LE	ZF || LT	less than or equal
+ * LS	!CF || ZF	lower or same (unsigned <=)
+ * GT	!ZF && !LT	greater than
+ * HI	CF && !ZF	higher (unsigned > 0)
+ * GE	ZF || !LT	greater than or equal
+ * HS	CF   		higher or same (unsigned >=)
+ * CF	CF		carry set
+ * NC	!CF		carry not set
+ * OF	OF		overflow set
+ * NO	!OF		overflow not set
+ * SF   SF              sign-flag set
+ * NS   !SF             sign-flag not set
+ */
+

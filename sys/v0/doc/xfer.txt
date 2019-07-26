@@ -1,0 +1,21 @@
+/* XFER-unit */
+
+/*
+ * Instruction  Arguments       Brief
+ * -----------  ---------       -----
+ * LDR          ria1, r2        load register
+ * LDN          ria1, r2        load non-temporal
+ * LDC          val, ria1, r2   load conditional
+ * STR          r1, adr         store register
+ * STN          r1, adr         store non-temporal
+ * STC          val, r1, r2     store conditional
+ * PSH          r1              push register
+ * PSM          val             push register-range
+ * POP          r1              pop register
+ * POM          val             pop register-range
+ * IOC          val, ri1, r2    I/O command
+ * IOP          val, ri1, r2    I/O permission
+ * IOR          val, ri1, r2    read I/O port
+ * IOW          val, ri1, r2    write I/O port
+ */
+

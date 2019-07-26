@@ -1,0 +1,18 @@
+V0 MACHINE ARCHITECTURE
+-----------------------
+
+INTRODUCTION
+------------
+
+V0 stems from more than 2 decades of hacking code on Unix-like systems such as
+Linux and FreeBSD. At around 2004, I decided to do a new UNIX/POSIX-like
+operating system. More than 100,000 lines of code into the project, I'm taking a
+turn to give my shot at designing a new microprocessor, a toolchain of
+[at least] an assembler and C compiler for it, and a new operating system kernel
+as well as libraries for it. The plan would be to write a couple of books on the
+project, too.
+
+Whereas relatively simple, the V0 processor has features to facilitate virtual
+memory, multithreading, multiprocessing, as well as other capabilities of
+multitasking operating systems.
+

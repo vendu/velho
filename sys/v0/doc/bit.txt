@@ -1,0 +1,17 @@
+/* BIT-unit */
+
+/*
+ * Instruction  Arguments       Brief
+ * -----------  ---------       -----
+ * CLZ          ri1, r2         count leading zero-bits
+ * HAM          ri1, r2         Hamming weight, count one-bits
+ * PAR          ri1, r2         calculate parity
+ * SWP          ri1, r2         swap byte-order
+ * EBD          ri1, r2         encode binary-coded decimal
+ * DBD          ri1, r2         decode binary-coded decimal
+ * CRC          ri1, r2         compute 16-bit IPv4 checksum
+ * ECC          ri1, r2         compute 32-bit ECC checksum
+ * HSH          ri1, r2         hash value
+ * UNH          ri1, r2         unhash value
+ */
+

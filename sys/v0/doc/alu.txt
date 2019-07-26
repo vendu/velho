@@ -1,0 +1,21 @@
+/* ALU-unit */
+
+/*
+ * Instruction  Arguments       Brief
+ * -----------  ---------       -----
+ * NOT          ri1, r2         reverse all bits
+ * NEG          ri1, r2         arithmetic negation
+ * IOR          ri1, r2         logical [inclusive] OR
+ * XOR          ri1, r2         logical exclusive OR
+ * AND          ri1, r2         logical AND
+ * INC          r1              increment by one
+ * DEC          r1              decrement by one
+ * ADD          ri1, r2         addition
+ * ADC          ri1, r2         addition with carry
+ * SUB          ri1, r2         subtraction
+ * SBB          ri1, r2         subtraction with borrow
+ * CMP          ri1, r2         comparison, set flags
+ * ZEX          ri1, r2         zero-extend
+ * SEX          ri1, r2         sign-extend
+ */
+
