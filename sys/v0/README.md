@@ -15,7 +15,17 @@ to the whole, lively online hacker community including but not limited to
 
 [uri](https://metacpan.org/author/URI)
 
+[rms](https://stallman.org/)
+
+[richard](http://www.kohala.com/start/)
+
 [raster](https://rasterman.com/)
+
+[rms](
+
+[steve](https://www.apple.com/stevejobs/)
+
+[bill](https://www.gatesnotes.com/)
 
 The reasons for doing this are mostly educational, and of course having fun
 doing all this.
