@@ -2,6 +2,7 @@
 #define __V0_TYPES_H__
 
 #include <stdint.h>
+#include <mach/param.h>
 #include <v0/conf.h>
 #include <v0/regs.h>
 #include <v0/fpu.h>
@@ -15,8 +16,14 @@ typedef uint32_t                v0uword;        // unsigned register value
 typedef int64_t                 v0wide;    	// signed wide-register value
 typedef uint64_t                v0uwide;   	// unsigned wide-register value
 
+#if (PTRBITS == 32)
+typedef uint32_t                v0trapfunc;     // trap function address + flags
+#elif (PTRBITS == 64)
+typedef uint64_t                v0trapfunc;
+#else
+#error v0trapfunc not defined in <v0/types.h>
+#endif
 typedef uint32_t                v0pagedesc;     // page address + flags
-typedef uint32_t                v0trapdesc;     // trap function address + flags
 
 typedef uint32_t                v0iodesc;       // device page address + flags
 typedef uint32_t                v0ioperm;       // I/O-permission bits
