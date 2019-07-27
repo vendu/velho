@@ -7,6 +7,8 @@ new Velho Processor Architecture.
 First and foremost, I'd like to extend my greetings & the best of wishes
 to the whole, lively online hacker community including but not limited to
 
+[dmr](https://www.bell-labs.com/usr/dmr/www/)
+
 [don](https://www-cs-faculty.stanford.edu/~knuth/)
 
 [hank](https://www.hackersdelight.org/)
