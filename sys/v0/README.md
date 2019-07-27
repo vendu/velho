@@ -1,14 +1,28 @@
-# Valhalla Processor 0; V0
+# Velho Processor 0; V0
   ---
 
 This directory contains an on-going design of the first version of my
-new Valhalla Processor Architecture.
+new Velho Processor Architecture.
+
+First and foremost, I'd like to extend my greetings & the best of wishes
+to the whole, lively online hacker community including but not limited to
+
+[don](https://www-cs-faculty.stanford.edu/~knuth/)
+[hank](https://www.hackersdelight.org/)
+[uri](https://metacpan.org/author/URI)
+[raster](https://rasterman.com/)
 
 The reasons for doing this are mostly educational, and of course having fun
 doing all this.
 
 V0 is designed to be friendly to the programmers and compiler implementors. The
 instruction set is relatively RISC-like with a few additions here and there.
+
+One of the [educational] purposes of the Velho Project is to explore and
+develop new tools much like
+
+[clash-lang](https://clash-lang.org/)
+[fhdl](http://cs.ecs.baylor.edu/~maurer/fhdl.html)
 
 Here's some software I plan to do for the virtual machine (hopefully later to
 be implemented in hardware using FPGA-kits).
