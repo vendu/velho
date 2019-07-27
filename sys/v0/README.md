@@ -8,8 +8,11 @@ First and foremost, I'd like to extend my greetings & the best of wishes
 to the whole, lively online hacker community including but not limited to
 
 [don](https://www-cs-faculty.stanford.edu/~knuth/)
+
 [hank](https://www.hackersdelight.org/)
+
 [uri](https://metacpan.org/author/URI)
+
 [raster](https://rasterman.com/)
 
 The reasons for doing this are mostly educational, and of course having fun
