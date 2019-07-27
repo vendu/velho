@@ -8,22 +8,31 @@ First and foremost, I'd like to extend my greetings & the best of wishes
 to the whole, lively online hacker community including but not limited to
 
 [dmr](https://www.bell-labs.com/usr/dmr/www/)
+- unix/bell
 
 [don](https://www-cs-faculty.stanford.edu/~knuth/)
+- everything
 
 [hank](https://www.hackersdelight.org/)
+- hacker's delight
 
 [uri](https://metacpan.org/author/URI)
+- perl and other hacks :)
 
 [raster](https://rasterman.com/)
+- :)
 
 [rms](https://stallman.org/)
+- gnu project and everything else
 
 [richard](http://www.kohala.com/start/)
+- the books
 
 [steve](https://www.apple.com/stevejobs/)
+- next/apple
 
 [bill](https://www.gatesnotes.com/)
+- ... ;)
 
 The reasons for doing this are mostly educational, and of course having fun
 doing all this.
