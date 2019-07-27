@@ -14,7 +14,7 @@
 #include <v0/doc/atom.txt>
 #include <v0/doc/flow.txt>
 #include <v0/doc/xfer.txt>
-#endif
+#endif /* V0_LITERAL_DOCS */
 
 /* NOP is declared as all 1-bits in code */
 #define V0_NOP_CODE             0xffff

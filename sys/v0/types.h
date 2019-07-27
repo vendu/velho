@@ -10,16 +10,16 @@
 
 /* basic types */
 
-typedef int32_t         v0word;         // signed register value
-typedef uint32_t        v0uword;        // unsigned register value
-typedef int64_t         v0wide;    	// signed wide-register value
-typedef uint64_t        v0uwide;   	// unsigned wide-register value
+typedef int32_t                 v0word;         // signed register value
+typedef uint32_t                v0uword;        // unsigned register value
+typedef int64_t                 v0wide;    	// signed wide-register value
+typedef uint64_t                v0uwide;   	// unsigned wide-register value
 
-typedef uint32_t        v0pagedesc;     // page address + flags
-typedef uint32_t        v0trapdesc;     // trap function address + flags
+typedef uint32_t                v0pagedesc;     // page address + flags
+typedef uint32_t                v0trapdesc;     // trap function address + flags
 
-typedef uint32_t        v0iodesc;       // I/O-device page address + flags
-typedef uint32_t        v0ioperm;       // I/O-permission bits
+typedef uint32_t                v0iodesc;       // device page address + flags
+typedef uint32_t                v0ioperm;       // I/O-permission bits
 
 /* instruction format */
 
@@ -68,7 +68,6 @@ typedef uint32_t        v0ioperm;       // I/O-permission bits
 #define V0_IO_FLAG_BIT          0x8000
 #define V0_IO_MAP_BITS          15
 #define V0_IO_FLAG_BITS         2
-#define
 
 /*
  * 32-bit little-endian argument parcel
@@ -126,8 +125,8 @@ struct v0callerctx {
 struct v0tcb {
     v0word      msw0;                   // ring #0 machine status word
     v0word      sp0;                    // ring #0 stack-pointer
-    v0wide      genregs[V0_STD_REGS];   // wide registers
-    v0word      sysregs[V0_SYS_REGS];   // system registers
+    v0wide      genregs[V0_STD_REGISTERS];   // wide registers
+    v0word      sysregs[V0_SYS_REGISTERS];   // system registers
 };
 
 /* flg-member bits */
@@ -154,9 +153,9 @@ struct v0iocred {
     long flg;                   // access permissions
 };
 
-#define V0_MACH_THREADS   V0_MAX_THREADS
-#define V0_TLB_ENTRIES   (V0_PAGE_SIZE / sizeof(v0pagedesc))
-#define V0_IOMAP_ENTRIES (V0_PAGE_SIZE / sizeof(v0iodesc *))
+//#define V0_MACH_THREADS         V0_MAX_THREADS
+#define V0_TLB_ENTRIES          (V0_PAGE_SIZE / sizeof(v0pagedesc))
+#define V0_IOMAP_ENTRIES        (V0_PAGE_SIZE / sizeof(v0iodesc *))
 #define v0initvm(vm, ramsz, clsft, numtlb, pgsft, numio)                \
     ((vm)->atr.nbram = (ramsz),                                         \
      (vm)->atr.clshift = (clsft),                                       \
@@ -170,10 +169,10 @@ struct v0iocred {
 struct v0vm {
     struct v0machthr thrbuf[V0_MAX_THREADS];
     v0pagedesc       tlb[V0_TLB_ENTRIES];
-    v0wide           regs[V0_STD_REGS];
-    v0flt            fpuregs[V0_FPU_REGS];
-    v0wide           gpuregs[V0_GPU_REGS];
-    v0flt            dspregs[V0_DSP_REGS];
+    v0wide           regs[V0_MAX_REGISTERS];
+    v0flt            fpuregs[V0_FPU_REGISTERS];
+    v0wide           gpuregs[V0_GPU_REGISTERS];
+    v0flt            dspregs[V0_DSP_REGISTERS];
     struct v0sysatr  atr;
 };
 

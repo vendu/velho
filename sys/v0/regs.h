@@ -5,10 +5,12 @@
 #include <v0/docs/regs.txt>
 #endif
 
+#define V0_MAX_REGISTERS        32
+
 #define V0_REG_BITS             32
 #define V0_RET_REG      	V0_R0_REG // function return value register
 #define V0_REG_ARGS             4 // R1..R3, function register arguments
-#define V0_SAVE_REGS            10 // R4..R12/SP, FP, callee save arguments
+#define V0_SAVE_REGISTERS            10 // R4..R12/SP, FP, callee save arguments
 #define V0_R0_REG               0
 #define V0_R1_REG               1
 #define V0_R2_REG               2
@@ -29,8 +31,8 @@
 #define V0_FP_REG               V0_R13_REG
 #define V0_LR_REG               V0_R14_REG
 #define V0_PC_REG               V0_R15_REG
-#define V0_STD_REGS             16 // # of integer/scalar registers
-#define V0_CALLEE_REGS          12 // callee saves r4..r15
+#define V0_STD_REGISTERS        16 // # of integer/scalar registers
+#define V0_CALLEE_REGISTERS     12 // callee saves r4..r15
 
 /* SYSTEM REGISTERS */
 #define V0_MSW_REG      	0x00 // machine status word
@@ -48,7 +50,7 @@
 #define V0_TLS_REG      	0x0c // thread-local storage base address
 #define V0_TWC_REG       	0x0d // thread wait channel
 #define V0_SP0_REG              0x0e // ring #0 (system-mode) stack-pointer
-#define V0_SYS_REGS             16
+#define V0_SYS_REGISTERS        16
 
 /* values for MSW */
 #define V0_MSW_DEF_BITS 	(V0_IF_BIT)

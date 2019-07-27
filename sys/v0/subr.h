@@ -6,7 +6,7 @@
  * struct v0calleectx {
  *     // v0word varsize; (local variables in bytes) goes here
  *     // local variables go here
- *     v0word      creg[V0_SAVE_REGS];
+ *     v0word      creg[V0_SAVE_REGISTERS];
  *     v0word      fp;          // caller frame pointer         <- FP after BEG
  *     v0word      lr;          // caller return address        <- SP after CSR
  *     v0word      args[VLA];   // stack argyments for callee   <- SP after CSR
@@ -53,7 +53,7 @@ v0beg(struct vm *vm, v0word nb)
 
     pc += sizeof(struct v0ins);
     (v0uword *)&vm->mem[sp] = fp;
-    sp -= V0_SAVE_REGS * sizeof(v0uword);
+    sp -= V0_SAVE_REGISTERS * sizeof(v0uword);
     stk = (v0uword *)&vm->mem[sp];
     regs[V0_FP_REG] = sp;
     stk[0] = regs[V0_R4_REG];
@@ -91,7 +91,7 @@ v0fin(struct vm *vm, v0word nb)
     regs[V0_R6_REG] = stk[2];
     regs[V0_R7_REG] = stk[3];
     regs[V0_R8_REG] = stk[4];
-    fp += V0_SAVE_REGS - 1;
+    fp += V0_SAVE_REGISTERS - 1;
     regs[V0_R9_REG] = stk[5];
     regs[V0_R10_REG] = stk[6];
     regs[V0_R11_REG] = stk[7];
@@ -256,14 +256,14 @@ v0irt(struct vm *vm)
     v0wide     *regs = &t_thr->genregs;
     v0uword     fp = regs[V0_FP_REG];
     v0uword    *stk = (v0uword *)&g_vm.mem[fp];
-    v0wide     *ctx = (v0wide *)stk - V0_INT_REGS;
+    v0wide     *ctx = (v0wide *)stk - V0_MAX_REGISTERS;
     v0uword     msw = *stk;
     v0uword     ufp = stk[1];
     v0uword     usp = stk[2];
     v0uword     pc = stk[3];
     v0uword     sp = fp + 4 * sizeof(v0uword);
 
-    v0bcopyw(ctx, regs, V0_INT_REGS * sizeof(v0wide));
+    v0bcopyw(ctx, regs, V0_MAX_REGISTERS * sizeof(v0wide));
     regs[V0_SP_REG] = usp;
     regs[V0_FP_REG] = ufp;
     v0->sysregs[V0_SP0_REG] = sp;
