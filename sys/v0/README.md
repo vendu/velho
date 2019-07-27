@@ -15,7 +15,7 @@ to the whole, lively online hacker community including but not limited to
 
 [uri](https://metacpan.org/author/URI)
 
-[rms](https://stallman.org/)
+(https://stallman.org/)
 
 [richard](http://www.kohala.com/start/)
 
