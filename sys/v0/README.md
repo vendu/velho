@@ -15,11 +15,11 @@ to the whole, lively online hacker community including but not limited to
 
 [uri](https://metacpan.org/author/URI)
 
+[raster](https://rasterman.com/)
+
 [rms](https://stallman.org/)
 
 [richard](http://www.kohala.com/start/)
-
-[raster](https://rasterman.com/)
 
 [steve](https://www.apple.com/stevejobs/)
 
