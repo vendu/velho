@@ -1,5 +1,5 @@
 # Valhalla Processor 0; V0
-  ------------------------
+  ---
 
 This directory contains an on-going design of the first version of my
 new Valhalla Processor Architecture.

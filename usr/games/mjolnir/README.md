@@ -1,11 +1,11 @@
 # Mjolnir README
-  --------------
+  ---
 
-doc/ACTIONS.txt		- game actions
-doc/CHR.txt		- player and other characteres
-doc/CMD.txt		- game commands
-doc/IMAGETILES.txt	- some graphics tiles described
-MONSTERS.txt		- game monster descriptions
-NPC.txt			- non-player game characters
-SPECIAL.txt		- game special items
+- [actions](https://github.com/vendu/velho/blob/master/usr/games/mjolnir/doc/ACTIONS.txt)
+- [characters](https://github.com/vendu/velho/blob/master/usr/games/mjolnir/doc/CHR.txt)
+- [commands](https://github.com/vendu/velho/blob/master/usr/games/mjolnir/doc/CMD.txt)
+- [graphics/tiles](https://github.com/vendu/velho/blob/master/usr/games/mjolnir/doc/IMAGETILES.txt)
+- [monsters](https://github.com/vendu/velho/blob/master/usr/games/mjolnir/doc/MONSTERS.txt)
+- [non-player characters](https://github.com/vendu/velho/blob/master/usr/games/mjolnir/doc/NPC.txt
+- [special items](https://github.com/vendu/velho/blob/master/usr/games/mjolnir/doc/SPECIAL.txt)
 
