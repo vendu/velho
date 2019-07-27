@@ -11,7 +11,7 @@
 
 [monsters](https://github.com/vendu/velho/blob/master/usr/games/mjolnir/doc/MONSTERS.txt)
 
-[nonplayers](https://github.com/vendu/velho/blob/master/usr/games/mjolnir/doc/NPC.txt
+[nonplayer characters](https://github.com/vendu/velho/blob/master/usr/games/mjolnir/doc/NPC.txt
 
 [special items](https://github.com/vendu/velho/blob/master/usr/games/mjolnir/doc/SPECIAL.txt)
 
