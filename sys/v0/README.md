@@ -7,6 +7,8 @@ new Velho Processor Architecture.
 First and foremost, I'd like to extend my greetings & the best of wishes
 to the whole, lively online hacker community including but not limited to
 
+[opencores.org](https://opencores.org)
+
 [dmr](https://www.bell-labs.com/usr/dmr/www/)
 - unix/bell
 
@@ -44,6 +46,7 @@ One of the [educational] purposes of the Velho Project is to explore and
 develop new tools much like
 
 [clash-lang](https://clash-lang.org/)
+
 [fhdl](http://cs.ecs.baylor.edu/~maurer/fhdl.html)
 
 Here's some software I plan to do for the virtual machine (hopefully later to
