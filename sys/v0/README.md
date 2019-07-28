@@ -7,6 +7,12 @@ new Velho Processor Architecture.
 First and foremost, I'd like to extend my greetings & the best of wishes
 to the whole, lively online hacker community including but not limited to
 
+[freenode](https://freenode.net)
+- anyone and everyone on #osdev, #oszero, #cpudev, ##programming, #anapnea, #gah, #northtech, #proglangdesign, ...
+- [rindolf](https://github.com/shlomif/)
+  - thanks for being on one of my favorite channels more than I have had the
+    time lately... Wait till you guys are gonna have salmon Finnish-style... :)
+
 [opencores.org](https://opencores.org)
 - very nice community effort
 
