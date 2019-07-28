@@ -8,8 +8,10 @@ First and foremost, I'd like to extend my greetings & the best of wishes
 to the whole, lively online hacker community including but not limited to
 
 [opencores.org](https://opencores.org)
+- very nice community effort
 
 [gadgetfactory](http://papilio.cc/)
+- affordable development boards
 
 [dmr](https://www.bell-labs.com/usr/dmr/www/)
 - unix/bell
