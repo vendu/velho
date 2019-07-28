@@ -9,6 +9,8 @@ to the whole, lively online hacker community including but not limited to
 
 [opencores.org](https://opencores.org)
 
+[gadgetfactory](http://papilio.cc/)
+
 [dmr](https://www.bell-labs.com/usr/dmr/www/)
 - unix/bell
 
