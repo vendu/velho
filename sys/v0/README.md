@@ -25,6 +25,7 @@ to the whole, lively online hacker community including but not limited to
 - affordable development boards
 
 [abrash](http://www.jagregory.com/abrash-black-book/)
+- for getting many of us going on code optimisation :)
 
 [dmr](https://www.bell-labs.com/usr/dmr/www/)
 - unix/bell
