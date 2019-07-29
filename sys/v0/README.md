@@ -24,6 +24,8 @@ to the whole, lively online hacker community including but not limited to
 [gadgetfactory](http://papilio.cc/)
 - affordable development boards
 
+[abrash](http://www.jagregory.com/abrash-black-book/)
+
 [dmr](https://www.bell-labs.com/usr/dmr/www/)
 - unix/bell
 
