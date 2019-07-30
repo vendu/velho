@@ -1,4 +1,4 @@
-# 10 Commandments for Code Optimization
+# 0x0C Commandments for Code Optimization
   ---
 
 ### Copyright (C) 2018 Tuomo Petteri Venäläinen
