@@ -138,25 +138,26 @@ v0initsigmap(void)
     return;
 }
 
+#define v0trapdesc(func, flg)   ((uintptr_t)(f) | (flg));
 static void
 v0inittrapvec(void)
 {
-    g_trapvec[V0_IRQ_0x00_TRAP] = (v0trapfunc)v0tmrirq | V0_SYS_TRAP_BIT;
-    g_trapvec[V0_IRQ_0x01_TRAP] = (v0trapfunc)v0audirq | V0_SYS_TRAP_BIT;
-    g_trapvec[V0_IRQ_0x02_TRAP] = (v0trapfunc)v0vidirq | V0_SYS_TRAP_BIT;
-    g_trapvec[V0_IRQ_0x03_TRAP] = (v0trapfunc)v0kbdirq | V0_SYS_TRAP_BIT;
-    g_trapvec[V0_IRQ_0x04_TRAP] = (v0trapfunc)v0pntirq | V0_SYS_TRAP_BIT;
-    g_trapvec[V0_IRQ_0x05_TRAP] = (v0trapfunc)v0hidirq | V0_SYS_TRAP_BIT;
-    g_trapvec[V0_IRQ_0x06_TRAP] = (v0trapfunc)v0netirq | V0_SYS_TRAP_BIT;
-    g_trapvec[V0_IRQ_0x07_TRAP] = (v0trapfunc)v0dskirq | V0_SYS_TRAP_BIT;
-    g_trapvec[V0_IRQ_0x08_TRAP] = (v0trapfunc)v0optirq | V0_SYS_TRAP_BIT;
-    g_trapvec[V0_IRQ_0x09_TRAP] = (v0trapfunc)v0usbirq | V0_SYS_TRAP_BIT;
-    g_trapvec[V0_IRQ_0x0a_TRAP] = (v0trapfunc)v0irq0x0a | V0_SYS_TRAP_BIT;
-    g_trapvec[V0_IRQ_0x0b_TRAP] = (v0trapfunc)v0irq0x0b | V0_SYS_TRAP_BIT;
-    g_trapvec[V0_IRQ_0x0c_TRAP] = (v0trapfunc)v0irq0x0c | V0_SYS_TRAP_BIT;
-    g_trapvec[V0_IRQ_0x0d_TRAP] = (v0trapfunc)v0irq0x0d | V0_SYS_TRAP_BIT;
-    g_trapvec[V0_IRQ_0x0e_TRAP] = (v0trapfunc)v0irq0x0e | V0_SYS_TRAP_BIT;
-    g_trapvec[V0_IRQ_0x0f_TRAP] = (v0trapfunc)v0irq0x0f | V0_SYS_TRAP_BIT;
+    g_trapvec[V0_IRQ_0x00_TRAP] = v0trapdesc(v0tmrirq, V0_SYS_TRAP_BIT);
+    g_trapvec[V0_IRQ_0x01_TRAP] = v0trapdesc(v0audirq, V0_SYS_TRAP_BIT);
+    g_trapvec[V0_IRQ_0x02_TRAP] = v0trapdesc(v0vidirq, V0_SYS_TRAP_BIT);
+    g_trapvec[V0_IRQ_0x03_TRAP] = v0trapdesc(v0kbdirq, V0_SYS_TRAP_BIT);
+    g_trapvec[V0_IRQ_0x04_TRAP] = v0trapdesc(v0pntirq, V0_SYS_TRAP_BIT);
+    g_trapvec[V0_IRQ_0x05_TRAP] = v0trapdesc(v0hidirq, V0_SYS_TRAP_BIT);
+    g_trapvec[V0_IRQ_0x06_TRAP] = v0trapdesc(v0netirq, V0_SYS_TRAP_BIT);
+    g_trapvec[V0_IRQ_0x07_TRAP] = v0trapdesc(v0dskirq, V0_SYS_TRAP_BIT);
+    g_trapvec[V0_IRQ_0x08_TRAP] = v0trapdesc(v0optirq, V0_SYS_TRAP_BIT);
+    g_trapvec[V0_IRQ_0x09_TRAP] = v0trapdesc(v0usbirq, V0_SYS_TRAP_BIT);
+    g_trapvec[V0_IRQ_0x0a_TRAP] = v0trapdesc(v0irq0x0a, V0_SYS_TRAP_BIT);
+    g_trapvec[V0_IRQ_0x0b_TRAP] = v0trapdesc(v0irq0x0b, V0_SYS_TRAP_BIT);
+    g_trapvec[V0_IRQ_0x0c_TRAP] = v0trapdesc(v0irq0x0c, V0_SYS_TRAP_BIT);
+    g_trapvec[V0_IRQ_0x0d_TRAP] = v0trapdesc(v0irq0x0d, V0_SYS_TRAP_BIT);
+    g_trapvec[V0_IRQ_0x0e_TRAP] = v0trapdesc(v0irq0x0e, V0_SYS_TRAP_BIT);
+    g_trapvec[V0_IRQ_0x0f_TRAP] = v0trapdesc(v0irq0x0f, V0_SYS_TRAP_BIT);
 
     return;
 }

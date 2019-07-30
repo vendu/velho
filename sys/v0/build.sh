@@ -1,4 +1,4 @@
 #! /bin/sh
 
-gcc -O -I.. -I../../usr/lib -o vm *.c
+gcc -O -Iinclude -I.. -I../../usr/lib -o vm src/*.c
 
