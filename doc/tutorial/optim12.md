@@ -61,10 +61,10 @@
 	- use your favorite search engine(s) to find lots of documents/papers
 	  on the Internet
 ## 0x0b	Hack!
-	- https://github.com/vendu/velho/		- my process + os start
-	- https://github.com/vendu/OS-Zero/		- my take on unix/posix
-	- https://github.com/vendu/Resurrection		- old X11/Xorg code
-	- https://github.com/vendu/vendetta-emacs-theme	- my emacs theme
+	- [velho](https://github.com/vendu/velho/)		- proc + os
+	- [zero](https://github.com/vendu/OS-Zero/)		- unix/posix
+	- [resurrection](https://github.com/vendu/Resurrection)	- X11/Xorg code
+	- [vendetta](https://github.com/vendu/vendetta-emacs-theme)
 
 ## 0x0c	Explore.
 
