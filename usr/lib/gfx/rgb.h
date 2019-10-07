@@ -14,17 +14,18 @@
 
 #if (__BYTE_ORDER == __LITTLE_ENDIAN)
 
-#define <gfx/rgb-lsb.h>
+#include <gfx/rgb-lsb.h>
 
 #elif (__BYTE_ORDER == __BIG_ENDIAN)
 
-#define <gfx/rgb-msb.h>
+#include <gfx/rgb-msb.h>
 
 #endif /* __BYTE_ORDER */
 
 typedef int32_t                 gfxpix32;
 typedef int16_t                 gfxpix555;
 typedef int16_t                 gfxpix565;
+typedef int16_t                 gfxpix444;
 
 #define GFX_BLACK               0x00000000
 #define GFX_WHITE               0xffffffff

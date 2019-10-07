@@ -1,4 +1,5 @@
 #include <v0/trap.h>
+#include <zen/signal.h>
 
 typedef                 void (*v0trapfunc)(struct v0trapframe *);
 

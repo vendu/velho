@@ -1,8 +1,12 @@
 #ifndef __V0_GPU_H__
 #define __V0_GPU_H__
 
+#include <stdint.h>
 #include <v0/conf.h>
 #include <v0/types.h>
+#include <gfx/rgb.h>
+
+typedef gfxpix444               v0pix;
 
 #define V0_GPU_REGISTERS
 
@@ -35,9 +39,9 @@
 #define V0_GPU_NAND_OP          0x15    // dest = ~(src & dest)
 
 struct v0gpu {
-    v0wide                       regs[V0_GPU_REGISTERS];
-    v0word                       w;
-    v0word                       h;
+    v0flt                        regs[V0_GPU_REGISTERS];
+    v0flt                        w;
+    v0flt                        h;
     v0pix                       *fb;
 };
 
