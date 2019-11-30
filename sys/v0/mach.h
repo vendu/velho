@@ -2,9 +2,7 @@
 #define __V0_MACH_H__
 
 #include <limits.h>
-#include <v0/conf.h>
-#include <v0/fpu.h>
-#include <v0/types.h>
+#include <v0/v0.h>
 
 struct v0machatr {
     size_t       nbbram;            // size of BRAM-memory in bytes

@@ -8,8 +8,10 @@
 #include <mmintrin.h>
 #endif
 
-#define gfxdiv255(c)                                                    \
+#define gfxdiv255a(c)                                                   \
     ((((c) << 8) + (c) + 256) >> 16)
+#define gfxdiv255b(c)                                                   \
+    (((c) * 257 + 257) >> 16)
 #define gfxdiv256(c)                                                    \
     ((c) >> 8)
 #define gfxalphablendcfast(src, dest, a)                                \
@@ -268,6 +270,6 @@
         _val1 += _srcrb;                                                \
         (dest) = _val1;                                                 \
     } while (0)
-        
+
 #endif /* __GFX_ALPHA_H__ */
 

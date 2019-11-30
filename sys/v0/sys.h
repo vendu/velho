@@ -1,7 +1,7 @@
 #ifndef __V0_SYS_H__
 #define __V0_SYS_H__
 
-#include <v0/types.h>
+#include <v0/v0.h>
 
 /* prec-member */
 #define V0_TIME_NANO            1000000000L
@@ -23,37 +23,44 @@ struct v0timedev {
     long        flg;            // device flag-bits
 };
 
-/* IOC-commands */
-#define V0_IO_CONF_BUS          0
-#define V0_IO_INIT_BUS          1
-#define V0_IO_CONF_DEV          2
-#define V0_IO_INIT_DEV          3
-#define V0_IO_OPEN_DEV          4
-#define V0_IO_SEEK_DEV          5
-#define V0_IO_READ_DEV          6
-#define V0_IO_WRITE_DEV         7
-#define V0_IO_SYNC__BUF         8
-#define V0_IO_FLUSH_BUF         9
+/* IOP-commands */
 
-/* I/O permission-bits */
-#define V0_IO_RAW               (1L << 31)     // raw/character-based I/O
-#define V0_IO_BLK               (1L << 30)     // buffered block-based I/O
-#define V0_IO_NO_BUF            (1L << 29)     // do not cache blocks
-#define V0_IO_DIRECT            (1L << 28)     // direct memory access
-#define V0_IO_SYNC              (1L << 27)     // synchronous I/O
-#define V0_IO_POLL              (1L << 26)     // pollable object
-#define V0_IO_BUSY              (1L << 25)     // I/O in progress
-#define V0_IO_SIGIO             (1L << 24)     // send SIGIO on objects ready
-#define V0_IO_SIGURG            (1L << 23)     // send SIGURG for ZEN_IO_SYNC
-#define V0_IO_UR_PERM   	(1L << 8)      // user read permission bit
-#define V0_IO_UW_PERM   	(1L << 7)      // user write
-#define V0_IO_UX_PERM           (1L << 6)      // user execute
-#define V0_IO_GR_PERM   	(1L << 5)      // group read
-#define V0_IO_GW_PERM   	(1L << 4)      // group write
-#define V0_IO_GX_PERM   	(1L << 3)      // group execute
-#define V0_IO_AR_PERM   	(1L << 2)      // world read
-#define V0_IO_AW_PERM   	(1L << 1)      // world write
-#define V0_IO_AX_PERM   	(1L << 0)      // world execute
+#define V0_IO_PORT_CLR_PERM     0x00    // disable I/O-permission
+#define V0_IO_PORT_SET_PERM     0x01    // enable I/O-permission
+#define V0_IO_PORT_READ         0x02    // read data from port
+#define V0_IO_PORT_WRITE        0x03    // write data to port
+#define V0_IO_PORT_POLL         0x04    // check port for input
+#define V0_IO_PORT_FLUSH        0x05    // commit pending write for port
+#define V0_IO_PORT_WAIT         0x06    // wait for input on port
+#define V0_IO_PORT_SYNC         0x07    // set port to synchronous I/O mode
+
+/* IOC-commands */
+#define V0_IO_PROBE_BUS         0
+#define V0_IO_CONF_BUS          1
+#define V0_IO_PROBE_DEV         2
+#define V0_IO_CONF_DEV          3
+#define V0_IO_LOCK_DEV          4
+#define V0_IO_MAP_BUF           5
+#define V0_IO_CONF_BUF          6
+#define V0_IO_OPEN_DEV          7
+#define V0_IO_CLOSE_DEV         8
+#define V0_IO_SEEK_DEV          9
+#define V0_IO_READ_DEV          10
+#define V0_IO_WRITE_DEV         11
+#define V0_IO_SYNC_BUF          12
+#define V0_IO_FLUSH_BUF         13
+#define V0_IO_POLL_DEV          14
+#define V0_IO_WAIT_DEV          15
+
+#define V0_IO_RAW               (1L << 31)      // raw/character-based I/O
+#define V0_IO_BLK               (1L << 30)      // buffered block-based I/O
+#define V0_IO_NO_BUF            (1L << 29)      // do not cache blocks
+#define V0_IO_DIRECT            (1L << 28)      // direct memory access
+#define V0_IO_SYNC              (1L << 27)      // synchronous I/O
+#define V0_IO_POLL              (1L << 26)      // pollable object
+#define V0_IO_BUSY              (1L << 25)      // I/O in progress
+#define V0_IO_SIGIO             (1L << 24)      // send SIGIO on objects ready
+#define V0_IO_SIGURG            (1L << 23)      // send SIGURG for ZEN_IO_SYNC
 
 /* I/O control register IDs */
 #define V0_PIC_REG      	0x00    // programmable interrupt controller

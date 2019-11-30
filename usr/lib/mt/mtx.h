@@ -95,7 +95,6 @@ mtunlkfmtx(volatile m_atomic_t *lp)
     return;
 }
 
-
 /*
  * try to acquire fast mutex lock
  * - return non-zero on success, zero if already locked

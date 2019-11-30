@@ -45,6 +45,7 @@ struct zenvfsnode {
     } node;
 };
 
+/* FIXME */
 struct iovec;
 typedef uint32_t DIR;
 typedef uint32_t FILE;

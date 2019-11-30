@@ -2,9 +2,10 @@
 #define __SYS_V0_BIT_H__
 
 #include <stdint.h>
+#include <v0/v0.h>
 
-extern const uint8_t g_clztab4bit[16];
-extern const uint8_t g_clztab16bit[16];
+extern const uint8_t    g_ctztab4bit[16];
+extern const uint8_t    g_clztab4bit[16];
 
 static __inline__ long
 m_clz32(uint32_t u32)
@@ -28,6 +29,7 @@ m_clz32(uint32_t u32)
     return ones;
 }
 
+#if 0
 static __inline__ long
 m_clz32a(uint32_t u32)
 {
@@ -53,6 +55,7 @@ m_clz32a(uint32_t u32)
 
     return val;
 }
+#endif
 
 static __inline__ long
 m_ctz(uint32_t u32)

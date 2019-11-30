@@ -30,5 +30,5 @@ struct gfxpix32 {
     uint8_t alpha;
 };
 
-#define /* __GFX_RGB_LSB_H__ */
+#endif /* __GFX_RGB_LSB_H__ */
 

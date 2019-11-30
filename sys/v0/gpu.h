@@ -2,13 +2,12 @@
 #define __V0_GPU_H__
 
 #include <stdint.h>
-#include <v0/conf.h>
-#include <v0/types.h>
+#include <v0/v0.h>
 #include <gfx/rgb.h>
 
 typedef gfxpix444               v0pix;
 
-#define V0_GPU_REGISTERS
+#define V0_GPU_REGISTERS        16
 
 #if (V0_MACHINE_TYPE == V0_PAPILIO_PRO)
 #define V0_GPU_PIX_FORMAT   V0_GPU_444_PIX

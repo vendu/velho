@@ -1,7 +1,7 @@
 #ifndef __V0_TRAP_H__
 #define __V0_TRAP_H__
 
-#include <v0/types.h>
+#include <v0/v0.h>
 
 #define v0trapirq(t)            ((t) & V0_IRQ_TRAP_BIT)
 #define v0trapirqid(t)          ((t) & ~V0_IRQ_TRAP_BIT)
@@ -40,13 +40,26 @@
 #define V0_IRQ_0x07_TRAP    V0_IRQ_TRAP(0x07)   // interrupt 7	- DSK
 #define V0_IRQ_0x08_TRAP    V0_IRQ_TRAP(0x08)   // interrupt 8  - OPT
 #define V0_IRQ_0x09_TRAP    V0_IRQ_TRAP(0x09)   // interrupt 9  - USB
-#define V0_IRQ_0x0a_TRAP    V0_IRQ_TRAP(0x0a)   // interrupt 10
+#define V0_IRQ_0x0a_TRAP    V0_IRQ_TRAP(0x0a)   // interrupt 10 - DEV
 #define V0_IRQ_0x0b_TRAP    V0_IRQ_TRAP(0x0b)   // interrupt 11
 #define V0_IRQ_0x0c_TRAP    V0_IRQ_TRAP(0x0c)   // interrupt 12
 #define V0_IRQ_0x0d_TRAP    V0_IRQ_TRAP(0x0d)   // interrupt 13
 #define V0_IRQ_0x0e_TRAP    V0_IRQ_TRAP(0x0e)   // interrupt 14
 #define V0_IRQ_0x0f_TRAP    V0_IRQ_TRAP(0x0f)   // interrupt 15
 #define V0_MAX_TRAP         32                  // max # of traps for system
+
+/* predefined traps */
+#define V0_TMR_TRAP         V0_IRQ_0x00_TRAP    // timer interrupt
+#define V0_AUD_TRAP         V0_IRQ_0x01_TRAP    // audio interrupt
+#define V0_VID_TRAP         V0_IRQ_0x02_TRAP    // video interrupt
+#define V0_KBD_TRAP         V0_IRQ_0x03_TRAP    // keyboard interrupt
+#define V0_PTR_TRAP         V0_IRQ_0x04_TRAP    // pointer such as mouse
+#define V0_HID_TRAP         V0_IRQ_0x05_TRAP    // human interface device
+#define V0_NET_TRAP         V0_IRQ_0x06_TRAP    // network interrupt
+#define V0_DSK_TRAP         V0_IRQ_0x07_TRAP    // disk interrupt
+#define V0_OPT_TRAP         V0_IRQ_0x08_TRAP    // optical/disc interrupt
+#define V0_USB_TRAP         V0_IRQ_0x09_TRAP    // USB interrupt
+#define V0_DEV_TRAP         V0_IRQ_0x0a_TRAP    // miscellaneous devices
 
 /* IV-register contents */
 
@@ -61,7 +74,6 @@
 #define V0_PF_READ          (1 << 2)       	// page-fault during read
 #define V0_PF_RING0         (1 << 3)       	// page-fault with system page
 #define V0_PF_STACK         (1 << 4)       	// stack-fault
-#define V0_PF_ADR_MASK      (~(V0_PAGE_SIZE - 1)) // page-fault address mask
 /* IO (input/output) trap error code bits */
 #define V0_IO_EXEC          (1 << 0)       	// execute error
 #define V0_IO_WRITE         (1 << 1)       	// write error

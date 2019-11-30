@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <zero/cdefs.h>
-#include <v0/conf.h>
-#include <v0/inst.h>
+#include <v0/v0.h>
 
 /* internal type-definitions */
 typedef void            * (*v0instfunc(struct v0inst *inst));

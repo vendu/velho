@@ -1,38 +1,41 @@
 #ifndef __V0_REGS_H__
 #define __V0_REGS_H__
 
+#include <v0/v0.h>
 #if defined (V0_LITERAL_DOCS)
 #include <v0/docs/regs.txt>
 #endif
 
 #define V0_MAX_REGISTERS        32
 
-#define V0_REG_BITS             32
+//#define V0_REG_SIZE             32
 #define V0_RET_REG      	V0_R0_REG // function return value register
-#define V0_REG_ARGS             4 // R1..R3, function register arguments
-#define V0_SAVE_REGISTERS            10 // R4..R12/SP, FP, callee save arguments
-#define V0_R0_REG               0
-#define V0_R1_REG               1
-#define V0_R2_REG               2
-#define V0_R3_REG               3
-#define V0_R4_REG               4
-#define V0_R5_REG               5
-#define V0_R6_REG               6
-#define V0_R7_REG               7
-#define V0_R8_REG               8
-#define V0_R9_REG               9
-#define V0_R10_REG              10
-#define V0_R11_REG              11
-#define V0_R12_REG      	0x0c // frame-pointer
-#define V0_R13_REG      	0x0d // stack-pointer
-#define V0_R14_REG      	0x0e // link-register
-#define V0_R15_REG      	0x0f // program-counter
-#define V0_SP_REG               V0_R12_REG
-#define V0_FP_REG               V0_R13_REG
-#define V0_LR_REG               V0_R14_REG
-#define V0_PC_REG               V0_R15_REG
-#define V0_STD_REGISTERS        16 // # of integer/scalar registers
-#define V0_CALLEE_REGISTERS     12 // callee saves r4..r15
+#define V0_REG_ARGS             5 // R1..R3, function register arguments
+#define V0_CALLEE_REGISTERS     10 // R4..R11, FP, SP, callee save arguments
+#define V0_R0_REG               0               // zero register
+#define V0_R1_REG               1               // function argument
+#define V0_R2_REG               2               // function argument
+#define V0_R3_REG               3               // function argument
+#define V0_R4_REG               4               // function argument
+#define V0_R5_REG               5               // scratch register
+#define V0_R6_REG               6               // scratch register
+#define V0_R7_REG               7               // scratch register
+#define V0_R8_REG               8               // scratch register
+#define V0_R9_REG               9               // scratch register
+#define V0_R10_REG              10              // scratch register
+#define V0_R11_REG              11              // function return value
+#define V0_R12_REG      	12              // frame-pointer
+#define V0_R13_REG      	13              // stack-pointer
+#define V0_R14_REG      	14              // link-register
+#define V0_R15_REG      	15              // program-counter
+#define V0_ZR_REG               0x00            // zero register
+#define V0_FR_REG               0x11            // function return value
+#define V0_TR_REG               0x11            // temporary storage for caller
+#define V0_FP_REG               V0_R12_REG      // store stack frame address
+#define V0_SP_REG               V0_R13_REG      // store current stack pointer
+#define V0_LR_REG               V0_R14_REG      // link register, i.e. return address
+#define V0_PC_REG               V0_R15_REG      // program counter/instruction pointer
+#define V0_GENERAL_REGISTERS    16              // # of general registers
 
 /* SYSTEM REGISTERS */
 #define V0_MSW_REG      	0x00 // machine status word
@@ -50,7 +53,7 @@
 #define V0_TLS_REG      	0x0c // thread-local storage base address
 #define V0_TWC_REG       	0x0d // thread wait channel
 #define V0_SP0_REG              0x0e // ring #0 (system-mode) stack-pointer
-#define V0_SYS_REGISTERS        16
+#define V0_SYSTEM_REGISTERS     16
 
 /* values for MSW */
 #define V0_MSW_DEF_BITS 	(V0_IF_BIT)

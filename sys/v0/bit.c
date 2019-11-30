@@ -1,8 +1,9 @@
 #include <stdint.h>
 
-static uint8_t          g_ctztab4bit[32];
-static const uint8_t    g_clztab4bit[16]
+uint8_t         g_ctztab4bit[32];
+const uint8_t   g_clztab4bit[16]
 = { 4U, 3U, 2U, 2U, 1U, 1U, 1U, 1U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U };
+#if 0
 static const uint8_t    g_clztab8bit[256]
 = {
     32U, 31U, 30U, 30U, 29U, 29U, 29U, 29U,
@@ -38,6 +39,7 @@ static const uint8_t    g_clztab8bit[256]
     24U, 24U, 24U, 24U, 24U, 24U, 24U, 24U,
     24U, 24U, 24U, 24U, 24U, 24U, 24U, 24U
 };
+#endif
 
 static __inline__ void
 bitinitctz(void)

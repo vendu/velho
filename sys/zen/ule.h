@@ -10,9 +10,9 @@
 #include <mt/mtx.h>
 
 /* thread priority parameters */
-#define TAO_SCHED_PRIO_MAX      128
+#define TAO_SCHED_PRIO_MAX      256
 #define TAO_SCHED_PRIOS         32
-#define TAO_SCHED_PRIO_SHIFT    2
+#define TAO_SCHED_PRIO_SHIFT    3
 #define TAO_SCHED_QUICK         0
 #define TAO_SCHED_FAST          1
 #define TAO_SCHED_USER          2

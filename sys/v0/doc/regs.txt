@@ -6,7 +6,7 @@
  * %r0          zero register; reads always return zero, writes are NOPs
  * %zr          synonymous with %r0
  * %r1          function return value, first caller save register
- * %r2..%r7     function argument registers (the rest on stack)
+ * %r2..%r7     6 function argument registers (the rest on stack)
  * %r7..%r15    scratch registers; callee-save
  *
  * System Registers

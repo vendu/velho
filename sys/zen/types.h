@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #if defined(__v0__)
-#include <zen/bsp/v0.h>
+#include <zen/sys/v0.h>
 #endif
 #include <zen/types.h>
 
@@ -15,30 +15,13 @@ typedef uint32_t        zendev_t;       // device type
 typedef int64_t         zenoff_t;       // file-system offset
 typedef int32_t         zenuid_t;       // user ID
 typedef int32_t         zengid_t;       // group ID
+typedef uint32_t        zenperm_t;      // I/O permission flags
 
-union m_task {
-#if defined(__v0__)
-    struct v0tcb        v0;
-#endif
-};
-
-#define ZEN_ROOT_UID    INT32_C(0)
-#define ZEN_ROOT_GID    INT32_C(0)
-#define ZEN_NO_GID      (~INT32_C(0))
-struct zencred {
-    zenuid_t            uid;
-    zengid_t            gid;
-    m_uword_t           nxgid;
-    zengid_t           *xgidtab;
-};
-
-struct zenacl {
-    void               *data;
-    m_word_t          (*chk)(zenuid_t uid, zenuid_t gid, struct zenacl *acl);
-};
-
-struct zenperm {
-    m_uword_t           flags;
+struct zendev {
+    struct zenvfsfuncs *funcs;
+    uint32_t            dev;    // 16-bit major + 16-bit minor device IDs
+    uint16_t            bus;
+    uint16_t            flg;
 };
 
 #define MEM_NULL_FLAGS          0
@@ -72,7 +55,7 @@ struct zenmap {
     m_adr_t             adr;
     m_uword_t           size;
     m_uword_t           flags;
-    struct zencred     *cred;
+    struct zencred      cred;
 };
 
 struct zenpage {
@@ -86,10 +69,18 @@ struct zenpage {
     struct zenpage     *next;   // next in queue
 };
 
+struct zendesc {
+    m_adr_t    buf;             // buffer [page] address
+    m_adr_t    ofs;             // buffer offset
+    uint32_t   flg;
+};
+
+};
+
 struct zensys {
     struct zentask     *systasktab[ZEN_SYS_TASKS];
     struct zentask     *tasktab[ZEN_PROC_TASKS];
-    struct m_page_t    *pagedir[ZEN_PAGE_DIR_ITEMS];
+    m_page_t           *pagedir[ZEN_PAGE_DIR_ITEMS];
     m_uword_t           ndesc;
     m_desc_t           *desctab;
     m_uword_t           nnodehash;

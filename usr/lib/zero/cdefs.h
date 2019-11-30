@@ -17,6 +17,10 @@
 #endif /* __STDC_VERSION__ >= 201112L */
 #endif /* __STDC_VERSION__ */
 
+#if defined(_MSC_VER) || defined(__CC_ARM)
+#define INLINE          __forceinline
+#endif
+
 #if defined(__GNUC__) || defined(__clang__)
 #if (defined(__i386__) || defined(__i486__)                             \
      || defined(__i586__) || defined(__i686__))

@@ -1,6 +1,5 @@
 #include <stddef.h>
-#include <v0/types.h>
-#include <v0/mem.h>
+#include <v0/v0.h>
 
 static v0pagedesc *g_v0pagedir[V0_PAGE_DIR_ITEMS];
 static v0pagedesc  g_v0tlb[V0_PAGE_TLB_ITEMS];

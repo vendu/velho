@@ -4,16 +4,17 @@
  * Instruction  Arguments       Brief
  * -----------  ---------       -----
  * NOP          N/A             no operation (alignment of memory etc.)
- * HLT          ri1             halt until interrupt, ri1 is interrupt mask
- * RST          N/A             reset system
+ * HLT          <ri1>, <adr>    halt until interrupt, ri1 is interrupt mask,
+   		     		adr is used to save old mask
+ * RST          <ri1>           reset system
  * INT          ri1             raise interrupt, ri1 is number
  * STI          N/A             enable interrupts
  * CLI          N/A             disable interrupts
- * STE          ri1             reserve cacheline
- * WFE          ri1             wait for event on cacheline
- * SEV          ri1             signal event on cacheline
+ * STC          adr             reserve cacheline
+ * WFC          ri1             wait for event on cacheline
+ * SEC          ri1             signal event on cacheline
  * RPC          ri1, r2         read performance counter
- * LDX          ria1, r2        load system register
+ * LDX          ri1, r2         load system register
  * STX          r1, adr         store system register
  * IPG          ri1             invalidate TLB page entry
  * PFC          ri1             prefetch cacheline

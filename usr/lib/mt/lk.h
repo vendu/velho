@@ -3,7 +3,11 @@
 
 /* velho lock routines */
 
+#include <stdint.h>
 #include <mach/asm.h>
+
+#define MT_MEM_LK_BIT          ((uintptr_t)1 << MT_MEM_LK_BIT_OFS)
+#define MT_MEM_LK_BIT_OFS      1
 
 static INLINE long
 mtlkbit(volatile m_atomic_t *lp, long pos)

@@ -24,7 +24,7 @@ typedef v0pix12                         v0pixel;
     (((uint8_t *)(ptr)[0] >> PAPILIO_PRO_PIX_SHIFT) & PAPILIO_PRO_PIX_MASK)
 #define v0getred(ptr)                                                   \
     ((uint8_t *)(ptr)[1] & PAPILIO_PRO_PIX_MASK)
-#define v0getflg(ptr)                                                   \
+#define v0getpixflg(ptr)                                                \
     (((uint8_t *)(ptr)[1] >> PAPILIO_PRO_PIX_SHIFT) & PAPILIO_PRO_PIX_MASK)
 
 #define PAPILIO_PRO_TIMER_PREC          32000000        // 32 MHz oscillator

@@ -1,18 +1,20 @@
 #ifndef __SYS_V0_SHIFT_H__
 #define __SYS_V0_SHIFT_H__
 
-static __inline__ v0word
-v0shl(cnt, word)
+#include <v0/v0.h>
+
+static __inline__ long
+v0shl(long cnt, long word)
 {
     word <<= cnt;
 
     return word;
 }
 
-static __inline__ v0word
-v0shr(v0word cnt, v0word word)
+static __inline__ long
+v0shr(long cnt, long word)
 {
-    v0word mask = 0xffffffff;
+    long        mask = 0xffffffff;
 
     word >>= cnt;
     mask >>= cnt;
@@ -21,11 +23,11 @@ v0shr(v0word cnt, v0word word)
     return word;
 }
 
-static __inline__ v0word
-v0sar(v0word cnt, v0word word)
+static __inline__ long
+v0sar(long cnt, long word)
 {
-    v0word sign = word & 0x80000000;
-    v0word mask = 0xffffffff;
+    long        sign = word & 0x80000000;
+    long        mask = 0xffffffff;
 
     word >>= cnt;
     if (sign) {
@@ -39,10 +41,10 @@ v0sar(v0word cnt, v0word word)
     return word;
 }
 
-static __inline__ v0word
-v0rol(v0word cnt, v0word word)
+static __inline__ long
+v0rol(long cnt, long word)
 {
-    v0word mask = 0xffffffff;
+    long        mask = 0xffffffff;
 
     mask >>= 32 - cnt;
     word <<= cnt;
@@ -51,10 +53,10 @@ v0rol(v0word cnt, v0word word)
     return word;
 }
 
-static __inline__ v0word
-v0ror(v0word cnt, v0word word)
+static __inline__ long
+v0ror(long cnt, long word)
 {
-    v0word mask = 0xffffffff;
+    long        mask = 0xffffffff;
 
     mask <<= 32 - cnt;
     word >>= cnt;

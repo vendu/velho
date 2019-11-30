@@ -1,4 +1,4 @@
-#include <v0/conf.h>
+#include <v0/v0.h>
 #include <zero/cdefs.h>
 #if defined(V0_PTHREAD)
 #include <pthread.h>

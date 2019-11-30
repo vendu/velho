@@ -1,6 +1,8 @@
 #ifndef __SYS_V0_LOGIC_H__
 #define __SYS_V0_LOGIC_H__
 
+#include <v0/v0.h>
+
 static __inline__ v0word
 v0not(v0word word)
 {

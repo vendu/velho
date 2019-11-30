@@ -13,8 +13,7 @@
 #include <mt/thr.h>
 
 #define MTTKTLKSPINS 16384
-
-#define MTTKTSIZE    WORDSIZE
+#define MTTKLKTSIZE  (2 * WORDSIZE)
 
 #if (WORDSIZE == 4)
 

@@ -3,7 +3,6 @@
 
 #include <mach/atomic.h>
 #include <mach/mem.h>
-#include <mach/atomic.h>
 #if defined(_WIN64)
 #include <zero/msc/win64.h>
 #elif defined(_WIN32)
