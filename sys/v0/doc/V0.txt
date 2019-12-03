@@ -1,0 +1,394 @@
+V0 Machine Description
+----------------------
+
+Copyright (C) 2019 Tuomo Petteri Venäläinen
+
+The processor is divided into the following execution units.
+
+SYS	- system operations
+ALU	- logical operations, addition, subtraction, zero- and sign extension
+MULTI	- multiplication, division, fused-multiplication and reciprocal
+	  operations
+SHIFT	- shift, rotate, shift-and-add as well as shift-and-multiply operations
+
+/* unit-names */
+#define V0_SYS_UNIT             0x00
+#define V0_ALU_UNIT             0x01
+#define V0_MULTI_UNIT           0x02
+#define V0_SHIFT_UNIT           0x03
+#define V0_BIT_UNIT             0x04
+#define V0_ATOM_UNIT            0x05
+#define V0_FLOW_UNIT            0x06
+#define V0_XFER_UNIT            0x07
+#define V0_STD_UNITS            8
+#define V0_FPU_UNIT             0x08
+#define V0_GPU_UNIT             0x09
+#define V0_DSP_UNIT             0x0a
+#define V0_EXTRA_UNITS          8
+#define V0_UNITS                16
+
+Instruction Format
+------------------
+- instructions are 16-bit parcels followed by optional 32-bit argument parcel
+- if V0_VAL_BIT is set, the instruction parcel contains an unsigned 7-bit
+  argument value in the val-field
+- argument parcels are aligned to 32-bit boundaries
+
+Register File
+-------------
+
+The V0 processor has 16 general purpose registers which implement the following
+flow control registers: frame pointer, stack pointer, link register (return
+address back to the calling function), as well as program counter often called
+instruction pointer with the address of the current or next instruction to be
+executed.
+
+The following registers are included. Of these, R0/ZR is the zero register; all
+reads from this register return zero whereasa all writes to this register result
+to NOPs. R1 through R7 are caller-saved registers, whereas R8-R15 are callee-
+saved (including function call support registers).
+
+Register	Brief				Saved By
+--------	-----				--------
+R0		zero register			N/A
+R1		function argument		Caller
+R2		function argument		Caller
+R3		function argument		Caller
+R4		function argument		Caller
+R5		scratch register		N/A
+R6		scratch register		N/A
+R7		scratch register		N/A
+R8		scratch register		N/A
+R9		scratch register		N/A
+R10		scratch register		N/A
+R11/FR		return value			Callee
+R12/FP		[stack] frame pointer		Caller
+R13/SP		stack pointer			Callee
+R14/LR		link register/return address	Caller
+R15/PC		program counter			Caller
+
+Function Call Mechanism
+-----------------------
+
+- R0 is zero register which doesn't need to be saved across calls
+- R1..R4 are function argument registers
+- R5..R10 are scratch registers for functions to use
+- R11/FR is the return value from called functions
+- R12/FP is the pointer to the stack frame of the current function
+
+Instruction Set
+---------------
+
+Argument Presentation
+---------------------
+
+The argument descriptions of the instructions are formatted as follows:
+
+v	- immediate 7-bit value in [16-bit] instruction parcel
+r	- register ID
+i	- 32-bit argument parcel at next 32-bit aligned address after
+    	  instruction parcel
+adr	- memory address specified as follows
+- if V0_NDX_ADR is set, read offset from the 32-bit word at next 32-bit aligned
+  address after instruction parcel
+- if V0_REG_ADR is set, read base address from the specified register
+- add possible offset (or zero) to possible base address (or zero)
+
+SYS-Unit
+--------
+
+NOTE: NOP, i.e. no-operation, is declared as a 16-bit parcel of all 1-bits.
+
+NOP	N/A		no operation
+- this opcode just advances program counter and performs no [other] operation.
+
+HLT          <ri1>, <adr>	halt until interrupt
+- if ri1 is present, it defines the mask of interrupts to ignore
+- if adr is present, the current interrupt mask is saved at that address
+
+RST     v               reset system, if v is non-zero reboot
+
+INT     v		raise interrupt, v is number
+
+STI     <ri1>, <adr>    enable interrupts
+- if ri1 is present, it defines the mask of interrupts to enable
+  - else enable all interrupts
+- if adr is present, the current interrupt mask is saved at that address
+
+CLI     <ri1>, <adr>    disable interrupts
+- if ri1 is present, it defgines the mask of interrupts to disable
+  - else disable all interrupts
+- if adr is present, the current interrupt mask is saved at that address
+
+RCL     adr             reserve cacheline
+- mark cacheline reserved (clear on thread switch)
+
+WFE     v	        wait for an event
+- if v is zero, wait for any event
+- if v is non-zero, it defines the type of an event to wait for
+
+SEV     v               signal event
+- v is event type
+
+RPC     v, r1           read performance counter
+- v is counter ID
+- value is stored in r1
+
+LDX     v, r1           load system register
+- v is system register ID
+- value is read from r1
+
+STX     v, adr          store system register
+- v is system register ID
+- value is stored at the address
+
+IPG     adr             invalidate TLB page entry
+- adr is the page address
+
+PFC     adr             prefetch cacheline into cache
+- adr is the cacheline address
+
+FLC     N/A             flush/invalidate caches
+
+PLK     adr             lock page (V0_MEM_LOCK_BIT in page-entry)
+- addr is the page address
+
+BRD     N/A             memory read barrier
+- synchronize memory read operations
+
+BWR     N/A             memory write barrier
+- synchronize memory write operations
+
+BAR     N/A             full memory barrier
+- synchronize memory read and write operations
+
+ALU-Unit
+--------
+
+NOT	ri1, r2		inverse all bits
+- ri1 is the source operand
+- the inverted value is stored in r2
+
+NEG	ri1, r2		perform arithmetic negation
+- ri1 is the source operand
+- the negated value is stored in r2
+
+AND	ri1, r2		compute logical AND of two operands
+- ri1 is the source operand
+- r2 is the target register (replaced)
+
+IOR     ri1, r2		compute logical OR of two operands
+- ri1 is the source operand
+- r2 is the target register (replaced)
+
+XOR     ri1, r2		compute logical XOR of two operands
+- ri1 is the source operand
+- r2 is the target register (replaced)
+
+INC	r1		increment register by one
+
+DEC	r1	        decrement register by one
+
+ADD	ri1, r2		add operand 1 to operand 2
+- ri1 is the source operand
+- r2 is the target register (replaced)
+
+ADC	ri1, r2		add operand 1 to operand 2, store carry
+- ri1 is the source operand
+- r2 is the target register (replaced)
+
+SUB	ri1, r2		subtract operand 1 from operand 2
+- ri1 is the source operand
+- r2 is the target register (replaced)
+
+SBB	ri1, r2		subtract operand 1 from operand 2, store borrow
+- ri1 is the source operand
+- r2 is the target register (replaced)
+
+CMP	ri1, r2		compare two operands, set processor flags
+
+ZEX	ri1, r2		zero-extend operand
+- ri1 is the source operand
+- r2 is the target register
+
+SEX	ri1, r2		sign-extend operand
+- ri1 is the source operand
+- r2 is the target register
+
+MULTI-Unit
+----------
+
+MUL	ri1, r2		multiply two operands
+- ri1 is the source operand
+- r2 is the target register (replaced)
+
+MLH	ri1, r2	   	multiply two operands, return high result word
+- ri1 is the source operand
+- r2 is the target register (replaced); shifted left by 32 after the MUL
+
+DIV	ri1, r2		divide r2 by ri1
+- ri1 is the source operand
+- r2 is the target register (replaced)
+
+REM	ri1, r2		compute remainder of r2/ri1
+- ri1 is the source operand
+- r2 is the target register
+
+MSL	v, ri1, r2	multiply and shift left (logical shift)
+- v is the shift count
+- ri1 is the source operand
+- r2 is the target register (replaced)
+- performs r2 = (r1 * r2) >> v;
+
+MSR	v, r1, r2	multiply and shift right
+- v is the shift count
+- r1 is the source register
+- r2 is the target register (replaced)
+- performs r2 = (r1 * r2) << v;
+
+IRP	ri1, r2		compute inverse reciprocal R 1/ri1 so X/ri1 => X * R
+- ri1 is the source operand (divisor)
+- r2 is the target register (replaced)
+
+Shift-Unit
+----------
+
+SHL	v, r1, r2	shift r1 left by v bits; store result in r2
+
+SHR	v, r1, r2	shift r1 left logically; store result in r2
+
+SAR	v. r1, r2	shift r1 left arithmetically; store result in r2
+
+ROL	v, r1, r2	rotate r1 left by v bits; store result in r2
+
+ROR	v, r1, r2	rotate r1 right by v bits; store result in r2
+
+SLA	v, ri1, r2	shift r2 left by v bits; add ri1 to result
+
+/* SHIFT-unit */
+#define V0_SHIFT_OP             0x00
+#define V0_SHADD_OP             0x01
+#define V0_SHMASK_OP            0x02
+#define V0_SHL_OP               V0_SHIFT_OP
+#define V0_SHR_OP               V0_SHIFT_OP     // FLAG1-bit set
+#define V0_SAR_OP               V0_SHIFT_OP     // FLAG1- and FLAG2-bits set
+#define V0_ROL_OP               V0_SHIFT_OP     // VAL-bit set
+#define V0_ROR_OP               V0_SHIFT_OP     // VAL- and FLAG1-bits set
+#define V0_SLA_OP               V0_SHADD_OP     // FLAG1-bit clear
+#define V0_SRA_OP               V0_SHADD_OP     // FLAG1-bit set
+#define V0_SLM_OP               V0_SHMASK_OP    // FLAG1-bit clear
+#define V0_SRM_OP               V0_SHMASK_OP    // FLAG1-bit set
+
+/* BIT-unit */
+#define V0_BCNT_OP              0x00            // bit-count
+#define V0_BSWAP_OP             0x01            // byte-swap
+#define V0_BCD_OP               0x02            // binary coded decimal
+#define V0_CHK_OP               0x04            // cyclic-redundancy check
+#define V0_HASH_OP              0x05            // hash routines
+#define V0_CLZ_OP               V0_BCNT_OP      // FLAG1-bit clear
+#define V0_HAM_OP               V0_BCNT_OP      // FLAG1-bit set
+#define V0_PAR_OP               V0_BCNT_OP      // FLAG2-bit set
+#define V0_SWP_OP               V0_BSWAP_OP     // 8/16-bit byteswap (FLAG1 0/1)
+#define V0_BEC_OP               V0_BCD_OP       // BCD encode (FLAG1-bit 0)
+#define V0_BDC_OP               V0_BCD_OP       // BCD decode (FLAG1-bit 1)
+#define V0_CRC_OP               V0_CHK_OP       // 16/32-bit CRC (FLAG1-bit 0/1)
+#define V0_ECC_OP               V0_CHK_OP       // FLAG1-bit set
+#define V0_HSH_OP               V0_HASH_OP      // hash using tmhash32()
+#define V0_HUN_OP               V0_HASH_OP      // FLAG1-bit set, unhash
+
+/* ATOM-unit */
+#define V0_LLSC_OP              0x00
+#define V0_BITXCHG_OP           0x01
+#define V0_FETCHADD_OP          0x02
+#define V0_CAS_OP               0x03            // no bits set
+#define V0_LDL_OP               V0_LLSC_OP      // FLAG1-bit clear
+#define V0_STL_OP               V0_LLSC_OP      // FLAG2-bit set
+#define V0_BTC_OP               V0_BITXCHG_OP   // FLAG1-bit clear
+#define V0_BTS_OP               V0_BITXCHG_OP   // set if clear, old in CF
+#define V0_XADD_OP              V0_FETCHADD_OP  // no flag-bits
+#define V0_XINC_OP              V0_FETCHADD_OP  // FLAG1-bit set
+#define V0_XDEC_OP              V0_FETCHADD_OP  // FLAG2-bit set
+
+/*
+ * V0_BRANCH_OPs have VAL-bit set in opcode and one of the following codes in
+ * the val-field.
+ */
+#define V0_EQ_VAL               0x00
+#define V0_ZF_VAL               V0_EQ_VAL
+#define V0_BEQ_VAL              0x01
+#define V0_BNE_VAL              0x02
+#define V0_BNZ_VAL              V0_BNE_VAL
+#define V0_BLT_VAL              0x03
+#define V0_BLE_VAL              0x04
+#define V0_BGT_VAL              0x05
+#define V0_BGE_VAL              0x06
+#define V0_BCF_VAL              0x07
+#define V0_BNC_VAL              0x08
+#define V0_BOF_VAL              0x09
+#define V0_BNO_VAL              0x0a
+#define V0_BSF_VAL              0x0b
+#define V0_BNS_VAL              0x0c
+
+/* FLOW-unit */
+#define V0_JUMP_OP              0x00
+#define V0_BRANCH_OP            0x01
+#define V0_FRAME_OP             0x02
+#define V0_CALL_OP              0x03
+#define V0_RETURN_OP            0x04
+#define V0_JMP_OP               V0_JMP_OP       // no flag-bits
+#define V0_JMR_OP               V0_JMP_OP       // FLAG1-bit set
+/* branch operations, see V0_EQ_VAL etc. above for the bits-value */
+#define V0_BEQ_OP               V0_BRANCH_OP
+#define V0_BZF_OP               V0_BRANCH_OP
+#define V0_BNE_OP               V0_BRANCH_OP
+#define V0_BNZ_OP               V0_BRANCH_OP
+#define V0_BLT_OP               V0_BRANCH_OP
+#define V0_BLE_OP               V0_BRANCH_OP
+#define V0_BGT_OP               V0_BRANCH_OP
+#define V0_BGE_OP               V0_BRANCH_OP
+#define V0_BCF_OP               V0_BRANCH_OP
+#define V0_BNC_OP               V0_BRANCH_OP
+#define V0_BOF_OP               V0_BRANCH_OP
+#define V0_BNO_OP               V0_BRANCH_OP
+#define V0_BSF_OP               V0_BRANCH_OP
+#define V0_BNS_OP               V0_BRANCH_OP
+#define V0_BEG_OP               V0_FRAME_OP      // FLAG1-bit set
+#define V0_FIN_OP               V0_FRAME_OP     // FLAG1-bit set
+#define V0_MKF_OP               V0_FRAME_OP     // VAL-bit set, # of args in val
+#define V0_CSR_OP               V0_CALL_OP      // no flag-bits
+#define V0_SYS_OP               V0_CALL_OP      // FLAG1-bit set
+#define V0_THR_OP               V0_THREAD_OP    // no flag-bits
+#define V0_THC_OP               V0_THREAD_OP    // VAL-bit set + command in val
+#define V0_THW_OP               V0_THREAD_OP    // FLAG1-bit set
+#define V0_THY_OP               V0_THREAD_OP    // FLAG2-bit set
+#define V0_RET_OP               V0_RETURN_OP    // no flag-bits
+#define V0_SRT_OP               V0_RETURN_OP    // FLAG1-bit set
+#define V0_THX_OP               V0_RETURN_OP    // FLAG2-bit set
+#define V0_IRT_OP               V0_RETURN_OP    // FLAG1- and FLAG2-bits set
+
+/* XFER-unit */
+#define V0_AXS_OP               0x00
+#define V0_LOAD_OP              0x01
+#define V0_STORE_OP             0x02
+#define V0_STACK_OP             0x03
+#define V0_IO_OP                0x04
+#define V0_CKR_OP               V0_AXS_OP       // no flag-bits
+#define V0_CKW_OP               V0_AXS_OP       // FLAG1-bit set
+#define V0_CKX_OP               V0_AXS_OP       // FLAG2-bit set
+#define V0_LDR_OP               V0_LOAD_OP      // no flag-bits
+#define V0_LDN_OP               V0_LOAD_OP      // FLAG1-bit set
+#define V0_LDC_OP               V0_LOAD_OP      // VAL-bit + condition bits
+#define V0_STR_OP               V0_STORE_OP     // no flag-bits
+#define V0_STN_OP               V0_STORE_OP     // FLAG1-bit set
+#define V0_STC_OP               V0_STORE_OP     // VAL-bit + condition bits
+#define V0_PSH_OP               V0_STACK_OP     // FLAG1-bit clear
+#define V0_PSM_OP               V0_STACK_OP     // FLAG1-bit set
+#define V0_POP_OP               V0_STACK_OP     // FLAG2-bit set
+#define V0_POM_OP               V0_STACK_OP     // FLAG1- and FLAG2-bits set
+#define V0_IOC_OP               V0_IO_OP        // VAL-bit + command in val
+#define V0_IOP_OP               V0_IO_OP        // no flag-bits
+#define V0_IRD_OP               V0_IO_OP        // FLAG1-bit set
+#define V0_IWR_OP               V0_IO_OP        // FLAG2-bit set
+
+#endif /* __V0_INST_H__ */
+
