@@ -30,7 +30,7 @@
 #define V0_PAGE_DIR_SHIFT       (V0_PAGE_TAB_SHIFT + V0_PAGE_SHIFT)
 #define V0_PAGE_DIR_BITS        (32 - V0_PAGE_TAB_BITS - V0_PAGE_SHIFT)
 #define V0_PAGE_DIR_ITEMS       ((1 << V0_PAGE_DIR_BITS) - 1)
-#define V0_TLB_ENTRIES          (V0_PAGE_SIZE / sizeof(v0pagedesc))
+#define V0_PAGE_TLB_ENTRIES     (V0_PAGE_SIZE / sizeof(v0pagedesc))
 #define V0_IOMAP_ITEMS          (V0_PAGE_SIZE / sizeof(v0iodesc))
 
 #define V0_SERVER_CONF          0

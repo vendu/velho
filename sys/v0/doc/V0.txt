@@ -246,6 +246,8 @@ MSR	v, r1, r2	multiply and shift right
 - r2 is the target register (replaced)
 - performs r2 = (r1 * r2) << v;
 
+MAD	i, r1, r2	r2 = r1 * r2 + i
+
 IRP	ri1, r2		compute inverse reciprocal R 1/ri1 so X/ri1 => X * R
 - ri1 is the source operand (divisor)
 - r2 is the target register (replaced)
@@ -267,17 +269,17 @@ SLA	v, ri1, r2	shift r2 left by v bits; add ri1 to result
 
 /* SHIFT-unit */
 #define V0_SHIFT_OP             0x00
-#define V0_SHADD_OP             0x01
-#define V0_SHMASK_OP            0x02
+#define V0_SHA_OP               0x01
+#define V0_SHM_OP               0x02
 #define V0_SHL_OP               V0_SHIFT_OP
 #define V0_SHR_OP               V0_SHIFT_OP     // FLAG1-bit set
 #define V0_SAR_OP               V0_SHIFT_OP     // FLAG1- and FLAG2-bits set
 #define V0_ROL_OP               V0_SHIFT_OP     // VAL-bit set
 #define V0_ROR_OP               V0_SHIFT_OP     // VAL- and FLAG1-bits set
-#define V0_SLA_OP               V0_SHADD_OP     // FLAG1-bit clear
-#define V0_SRA_OP               V0_SHADD_OP     // FLAG1-bit set
-#define V0_SLM_OP               V0_SHMASK_OP    // FLAG1-bit clear
-#define V0_SRM_OP               V0_SHMASK_OP    // FLAG1-bit set
+#define V0_SLA_OP               V0_SHA_OP       // FLAG1-bit clear
+#define V0_SRA_OP               V0_SHA_OP       // FLAG1-bit set
+#define V0_SLM_OP               V0_SHM_OP       // FLAG1-bit clear
+#define V0_SRM_OP               V0_SHM_OP       // FLAG1-bit set
 
 /* BIT-unit */
 #define V0_BCNT_OP              0x00            // bit-count

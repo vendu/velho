@@ -64,38 +64,4 @@
 #define v0store(val, adr)       ((v0word *)&g_vm.mem[(adr)] = (val))
 #define v0storew(val, adr)      ((v0wide *)&g_vm.mem[(adr)] = (val))
 
-static __inline__ v0word
-v0getadr1(struct v0sys *vm, struct v0inst *inst)
-{
-    v0adr       adr = 0;
-    v0word      val = 0;
-    v0word      reg = (inst->val & V0_REG_ADR) ? v0getregid1(inst) : -1;
-    v0word      ndx = (inst->val & V0_NDX_ADR) ? v0getimm32(inst) : 0;
-
-    if (reg >= 0) {
-        val = *(v0word *)&vm->genregs[reg];
-    }
-    adr += ndx;
-    adr += val;
-
-    return adr;
-}
-
-static __inline__ v0word
-v0getadr2(struct v0sys *vm, struct v0inst *inst)
-{
-    v0adr       adr = 0;
-    v0word      val = 0;
-    v0word      reg = (inst->val & V0_REG_ADR) ? v0getregid2(inst) : -1;
-    v0word      ndx = (inst->val & V0_NDX_ADR) ? v0getimm32(inst) : 0;
-
-    if (reg >= 0) {
-        val = *(v0word *)&vm->genregs[reg];
-    }
-    adr += ndx;
-    adr += val;
-
-    return adr;
-}
-
 #endif /* __V0_MACROS_H__ */

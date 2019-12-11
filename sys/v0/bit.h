@@ -4,68 +4,42 @@
 #include <stdint.h>
 #include <v0/v0.h>
 
-extern const uint8_t    g_ctztab4bit[16];
-extern const uint8_t    g_clztab4bit[16];
+#define V0_CONST_CTZ32  0x0ef96a62
+
+extern uint8_t          bitctztab4bit[16];
+extern const uint8_t    bitclztab4bit[16];
+extern const uint8_t    bitclztab16bit[16];
 
 static __inline__ long
 m_clz32(uint32_t u32)
 {
-    uint32_t    ones = 32;
+    uint32_t    nlz = 32;
 
     if (u32) {
         if (!(u32 & V0_CONST_HIGH_16)) {
-            ones += 16; u32 <<= 16;
+            nlz += 16; u32 <<= 16;
         }
         if (!(u32 & V0_CONST_HIGH_8)) {
-            ones += 8; u32 <<= 8;
+            nlz += 8; u32 <<= 8;
         }
         if (!(u32 & V0_CONST_HIGH_4)) {
-            ones += 4; u32 <<= 4;
+            nlz += 4; u32 >>= sizeof(uint32_t) - 8;
         }
-        u32 >>= sizeof(uint32_t) - 4;
-        ones += g_clztab4bit[u32];
+        nlz += bitclztab4bit[u32];
     }
 
-    return ones;
+    return nlz;
 }
 
-#if 0
 static __inline__ long
-m_clz32a(uint32_t u32)
+m_ctz32(uint32_t u32)
 {
-    uint32_t    cnt = 32;
-    uint32_t    val;
-
-    if (u32) {
-        if (u32 > V0_CONST_LOW_16) {
-            cnt = 24;
-        } else {
-            cnt = 16;
-        }
-    } else {
-        if (u32 > V0_CONST_LOW_8) {
-            cnt = 8;
-        } else {
-            cnt = 0;
-        }
-    }
-    u32 >>= cnt;
-    val = g_clztab16bit[u32];
-    val -= cnt;
-
-    return val;
-}
-#endif
-
-static __inline__ long
-m_ctz(uint32_t u32)
-{
-    uint32_t val = u32 & (-u32);
-    uint32_t magic = V0_CONST_CTZ;
+    uint32_t    val = u32 & (-u32);
 
     val *= V0_CONST_CTZ;
     val >>= 27;
-    val = g_ctztab4bit[val];
+    val = bitctztab4bit[val];
+    val += !u32;
 
     return val;
 }
@@ -73,9 +47,9 @@ m_ctz(uint32_t u32)
 static __inline__ long
 bytepar(uint8_t b)
 {
-    unsigned long ret;
-    unsigned long val1;
-    unsigned long val2;
+    uint32_t    ret;
+    uint32_t    val1;
+    uint32_t    val2;
 
     val1 = b;
     val2 = b;
