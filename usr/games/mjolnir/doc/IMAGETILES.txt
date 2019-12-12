@@ -1,0 +1,19 @@
+Image Tiles
+-----------
+
+- tiles should have 3 different versions for modes
+  - active
+  - hilited
+  - clicked
+
+- navigation (compass background)
+  - buttons; highlight the currently movable directions
+    - north
+    - east
+    - south
+    - west
+    - northeast
+    - southeast
+    - southwest
+    - northwest
+

@@ -1,0 +1,30 @@
+Characters
+----------
+
+To make the most fun off the game and keep it playable on old terminals too,
+the standard "graphics" are drawn as characters.
+
+Characters
+----------
+
+Character	| Display	| Description
+---------------------------------------------
+player		| @		| you
+ant		| a		| ant, soldier ant
+alien		| A		| extraterrestrial creature
+bee		| b		| regular bee, only stings once
+bee queen	| B		| bee queen
+dog		| d		| pet dog
+deity		| D		| deity
+ghoul		| G		| corpse eater
+human		| H		| human being
+Iku-Turso	| I		| Finnish sea monster :)
+oracle		| O		| oracles know about things
+unicorn		| u		| unicorn
+vampire		| v		| regular vampire
+Dracula		| V		| Dracula; attack will get all vampires to hit
+wolf		| w		| may be Fenris
+Fenris		| W		| the guardian wolf of gods; kills demons
+Thor		| T		| god of thunder
+zombie		| Z		| zombies; living dead; always evil, attack all
+
