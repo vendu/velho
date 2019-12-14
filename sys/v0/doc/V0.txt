@@ -248,9 +248,25 @@ MSR	v, r1, r2	multiply and shift right
 
 MAD	i, r1, r2	r2 = r1 * r2 + i
 
-IRP	ri1, r2		compute inverse reciprocal R 1/ri1 so X/ri1 => X * R
+IRP {
+
+};
+
+IRP1	ri1		compute single-iteration 27-bit-accurate inverse
+	   		reciprocal R 1/ri1 so X/ri1 => X * R
 - ri1 is the source operand (divisor)
 - r2 is the target register (replaced)
+
+IRP2	r1		compute second iteration for 47-bit-accurate inverse
+	     		reciprocal R 1/ri1 so X/ri1 => X * R
+- r1 is the source operand (divisor)
+
+IRP	ri1, r2		compute two-iteration 47-bit-accurate inverse reciprocal
+	     		rt = r2; rt *= irp1(rt); rt = irp2(rt); r2 = rt
+- ri1 is the source operand (divisor)
+- r2 is the target register (replaced, from IRP1)
+
+(IDV)	ri1, r2		rt = r2; rt *= ri1; r2 = rt; r2 *= ri1
 
 Shift-Unit
 ----------

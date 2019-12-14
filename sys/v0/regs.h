@@ -1,9 +1,9 @@
 #ifndef __V0_REGS_H__
 #define __V0_REGS_H__
 
-#include <v0/v0.h>
+#include <sys/v0/v0.h>
 #if defined (V0_LITERAL_DOCS)
-#include <v0/docs/regs.txt>
+#include <sys/v0/docs/regs.txt>
 #endif
 
 #define V0_MAX_REGISTERS        32

@@ -10,7 +10,6 @@
 /* flg-member */
 #define V0_TIME_SYNC            (1L << 0)
 #define V0_TIME_UTC             (1L << 1)
-
 #define V0_DEV_FLAG_BITS        16L
 #define V0_BUS_BITS             8L
 #define V0_DEV_BITS             8L
