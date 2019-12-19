@@ -106,9 +106,9 @@ HLT          <ri1>, <adr>	halt until interrupt
 - if ri1 is present, it defines the mask of interrupts to ignore
 - if adr is present, the current interrupt mask is saved at that address
 
-RST     v               reset system, if v is non-zero reboot
+RST     vr1             reset system, if vr1 is non-zero reboot
 
-INT     v		raise interrupt, v is number
+INT     vr1		raise interrupt, vr1 is number
 
 STI     <ri1>, <adr>    enable interrupts
 - if ri1 is present, it defines the mask of interrupts to enable
@@ -275,7 +275,7 @@ SHL	v, r1, r2	shift r1 left by v bits; store result in r2
 
 SHR	v, r1, r2	shift r1 left logically; store result in r2
 
-SAR	v. r1, r2	shift r1 left arithmetically; store result in r2
+SRA	v. r1, r2	shift r1 left arithmetically; store result in r2
 
 ROL	v, r1, r2	rotate r1 left by v bits; store result in r2
 
@@ -283,19 +283,38 @@ ROR	v, r1, r2	rotate r1 right by v bits; store result in r2
 
 SLA	v, ri1, r2	shift r2 left by v bits; add ri1 to result
 
+SLR	v, ri1, r2	shift r2 right by v bits; add ri1 to result
+
+SAL	v, r1, r2	add r1 to r2; shift left by v bits
+
+SAR	v, r1, r2	add r1 to r2; shift right b v bits
+
+SLM	v, ri1, r2	shift ri1 left by v bits; multiply by r2
+
+SLR	v, ri1, r2	shift ri1 right by v bits; multiply by r2
+
+SML	v, ri1, r2	multiply r2 by r1; shift left by v bits
+
+SMR	v, ri1, r2	multiply r2 by r1; shift right by v bits
+
 /* SHIFT-unit */
 #define V0_SHIFT_OP             0x00
 #define V0_SHA_OP               0x01
 #define V0_SHM_OP               0x02
+#define V0_SAM_OP		0x03
 #define V0_SHL_OP               V0_SHIFT_OP
 #define V0_SHR_OP               V0_SHIFT_OP     // FLAG1-bit set
-#define V0_SAR_OP               V0_SHIFT_OP     // FLAG1- and FLAG2-bits set
+#define V0_SRA_OP               V0_SHIFT_OP     // FLAG1- and FLAG2-bits set
 #define V0_ROL_OP               V0_SHIFT_OP     // VAL-bit set
 #define V0_ROR_OP               V0_SHIFT_OP     // VAL- and FLAG1-bits set
 #define V0_SLA_OP               V0_SHA_OP       // FLAG1-bit clear
 #define V0_SRA_OP               V0_SHA_OP       // FLAG1-bit set
+#define V0_SAL_OP               V0_SHA_OP       // FLAG2-bit clear
+#define V0_SAR_OP               V0_SHA_OP       // FLAG2-bit set
 #define V0_SLM_OP               V0_SHM_OP       // FLAG1-bit clear
 #define V0_SRM_OP               V0_SHM_OP       // FLAG1-bit set
+#define V0_SML_OP		V0_SAM_OP	// FLAG2-bit clear
+#define V0_SMR_OP		V0_SAM_OP	// FLAG2-bit set
 
 /* BIT-unit */
 #define V0_BCNT_OP              0x00            // bit-count

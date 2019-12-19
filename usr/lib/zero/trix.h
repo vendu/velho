@@ -68,17 +68,14 @@
 #define sign(x, nb)                                                     \
     ((x) = (x) & ((1U < (nb)) - 1),                                     \
      ((x) ^ (1U << ((nb) - 1))) - (1U << ((nb) - 1)))
-#define sign2(x, nb)                                                    \
-    (((x) << (CHAR_BIT * sizeof(x) - (nb))) >> (CHAR_BIT * sizeof(x) - (nb)))
 
 /* compare with power-of-two p2 */
 #define gtpow2(u, p2)  /* true if u > p2 */                             \
     ((u) & ~(p2))
 #define gtepow2(u, p2) /* true if u >= p2 */                            \
     ((u) & -(p2))
-#define swapi(a, b)      ((a) ^= (b), (b) ^= (a), (a) ^= (b))
 /* swap a and b without a temporary variable */
-#define swap(a, b)     ((a) ^= (b), (b) ^= (a), (a) ^= (b))
+#define swapi(a, b)     ((a) ^= (b), (b) ^= (a), (a) ^= (b))
 #define swap32(a, b)                                                    \
     do {                                                                \
         uint32_t _tmp = a;                                              \
@@ -151,11 +148,11 @@ long long llabs(long long x);
 #define divceil(a, b)   (((a) + (b) - 1) / (b))
 #define divround(a, b)  (((a) + ((b) / 2)) / (b))
 
-#define haszero2(a)     (~(a))
 #define haszero32(a)    (((a) - 0x01010101) & ~(a) & 0x80808080)
 
 /* count population of 1 bits in u32; store into r */
-#define onebits_32(u32, r)                                              \
+#define onebits_32a(u32, r)
+#define onebits_32a(u32, r)                                             \
     ((r) = (u32),                                                       \
      (r) -= ((r) >> 1) & 0x55555555,                                    \
      (r) = (((r) >> 2) & 0x33333333) + ((r) & 0x33333333),              \
@@ -922,148 +919,6 @@ ratreduce(int64_t *num, int64_t *den)
 /*
  * These were found at http://homepage.cs.uiowa.edu/~jones/bcd/mod.shtml
  */
-
-static __inline__ uint32_t
-bitcnt1u32a(uint32_t a) {
-    a = ((a >> 1) & 0x55555555) + (a & 0x55555555);
-    /* each 2-bit chunk sums 2 bits */
-    a = ((a >> 2) & 0x33333333) + (a & 0x33333333);
-    /* each 4-bit chunk sums 4 bits */
-    a = ((a >> 4) & 0x0F0F0F0F) + (a & 0x0F0F0F0F);
-    /* each 8-bit chunk sums 8 bits */
-    a = ((a >> 8) & 0x00FF00FF) + (a & 0x00FF00FF);
-    /* each 16-bit chunk sums 16 bits */
-
-    return (a >> 16) + (a & 0x0000FFFF);
-}
-
-static __inline__ uint32_t
-bitcnt1u32(uint32_t a) {
-    a = ((a >> 1) & 0x55555555) + (a & 0x55555555);
-    a = ((a >> 2) & 0x33333333) + (a & 0x33333333);
-    a = ((a >> 4) & 0x07070707) + (a & 0x07070707);
-    a = ((a >> 8) & 0x000f000f) + (a & 0x000f000f);
-
-    return (a >> 16) + (a & 0x0000001f);
-}
-
-/*
- * this one comes from
- * https://blogs.oracle.com/d/entry/bit_manipulation_population_count
- * - thanks Darryl Gove! :)
- */
-
-static __inline__ uint64_t
-bitcnt1u64(uint64_t a)
-{
-    uint64_t val;
-    uint64_t m1 = UINT64_C(0x5555555555555555);
-    uint64_t m2 = UINT64_C(0x3333333333333333);
-    uint64_t m3 = UINT64_C(0x0f0f0f0f0f0f0f0f);
-    uint64_t m4 = UINT64_C(0x00ff00ff00ff00ff);
-    uint64_t m5 = UINT64_C(0x0000ffff0000ffff);
-
-    val = a << 1;
-    val &= m1;
-    a &= m1;
-    a += val;
-    val = a << 2;
-    val &= m2;
-    a &= m2;
-    a += val;
-    val = a << 4;
-    val &= m3;
-    a &= m3;
-    a += val;
-    val = a << 8;
-    val &= m4;
-    a &= m4;
-    a += val;
-    val = a << 16;
-    val &= m5;
-    a &= m5;
-    a += val;
-    val = a << 32;
-    a += val;
-    a >>= 32;
-
-    return a;
-}
-
-/*
- * these bitcnt-routines are from http://bisqwit.iki.fi/source/misc/bitcounting/
- */
-
-static __inline__ uint32_t
-bitcnt1u32mul(uint32_t a)
-{
-    /* dX == (~0) / X */
-    uint32_t d3 = 0x55555555;
-    uint32_t d5 = 0x33333333;
-    uint32_t d17 = 0x0f0f0f0f;
-    uint32_t d255 = 0x01010101;
-
-    a -= (a >> 1) & d3;
-    a = (a & d5) + ((a >> 2) & d5);
-    a = (a + (a >> 4)) & d17;
-    a = (a * d255) >> 24;
-
-    return a;
-}
-
-static __inline__ uint32_t
-bitcnt1u32nomul(uint32_t a)
-{
-    /* dX == (~0) / X */
-    uint32_t d3 = 0x55555555;
-    uint32_t d5 = 0x33333333;
-    uint32_t d17 = 0x0f0f0f0f;
-
-    a -= (a >> 1) & d3;
-    a = (a & d5) + ((a >> 2) & d5);
-    a = (a + (a >> 4)) & d17;
-    a += a >> 8;
-    a += a >> 16;
-    a &= 0x7f;
-
-    return a;
-}
-
-static __inline__ uint32_t
-bitcnt1u64mul(uint32_t a)
-{
-    /* dX == (~0) / X */
-    uint64_t d3 = 0x5555555555555555;
-    uint64_t d5 = 0x3333333333333333;
-    uint64_t d17 = 0x0f0f0f0f0f0f0f0f;
-    uint64_t d255 = 0x0101010101010101;
-
-    a -= (a >> 1) & d3;
-    a = (a & d5) + ((a >> 2) & d5);
-    a = (a + (a >> 4)) & d17;
-    a = (a * d255) >> 56;
-
-    return a;
-}
-
-static __inline__ uint32_t
-bitcnt1u64nomul(uint64_t a)
-{
-    /* dX == (~0) / X */
-    uint64_t d3 = 0x5555555555555555;
-    uint64_t d5 = 0x3333333333333333;
-    uint64_t d17 = 0x0f0f0f0f0f0f0f0f;
-
-    a -= (a >> 1) & d3;
-    a = (a & d5) + ((a >> 2) & d5);
-    a = (a + (a >> 4)) & d17;
-    a += a >> 8;
-    a += a >> 16;
-    a += a >> 32;
-    a &= 0x7f;
-
-    return a;
-}
 
 /* found at http://homepage.cs.uiowa.edu/~jones/bcd/mod.shtml */
 

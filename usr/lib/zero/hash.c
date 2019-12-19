@@ -4,22 +4,6 @@
 #include <mach/param.h>
 #include <zero/cdefs.h>
 
-//#define _min(a, b) ((b) ^ (((a) ^ (b)) & -((a) < (b))))
-
-/* NOTE: THIS ONE IS BORKED :) */
-INLINE unsigned int
-_divu131071(unsigned int uval)
-{
-    unsigned long long mul = 0x80004001;
-    unsigned long long res = uval;
-
-    res *= mul;
-    res >>= 16;
-
-    return (unsigned int)res;
-}
-#define _modu131071(u) ((u) - (_divu131071(u) * 131071))
-
 /* hashpwj from the dragon book as supplied on the internet */
 //#define PRIME 131071    /* was 211 in the implementation I saw */
 

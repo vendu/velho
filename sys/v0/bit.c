@@ -58,8 +58,8 @@ m_bytepar(uint8_t b)
     uint32_t    val1;
     uint32_t    val2;
 
-    val1 = b;
     val2 = b;
+    val1 = b;
     val2 >>= 4;
     val1 ^= val2;
     val1 &= 0x0f;
