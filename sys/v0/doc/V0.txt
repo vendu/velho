@@ -14,11 +14,9 @@ SHIFT	- shift, rotate, shift-and-add as well as shift-and-multiply operations
 /* unit-names */
 #define V0_SYS_UNIT             0x00
 #define V0_ALU_UNIT             0x01
-/*
-* #define V0_MULTI_UNIT           0x02
-* #define V0_SHIFT_UNIT           0x03
-* #define V0_BIT_UNIT             0x04
-*/
+#define V0_MULTI_UNIT           0x02
+#define V0_SHIFT_UNIT           0x03
+#define V0_BIT_UNIT             0x04
 #define V0_ATOM_UNIT            0x05
 #define V0_FLOW_UNIT            0x06
 #define V0_XFER_UNIT            0x07
@@ -54,6 +52,7 @@ Register	Brief				Saved By
 --------	-----				--------
 R0		zero register			N/A
 R1		function argument		Caller
+		function return value		Callee
 R2		function argument		Caller
 R3		function argument		Caller
 R4		function argument		Caller
@@ -77,9 +76,15 @@ Function Call Mechanism
 - R5..R10 are scratch registers for functions to use
 - R11/FR is the return value from called functions
 - R12/FP is the pointer to the stack frame of the current function
+- R13/SP is the pointer to the current stack of the process (system or user)
+- R14/LR is the return address to the caller function
+- R15/PC is the program counter
 
 Instruction Set
 ---------------
+
+Instruction Format
+------------------
 
 Argument Presentation
 ---------------------

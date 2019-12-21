@@ -25,8 +25,7 @@
 /* flag-member bits */
 #define V0_UNIT_BITS            4
 #define V0_OP_BITS              4
-#define V0_VAL_BITS             7
-#define V0_FLAG_BITS            V0_VAL_BITS
+#define V0_VAL_BITS             15
 /* val-member values */
 #define V0_VAL_BIT              (1 << 15)       // 7-bit value present
 /* v0-size operations if both V0_HALF_BIT and V0_BYTE_BIT are clear */
@@ -36,7 +35,7 @@
 #define V0_VAL_MASK             0x7f00
 #define V0_FLAG_MASK            V0_VAL_MASK
 #define V0_FLAG1_BIT            0x4000  // operation flag-bit #1
-#define V0_FLAG2_BIT            0x2000  // operation flag-bit #1
+#define V0_FLAG2_BIT            0x2000  // operation flag-bit #2
 #define V0_SIGN_MASK            0x1000
 #define V0_NO_ADR       	0x0000  // register-only operands
 #define V0_NDX_ADR      	0x4000  // indexed, e.g. $4(%sp) or direct

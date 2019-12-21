@@ -1,0 +1,94 @@
+Mjolnir Non-Player Characters
+-----------------------------
+
+Characters
+----------
+
+To make the most fun off the game and keep it playable on old terminals too,
+the standard "graphics" are drawn as characters.
+
+Characters
+----------
+
+Character	| Display	| Description
+---------------------------------------------
+player		| @		| you
+ant		| a		| ant, soldier ant
+bee		| b		| regular bee, only stings once
+bee queen	| B		| bee queen
+dog		| d		| pet dog
+deity		| D		| deity
+Fenris		| F		| the guardian wolf of gods; kills demons
+ghoul		| G		| corpse eater
+human		| H		| human being
+Iku-Turso	| I		| Finnish sea monster :)
+oracle		| O		| oracles know about things
+unicorn		| u		| unicorn
+vampire		| v		| regular vampire
+Dracula		| V		| Dracula; attack will get all vampires to hit
+wizard		| W		| wizard
+Thor		| T		| god of thunder
+zombie		| z		| zombies; living dead; always evil, attack all
+
+Non-Character Objects
+---------------------
+
+Object		| Display	| Description
+---------------------------------------------
+floor		| .		| floor/ground
+corridor	| #		| corridor
+wall		| -		| horizontal wall
+wall		| |		| vertical wall
+door		| +		| door
+ration		| f		| food ration
+water		| ~		| water
+fountain	| {		| fountain
+gold		| $		| use to get merchandise
+silver bullet	| S		| use for demons
+potion		| !		| potion
+plant		| *		| plant
+punchcard	| "		| to be used on in-dungeon mainframes :)
+tape		| 8		| for in-dungeon mainframes
+stairway down	| >		| go down one level
+stairway up	| <		| go up one level
+statue	 	| &		| e.g. Buddha
+trap		| ^		| trap
+wand		| \		| magic wand
+scroll		| ?		| spell or other scroll
+ring		| =		| ring
+whip		| /		| whip
+armor		| ]		| suit or armor
+mirror		| [		| mirror on a wall
+chain		| c		| chain
+chest		| C		| chest; may find treasury in them
+sub-machine gun | g		| close-range combat
+honey		| h		| from beehives after killing the queen
+knife		| k		| knife, dagger, gurkha, ...
+kaleidoscope	| %		| kaleidoscope
+lockpick	| l		| thieves are naturally best at using these
+laser		| L		| laser gun
+mushroom	| m		| purple mushrooms are cosmic
+pistol		| p		| pistol
+sword		| s		| sword
+terminal	| t		| terminal connected to mainframe
+well		| w		| well (water, may be cursed/poisonous)
+cross		| x		| cross; may be Holy Cross
+altar		| X		| altar; sacrifice dead creatures on it
+
+Special Items
+-------------
+
+Object		| Display	| Description
+------		| -------	| -----------
+Altar		| A		| place to sacrifice/worship
+Crystal ball    | o		| may show things happening elsewhere
+Demon Whip	| /		| weapon against different forms of undead
+Jatimatic	| J		| sub-machine gun for close range combat
+Mjolnir		| M		| the hammer of Thor
+Pleignir	| P		| ribbon that can hold Fenris
+Katana		| K		| Golden katana of Kara the Princess of Atlantis
+Stormbringer	| S		| Stormbringer special sword
+Excalibur	| E		| Excalibur special sword
+Holy Cross	| x		| holy cross with the names of 5 archangels
+     		  		| - Michael, Raphael, Gabriel, Uriel, Lucifer
+
