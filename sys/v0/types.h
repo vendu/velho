@@ -57,13 +57,13 @@ struct v0arg {
 #define V0_INST_UNIT_OFS        0
 #define V0_INST_OP_OFS          (V0_INST_UNIT_OFS + V0_UNIT_BITS)
 #define V0_INST_VAL_OFS         (V0_INST_OP_OFS + V0_OP_BITS)
-#define V0_INST_VBIT_OFS        (V0_UNIT_BITS + V0_OP_BITS + V0_VAL_BITS)
+#define V0_INST_ABIT_OFS        (V0_UNIT_BITS + V0_OP_BITS + V0_VAL_BITS)
 struct v0inst {
     //    unsigned int unit : V0_UNIT_BITS;
     //    unsigned int op   : V0_OP_BITS;
     unsigned int code : V0_UNIT_BITS + V0_OP_BITS;
     unsigned int val  : V0_VAL_BITS;
-    unsigned int vbit : 1;
+    unsigned int abit : 1;
     struct v0arg arg[VLA];
 };
 

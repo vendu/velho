@@ -34,6 +34,13 @@ Instruction Format
   argument value in the val-field
 - argument parcels are aligned to 32-bit boundaries
 
+Instruction Parcel
+------------------
+
+0:3	| 4:7	| 8:14	| 15
+----------------------------
+unit	| op	| val
+
 Register File
 -------------
 
@@ -62,7 +69,6 @@ R7		scratch register		N/A
 R8		scratch register		N/A
 R9		scratch register		N/A
 R10		scratch register		N/A
-R11/FR		return value			Callee
 R12/FP		[stack] frame pointer		Caller
 R13/SP		stack pointer			Callee
 R14/LR		link register/return address	Caller
@@ -72,9 +78,8 @@ Function Call Mechanism
 -----------------------
 
 - R0 is zero register which doesn't need to be saved across calls
-- R1..R4 are function argument registers
+- R1..R4 are function argument registers; R1 is the return value
 - R5..R10 are scratch registers for functions to use
-- R11/FR is the return value from called functions
 - R12/FP is the pointer to the stack frame of the current function
 - R13/SP is the pointer to the current stack of the process (system or user)
 - R14/LR is the return address to the caller function

@@ -10,8 +10,8 @@
 
 //#define V0_REG_SIZE             32
 #define V0_RET_REG      	V0_R0_REG // function return value register
-#define V0_REG_ARGS             5 // R1..R3, function register arguments
-#define V0_CALLEE_REGISTERS     10 // R4..R11, FP, SP, callee save arguments
+#define V0_REG_ARGS             5 // R1..R5, function register arguments
+#define V0_CALLEE_REGISTERS     10 // R6..R11, FP, SP, callee save arguments
 #define V0_R0_REG               0               // zero register
 #define V0_R1_REG               1               // function argument
 #define V0_R2_REG               2               // function argument
@@ -23,18 +23,16 @@
 #define V0_R8_REG               8               // scratch register
 #define V0_R9_REG               9               // scratch register
 #define V0_R10_REG              10              // scratch register
-#define V0_R11_REG              11              // function return value
+#define V0_R11_REG              11              // scratch register
 #define V0_R12_REG      	12              // frame-pointer
 #define V0_R13_REG      	13              // stack-pointer
 #define V0_R14_REG      	14              // link-register
 #define V0_R15_REG      	15              // program-counter
 #define V0_ZR_REG               0x00            // zero register
-#define V0_FR_REG               0x11            // function return value
-#define V0_TR_REG               0x11            // temporary storage for caller
 #define V0_FP_REG               V0_R12_REG      // store stack frame address
 #define V0_SP_REG               V0_R13_REG      // store current stack pointer
-#define V0_LR_REG               V0_R14_REG      // link register, i.e. return address
-#define V0_PC_REG               V0_R15_REG      // program counter/instruction pointer
+#define V0_LR_REG               V0_R14_REG      // link register/return address
+#define V0_PC_REG               V0_R15_REG      // program counter
 #define V0_GENERAL_REGISTERS    16              // # of general registers
 
 /* SYSTEM REGISTERS */

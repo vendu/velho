@@ -4,15 +4,6 @@
 #include <zen/conf.h>
 #include <zen/types.h>
 
-/*
- * NOTES
- * -----
- * #define TASK_SELF    (-1)
- * pid_t                sys_proc(flg);
- * void                 taskdt(tid);
- * void                 taskat(tid);
- * pid_t                taskrm(tid);
-
 /* system threads */
 #define ZEN_KERNEL_THREAD       0       // kernel
 #define ZEN_INIT_THREAD         1       // init
