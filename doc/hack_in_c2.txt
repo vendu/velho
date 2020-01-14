@@ -1,0 +1,69 @@
+Be it your new kernel,
+or a game engine,
+got one thing to say,
+hack in C.
+
+Close to the machine,
+down to bare metal,
+you have but one choice,
+hack in C.
+
+Know your microprocessor,
+be one with what is fast,
+do what you best can,
+hack in C.
+
+CHORUS
+------
+If you can't do it in C,
+try it in assembly,
+if that's no go for you,
+then it ain't worth doing.
+------
+
+It's all just mathematics,
+often simple at that,
+don't make it too obscure,
+hack in C.
+
+Tune your memory access,
+play with the registers,
+keep it easy to yourself,
+hack in C.
+
+Know your cachelines,
+beware of your page size,
+it's all so very simple,
+hack in C.
+
+CHORUS
+------
+If you can't do it in C,
+try it in assembly,
+if that's no go for you,
+then it ain't worth doing.
+------
+
+Use the computer,
+push the envelope,
+unleash the horsepower,
+hack in C.
+
+Know what you are doing,
+write some mad fast code,
+keep it simple stupid,
+hack in C.
+
+You can truly mess up
+with SIGILLs and SIGSEGVs,
+still it's so much fun,
+hack in C.
+
+CHORUS
+------
+If you can't do it in C,
+try it in assembly,
+if that's no go for you,
+then it ain't worth doing.
+------
+
